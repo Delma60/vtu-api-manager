@@ -30,18 +30,8 @@ class CustomerService
             ]);
 
             $customer->assignRole('customer');
-            // wallet 
-            $customer->wallet->create();
 
-
-            // Initialize the customer's wallet immediately
-            // Wallet::create([
-            //     'user_id' => $customer->id, // Customer extends User, so it's a user_id
-            //     'balance' => 0.00,
-            //     'status' => 'active',
-            // ]);
-
-
+            $customer->wallet()->create([]);
 
             // Optional: Dispatch an event or send a welcome email here
             // event(new CustomerRegistered($customer, $password));

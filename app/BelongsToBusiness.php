@@ -1,5 +1,5 @@
 <?php
-// app/Traits/BelongsToBusiness.php
+
 namespace App;
 
 use App\Models\Business;
@@ -8,18 +8,21 @@ use Illuminate\Support\Facades\Auth;
 
 trait BelongsToBusiness
 {
-    protected static function booted()
+    // Use the Laravel trait naming convention to avoid conflicts!
+    protected static function bootedBelongsToBusiness()
     {
         // Automatically scope queries to the currently authenticated user's business
         static::addGlobalScope('business_tenant', function (Builder $builder) {
-            if (Auth::check() && !Auth::user()->isSuperAdmin()) {
+            // CRITICAL FIX: Use Auth::hasUser() to prevent infinite DB loops!
+            if (Auth::hasUser() && !Auth::user()->isSuperAdmin()) {
                 $builder->where('business_id', Auth::user()->business_id);
             }
         });
 
         // Automatically assign the business_id when creating new records
         static::creating(function ($model) {
-            if (Auth::check() && !Auth::user()->isSuperAdmin() && empty($model->business_id)) {
+            // CRITICAL FIX: Use Auth::hasUser()
+            if (Auth::hasUser() && !Auth::user()->isSuperAdmin() && empty($model->business_id)) {
                 $model->business_id = Auth::user()->business_id;
             }
         });

@@ -49,6 +49,15 @@ class CustomerController extends Controller
     public function show(Customer $customer)
     {
         //
+        $customer->load([
+            'wallet', 
+            'transactions' => function ($query) {
+                $query->latest()->take(10);
+            }
+        ]);
+
+        $metrics = $this->customerService->getCustomerMetrics($customer);
+        return Inertia::render('customers/show', compact("customer", "metrics"));
     }
 
     /**
@@ -57,6 +66,7 @@ class CustomerController extends Controller
     public function edit(Customer $customer)
     {
         //
+        return Inertia::render('customers/edit', compact("customer"));
     }
 
     /**

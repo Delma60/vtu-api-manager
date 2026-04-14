@@ -28,7 +28,7 @@ interface Customer {
     id: number;
     name: string;
     email: string;
-    phone: string | null;
+    phone_number: string | null;
     is_active: boolean;
     created_at: string;
     wallet: Wallet | null;

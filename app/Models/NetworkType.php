@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\BelongsToBusiness;
 use Illuminate\Database\Eloquent\Model;
 
 class NetworkType extends Model
 {
+    use BelongsToBusiness;
 
     protected $fillable = ['name', 'is_active', 'type'];
 

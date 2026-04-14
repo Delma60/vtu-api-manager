@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\HasRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -61,6 +62,23 @@ class User extends Authenticatable
     public function providers()
     {
         return $this->hasMany(Provider::class);
+    }
+
+   
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->type === 'super_admin';
+    }
+
+    public function isBusinessAdmin(): bool
+    {
+        return $this->type === 'business_admin';
+    }
+    
+    public function isCustomer(): bool
+    {
+        return $this->type === 'customer';
     }
 }
 

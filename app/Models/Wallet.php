@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\BelongsToBusiness;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,6 +10,7 @@ class Wallet extends Model
 {
     /** @use HasFactory<\Database\Factories\WalletFactory> */
     use HasFactory;
+    use BelongsToBusiness;
 
     protected $fillable = [
         'user_id',

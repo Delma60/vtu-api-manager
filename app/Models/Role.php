@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\BelongsToBusiness;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Role extends Model
 {
+    use BelongsToBusiness;
     protected $fillable = ['name', 'slug', 'service_cost_margins'];
 
     protected $casts = [

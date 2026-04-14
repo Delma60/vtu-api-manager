@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\BelongsToBusiness;
 use Illuminate\Database\Eloquent\Model;
 
 class FundingTransaction extends Model
 {
-    //
-    protected $table= "transactions";
+    use BelongsToBusiness;
 
-    
+    //
+    protected $table = "transactions";
+
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\ProviderController;
@@ -23,6 +24,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('networks', NetworkController::class);
     Route::resource('providers', ProviderController::class);
     Route::resource('network-types', NetworkTypeController::class);
+    Route::resource('customers', CustomerController::class);
+    
+
     Route::get('pricing/airtime-data', [PricingController::class, 'airtimeAndData'])->name('pricing.airtime-data');
     Route::get('pricing/airtime-plan/create', [PricingController::class, 'createAirtimePlan'])->name('pricing.airtime-plan.create');
 

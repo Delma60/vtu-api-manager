@@ -81,6 +81,19 @@ export function Sidebar() {
                         label="Transactions"
                     />
                     <NavItem
+                        isActive={activeTab.includes('/customers')}
+                        onClick={() => handleChange('/customers')}
+                        icon={
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0zm6 9v-1a4 4 0 00-4-4H7a4 4 0 00-4 4v1"
+                            />
+                        }
+                        label="Customers"
+                    />
+                    <NavItem
                         isActive={activeTab.includes('/wallets')}
                         onClick={() => handleChange('/wallets')}
                         icon={

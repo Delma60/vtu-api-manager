@@ -1,179 +1,271 @@
-import React from 'react';
-import { Head, useForm, Link } from '@inertiajs/react';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link, useForm } from '@inertiajs/react';
+import React, { useMemo } from 'react';
 
-export default function CreateAirtimePlan({ networks, providers }) {
-  // Fallbacks for UI preview if props aren't passed yet
-  const activeNetworks = networks || [{ id: 1, name: 'MTN' }, { id: 2, name: 'Airtel' }];
-  const activeProviders = providers || [{ id: 1, name: 'VTpass' }, { id: 2, name: 'MTN Direct' }];
+export default function CreateAirtimePlan({ networks: activeNetworks, providers }: any) {
+    const { data, setData, post, processing, errors } = useForm({
+        network_id: '',
+        provider_id: '',
+        vendor_api_code: '',
+        discount_percentage: '',
+        pin_discount_percentage: '',
+        is_active: true,
+        provider: '1',
+        plan_type: '',
+        providerable_cost_price: '0.00',
+        use_provider_as_providerable: false,
+        providerable: {
+            provider_id: 0,
+            cost_price: '0.00',
+            server_id: '',
+        },
+    });
 
-  const { data, setData, post, processing, errors } = useForm({
-    network_id: '',
-    provider_id: '',
-    vendor_api_code: '',
-    discount_percentage: '',
-    pin_discount_percentage: '',
-    is_active: true,
-  });
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        console.log('Submitting Airtime Plan:', data);
+        // post('/pricing/airtime-plan');
+    };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    post('/pricing/airtime-plan');
-  };
+    const costPrice = useMemo(() => {
+        const cp = data?.providerable.cost_price;
+        if (cp !== undefined && cp !== '') return parseFloat(String(cp)) || 0;
+        return 0;
+    }, [data.providerable.cost_price]);
 
-  return (
-    <div className="flex-1 bg-slate-950 min-h-screen p-8 text-slate-200 font-sans">
-      <Head title="Create Airtime Plan" />
+    const plan_types = useMemo(() => {
+        if (!data.network_id) return [];
+        const selectedNetwork = activeNetworks.find((net: any) => net.id.toString() === data.network_id.toString());
+        return selectedNetwork?.network_types.filter((nt) => nt.type === 'airtime') || [];
+    }, [data.network_id]);
 
-      {/* Header */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-5xl mx-auto">
-        <div>
-          <Link href="/pricing" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-indigo-400 transition-colors mb-2 group">
-            <svg className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-            Back to Pricing
-          </Link>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Create Airtime Configuration</h1>
-          <p className="text-sm text-slate-400 mt-1">Set up routing and discount margins for VTU and Airtime PINs.</p>
-        </div>
-      </header>
+    return (
+        <AppLayout>
+            <div className="flex min-h-screen flex-1 flex-col space-y-6 p-6">
+                <Head title="Create Airtime Plan" />
+                {/* Header */}
+                <header className="mb-8">
+                    <Link
+                        href="/pricing"
+                        className="group mb-2 inline-flex items-center text-sm font-medium text-slate-500 transition-colors hover:text-indigo-400"
+                    >
+                        <svg
+                            className="mr-1 h-4 w-4 transition-transform group-hover:-translate-x-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Back to Pricing
+                    </Link>
+                    <h1 className="text-2xl font-bold tracking-tight">Create Airtime Configuration</h1>
+                    <p className="mt-1 text-sm text-slate-400">Set up routing and discount margins for VTU and Airtime PINs.</p>
+                </header>
+                
+                <form onSubmit={handleSubmit} className="space-y-3">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        {/* Column 1: Identity & Vendor Routing */}
+                        <div className="space-y-3">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>General</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {/* Target Network */}
+                                    <div className="space-y-1">
+                                        <Select value={data.network_id} onValueChange={(value) => setData('network_id', value)}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select Network" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {activeNetworks.map((net) => (
+                                                    <SelectItem key={net.id} value={net.id.toString()}>
+                                                        {net.name} {net.id}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.network_id && <p className="text-xs text-red-400">{errors.network_id}</p>}
+                                    </div>
+                                    
 
-      <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-6">
-        
-        {/* ROW 1: General Information & Routing */}
-        <div className="bg-[#0f172a] rounded-xl border border-slate-800 shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center">
-            <h2 className="text-base font-semibold text-white">Row 1: Identity & Vendor Routing</h2>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-slate-400">Active Status</span>
-              <button
-                type="button"
-                onClick={() => setData('is_active', !data.is_active)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${data.is_active ? 'bg-emerald-500' : 'bg-slate-700'}`}
-              >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${data.is_active ? 'translate-x-6' : 'translate-x-1'}`} />
-              </button>
+                                    <div className="space-y-1">
+                                        <Select value={data.plan_type} onValueChange={(value) => setData('plan_type', value)}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select Plan Type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {plan_types.map((net) => (
+                                                    <SelectItem key={net.id} value={net.id.toString()}>
+                                                        {net.name?.toUpperCase()}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError message={errors.plan_type} />
+                                    </div>
+
+                                    {/* Vendor API Code */}
+                                    <div className="space-y-1">
+                                        <Input
+                                            placeholder="e.g., mtn_custom_vtu"
+                                            value={data.vendor_api_code}
+                                            onChange={(e) => setData('vendor_api_code', e.target.value)}
+                                        />
+                                        <p className="text-[10px] text-slate-500">The exact payload code the vendor expects.</p>
+                                        {errors.vendor_api_code && <p className="text-xs text-red-400">{errors.vendor_api_code}</p>}
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Settings</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex items-center justify-between px-3 py-2">
+                                        <Label>Active Status</Label>
+                                        <Switch checked={data.is_active} onCheckedChange={(v: boolean) => setData('is_active', v)} />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* Column 2: Financials & Margins */}
+                        <div className="space-y-3">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Financials & Margins</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    {/* Direct VTU Discount */}
+                                    <div className="space-y-2">
+                                        <Input
+                                            type="number"
+                                            step="0.1"
+                                            placeholder="e.g., 2.5"
+                                            value={data.discount_percentage}
+                                            onChange={(e) => setData('discount_percentage', e.target.value)}
+                                        />
+                                        <span className="block text-xs font-medium text-slate-500">
+                                            User pays {100 - (Number(data.discount_percentage) || 0)}%
+                                        </span>
+                                        {errors.discount_percentage && <p className="text-xs text-red-400">{errors.discount_percentage}</p>}
+                                    </div>
+
+                                    {/* Airtime PIN Discount */}
+                                    <div className="space-y-2">
+                                        <Input
+                                            type="number"
+                                            step="0.1"
+                                            placeholder="e.g., 2.0"
+                                            value={data.pin_discount_percentage}
+                                            onChange={(e) => setData('pin_discount_percentage', e.target.value)}
+                                        />
+                                        <span className="block text-xs font-medium text-slate-500">
+                                            User pays {100 - (Number(data.pin_discount_percentage) || 0)}%
+                                        </span>
+                                        {errors.pin_discount_percentage && <p className="text-xs text-red-400">{errors.pin_discount_percentage}</p>}
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card title="Server">
+                                <CardHeader>
+                                    <CardTitle>Servers</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <Select value={data.provider} onValueChange={(value) => setData('provider', value)}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select provider" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {providers.map((provider) => (
+                                                <SelectItem key={provider.id} value={provider.id.toString()}>
+                                                    {provider.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {data.provider && (
+                                        <div className="mt-4 flex items-center gap-2">
+                                            <div className="flex-1 space-y-2">
+                                                <Label className="text-sm font-medium">Server Plan ID</Label>
+                                                <Input
+                                                    type="text"
+                                                    placeholder="e.g. 101 or mt_500"
+                                                    value={data.providerable.server_id}
+                                                    className="w-full"
+                                                    onChange={(e) => setData('providerable', { ...data.providerable, server_id: e.target.value })}
+                                                />
+                                                <InputError message={errors?.providerable} />
+                                            </div>
+
+                                            <div className="flex-1 space-y-2">
+                                                <Label className="text-sm font-medium">Provider Cost Price</Label>
+                                                <Input
+                                                    type="text"
+                                                    placeholder="e.g. 101 or mt_500"
+                                                    value={data.providerable_cost_price ?? costPrice ?? ''}
+                                                    onChange={(e) => setData('pin_discount_percentage', e.target.value)}
+                                                />
+                                                <InputError message={errors?.providerable} />
+                                            </div>
+
+                                            {/* <Input
+                                                
+                                                label="Provider Cost Price"
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                value={values.providerable_cost_price ?? costPrice ?? ''}
+                                                onChange={handleCostPriceChange}
+                                                animated
+                                            /> */}
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center justify-between px-3 py-2">
+                                        <Label>Use provider as plan-specific provider</Label>
+                                        <Switch
+                                            checked={Boolean(data?.use_provider_as_providerable)}
+                                            onCheckedChange={(v: boolean) => {
+                                                setData('use_provider_as_providerable', v);
+                                                if (v) {
+                                                    setData('providerable', { ...data.providerable, provider_id: data.provider });
+                                                    if (!data.providerable.cost_price) {
+                                                        setData('providerable_cost_price', { ...data.providerable, cost_price: String(costPrice) });
+                                                    }
+                                                } else {
+                                                    setData('providerable', data.providerable);
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="flex items-center justify-end gap-4 pt-4">
+                        <Link href="/pricing" className="px-4 py-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-800">
+                            Cancel
+                        </Link>
+                        <Button type="submit" disabled={processing}>
+                            {processing ? 'Creating...' : 'Create Airtime Plan'}
+                        </Button>
+                    </div>
+                </form>
             </div>
-          </div>
-          
-          <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Target Network */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Target Network</label>
-              <select
-                value={data.network_id}
-                onChange={e => setData('network_id', e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm"
-              >
-                <option value="" disabled>Select Network...</option>
-                {activeNetworks.map(net => (
-                  <option key={net.id} value={net.id}>{net.name}</option>
-                ))}
-              </select>
-              {errors.network_id && <p className="text-rose-400 text-xs mt-1">{errors.network_id}</p>}
-            </div>
-
-            {/* Upstream Provider */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Upstream Provider</label>
-              <select
-                value={data.provider_id}
-                onChange={e => setData('provider_id', e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm"
-              >
-                <option value="" disabled>Select Vendor...</option>
-                {activeProviders.map(prov => (
-                  <option key={prov.id} value={prov.id}>{prov.name}</option>
-                ))}
-              </select>
-              <p className="text-[10px] text-slate-500 mt-1">Who fulfills this request?</p>
-              {errors.provider_id && <p className="text-rose-400 text-xs mt-1">{errors.provider_id}</p>}
-            </div>
-
-            {/* Vendor API Code */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Vendor API Code</label>
-              <input
-                type="text"
-                value={data.vendor_api_code}
-                onChange={e => setData('vendor_api_code', e.target.value)}
-                placeholder="e.g., mtn_custom_vtu"
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-sm"
-              />
-              <p className="text-[10px] text-slate-500 mt-1">The exact payload code the vendor expects.</p>
-              {errors.vendor_api_code && <p className="text-rose-400 text-xs mt-1">{errors.vendor_api_code}</p>}
-            </div>
-          </div>
-        </div>
-
-        {/* ROW 2: Financials & Margins */}
-        <div className="bg-[#0f172a] rounded-xl border border-slate-800 shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-slate-800 bg-slate-900/50">
-            <h2 className="text-base font-semibold text-white">Row 2: Financials & Margins</h2>
-          </div>
-          
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Direct VTU Discount */}
-            <div className="bg-slate-900/50 p-5 rounded-lg border border-slate-800">
-              <label className="block text-sm font-medium text-slate-300 mb-2">Direct VTU Discount (%)</label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  step="0.1"
-                  value={data.discount_percentage}
-                  onChange={e => setData('discount_percentage', e.target.value)}
-                  placeholder="e.g., 2.5"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-lg font-bold"
-                />
-                <span className="text-sm font-medium text-slate-400 bg-slate-800 px-3 py-2.5 rounded-lg border border-slate-700 whitespace-nowrap">
-                  User pays {100 - (Number(data.discount_percentage) || 0)}%
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-2">The percentage off face value given to your API users when they buy standard airtime.</p>
-              {errors.discount_percentage && <p className="text-rose-400 text-xs mt-1">{errors.discount_percentage}</p>}
-            </div>
-
-            {/* Airtime PIN Discount */}
-            <div className="bg-slate-900/50 p-5 rounded-lg border border-slate-800">
-              <label className="block text-sm font-medium text-slate-300 mb-2">Airtime PIN Discount (%)</label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  step="0.1"
-                  value={data.pin_discount_percentage}
-                  onChange={e => setData('pin_discount_percentage', e.target.value)}
-                  placeholder="e.g., 2.0"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono text-lg font-bold"
-                />
-                <span className="text-sm font-medium text-slate-400 bg-slate-800 px-3 py-2.5 rounded-lg border border-slate-700 whitespace-nowrap">
-                  User pays {100 - (Number(data.pin_discount_percentage) || 0)}%
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-2">The percentage off face value given when generating printable Airtime PINs.</p>
-              {errors.pin_discount_percentage && <p className="text-rose-400 text-xs mt-1">{errors.pin_discount_percentage}</p>}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-4 pt-4">
-          <Link href="/pricing" className="text-sm font-medium text-slate-400 hover:text-white transition-colors px-4 py-2">
-            Cancel
-          </Link>
-          <button
-            type="submit"
-            disabled={processing}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg shadow-indigo-500/25 disabled:opacity-50 flex items-center gap-2"
-          >
-            {processing && (
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            )}
-            Create Airtime Plan
-          </button>
-        </div>
-
-      </form>
-    </div>
-  );
+        </AppLayout>
+    );
 }

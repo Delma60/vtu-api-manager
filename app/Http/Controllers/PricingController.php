@@ -18,6 +18,7 @@ class PricingController extends Controller
         return Inertia::render('pricing/create-airtime-plan', [
             'networks' => Network::with('networkTypes')->get(),
             'providers' => Provider::all(),
+            "plan_types" => NetworkType::airtime()->get(),
         ]);
     }
 

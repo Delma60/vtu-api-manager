@@ -85,7 +85,7 @@ export default function CustomersIndex({ customers, flash }: PageProps) {
     // Actions
     const handleCreateCustomer = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/customers', {
+        post(route("customers.store"), {
             onSuccess: () => {
                 setIsAddDialogOpen(false);
                 reset();

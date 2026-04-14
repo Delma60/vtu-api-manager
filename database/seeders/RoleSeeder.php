@@ -20,6 +20,11 @@ class RoleSeeder extends Seeder
                 
             ],
             [
+                'name' => 'Business Owner',
+                'slug' => 'owner',
+                
+            ],
+            [
                 'name' => 'Verified Agent',
                 'slug' => 'agent',
                 

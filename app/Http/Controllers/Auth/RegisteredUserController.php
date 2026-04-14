@@ -50,14 +50,16 @@ class RegisteredUserController extends Controller
                 'is_active' => true,
             ]);
 
-            // 2. Create the Business Admin User
-            $newUser = User::create([
+            $newUser = $business->owner()->create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'business_id' => $business->id, // Assign to the newly created business
                 'type' => 'business_admin',     // Set them as an admin, not a customer
             ]);
+
+            $newUser->assignRole('owner');
+            
 
             return $newUser;
         });

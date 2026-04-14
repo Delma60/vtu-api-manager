@@ -39,7 +39,7 @@ class CustomerController extends Controller
     public function store(StoreCustomerRequest $request)
     {
         $validated = $request->validated();
-        $this->customerService->createCustomer($validated);
+        $customer = $this->customerService->createCustomer($validated);
         return back()->with('success', 'Customer created and wallet initialized.');
     }
 

@@ -26,6 +26,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('network-types', NetworkTypeController::class);
     Route::resource('customers', CustomerController::class);
     
+    Route::post('customers/{customer}/suspend', [CustomerController::class, 'suspend'])->name('customers.suspend');
+    Route::post('customers/{customer}/activate', [CustomerController::class, 'activate'])->name('customers.activate');
 
     Route::get('pricing/airtime-data', [PricingController::class, 'airtimeAndData'])->name('pricing.airtime-data');
     Route::get('pricing/airtime-plan/create', [PricingController::class, 'createAirtimePlan'])->name('pricing.airtime-plan.create');

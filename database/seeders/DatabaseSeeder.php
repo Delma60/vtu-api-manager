@@ -15,9 +15,11 @@ class DatabaseSeeder extends Seeder
     {
         
         // Seed providers after user exists
-        $this->call(ProviderSeeder::class);
+        $this->call([
+            ProviderSeeder::class,
+            RoleSeeder::class,
+            TransactionSeeder::class
+        ]);
 
-        // Seed transactions for the created user
-        $this->call(TransactionSeeder::class);
     }
 }

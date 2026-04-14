@@ -107,7 +107,7 @@ export default function CustomersIndex({ customers, flash }: PageProps) {
 
     return (
         <AppLayout>
-            <div className="mx-auto max-w-6xl space-y-8 p-4 md:p-6">
+            <div className="space-y-8 p-4">
                 <Head title="Customers" />
 
                 {/* Header Section */}

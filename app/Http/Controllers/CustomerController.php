@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
+use App\Services\CustomerService;
 use Inertia\Inertia;
 
 class CustomerController extends Controller
@@ -12,6 +13,8 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function __construct(protected CustomerService $customerService) {}
+    
     public function index()
     {
         $customers = Customer::with('wallet')
@@ -35,7 +38,9 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
-        //
+        $validated = $request->validated();
+        $this->customerService->createCustomer($validated);
+        return back()->with('success', 'Customer created and wallet initialized.');
     }
 
     /**

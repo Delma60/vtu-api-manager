@@ -29,12 +29,16 @@ class CustomerService
                 // Note: 'business_id' is handled by your BelongsToBusiness trait globally
             ]);
 
+            $customer->assignRole('customer');
+
             // Initialize the customer's wallet immediately
             Wallet::create([
                 'user_id' => $customer->id, // Customer extends User, so it's a user_id
                 'balance' => 0.00,
                 'status' => 'active',
             ]);
+
+
 
             // Optional: Dispatch an event or send a welcome email here
             // event(new CustomerRegistered($customer, $password));

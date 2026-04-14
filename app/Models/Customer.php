@@ -11,7 +11,7 @@ class Customer extends User
     /** @use HasFactory<\Database\Factories\CustomerFactory> */
     use BelongsToBusiness;
 
-    // protected $table = 'users';
+    protected $table = 'users';
 
     protected static function booted(): void
     {

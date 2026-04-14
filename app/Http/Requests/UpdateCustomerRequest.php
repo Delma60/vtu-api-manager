@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class UpdateCustomerRequest extends FormRequest
 {
@@ -12,7 +14,7 @@ class UpdateCustomerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,8 +24,16 @@ class UpdateCustomerRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+         return [
             //
+            'name' => 'nullable|string|max:255',
+            'email' => [
+                'nullable', 
+                'email', 
+                // Ensure email is unique across the specific business workspace
+                Rule::unique('users')->where(fn ($query) => $query->where('business_id', Auth::user()->business_id))
+            ],
+            'phone' => 'nullable|string|max:20',
         ];
     }
 }

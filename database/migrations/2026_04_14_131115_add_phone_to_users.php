@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->string('phone')->nullable()->after('email'); // Add phone_number column after email
+            // phone
+            $table->string('phone')->nullable()->after('email');
         });
     }
 
@@ -24,8 +25,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->dropColumn('phone_number'); // Remove the phone_number column
-            $table->dropColumn('phone'); // Remove the phone_number column
+            $table->dropColumn('phone');
         });
     }
 };

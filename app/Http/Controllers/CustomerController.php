@@ -75,6 +75,9 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
         //
+        $validated = $request->validated();
+        $updatedCustomer = $this->customerService->updateCustomer($customer, $validated);
+        return back()->with('success', 'Customer details updated successfully.');
     }
 
     /**
@@ -83,5 +86,12 @@ class CustomerController extends Controller
     public function destroy(Customer $customer)
     {
         //
+    }
+
+    public function suspend(Customer $customer)
+    {
+        $this->customerService->suspendCustomer($customer);
+        
+        return redirect()->back()->with('success', 'Customer account and wallet suspended.');
     }
 }

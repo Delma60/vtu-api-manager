@@ -1,12 +1,17 @@
 // resources/js/pages/customers/show.tsx
+import InputError from '@/components/input-error';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { Activity, ArrowLeft, Ban, Calendar, CheckCircle, CreditCard, Mail, MoreVertical, Phone, PlusCircle, Wallet } from 'lucide-react';
+import React from 'react';
 
 // Interfaces matching your backend CustomerController@show response
 interface Transaction {
@@ -41,6 +46,8 @@ interface PageProps {
 }
 
 export default function CustomerShow({ customer, metrics }: PageProps) {
+    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-NG', {
             style: 'currency',
@@ -67,6 +74,8 @@ export default function CustomerShow({ customer, metrics }: PageProps) {
             .toUpperCase();
     };
 
+    const { data, setData, put, processing, errors, reset, clearErrors } = useForm(customer);
+
     const handleSuspend = () => {
         if (confirm('Are you sure you want to suspend this customer?')) {
             router.post(route('customers.suspend', customer.id), {}, { preserveScroll: true });
@@ -77,6 +86,18 @@ export default function CustomerShow({ customer, metrics }: PageProps) {
         if (confirm("Reactivate this customer's account?")) {
             router.post(route('customers.activate', customer.id), {}, { preserveScroll: true });
         }
+    };
+
+    const handleEditSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Use the put method to hit the update route
+        put(route('customers.update', customer.id), {
+            onSuccess: () => {
+                setIsEditDialogOpen(false);
+                reset('password'); // Clear password field on success
+                clearErrors();
+            },
+        });
     };
 
     return (
@@ -127,7 +148,7 @@ export default function CustomerShow({ customer, metrics }: PageProps) {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem>Edit Profile</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>Edit Profile</DropdownMenuItem>
                                 <DropdownMenuItem>Reset Password</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 {customer.is_active ? (
@@ -279,6 +300,51 @@ export default function CustomerShow({ customer, metrics }: PageProps) {
                     </div>
                 </div>
             </div>
+            <Dialog
+                open={isEditDialogOpen}
+                onOpenChange={(open) => {
+                    setIsEditDialogOpen(open);
+                    if (!open) {
+                        reset('password');
+                        clearErrors();
+                    }
+                }}
+            >
+                <DialogContent className="sm:max-w-[425px]">
+                    <form onSubmit={handleEditSubmit}>
+                        <DialogHeader>
+                            <DialogTitle>Edit Customer Profile</DialogTitle>
+                            <DialogDescription>Update the customer's details. Leave the password blank to keep the current one.</DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-name">Full Name</Label>
+                                <Input id="edit-name" value={data.name} onChange={(e) => setData('name', e.target.value)} />
+                                <InputError message={errors.name} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-email">Email Address</Label>
+                                <Input id="edit-email" type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} />
+                                <InputError message={errors.email} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-phone">Phone Number</Label>
+                                <Input id="edit-phone" value={data.phone} onChange={(e) => setData('phone', e.target.value)} />
+                                <InputError message={errors.phone} />
+                            </div>
+                        
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="ghost" onClick={() => setIsEditDialogOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={processing}>
+                                {processing ? 'Saving...' : 'Save Changes'}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

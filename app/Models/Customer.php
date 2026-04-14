@@ -16,7 +16,9 @@ class Customer extends User
     protected static function booted(): void
     {
         static::addGlobalScope('customer_scope', function (Builder $builder) {
-            $builder->where('type', 'customer');
+            $builder->whereHas('role', function ($query) {
+                $query->where('slug', 'customer'); 
+            });
         });
     }
 

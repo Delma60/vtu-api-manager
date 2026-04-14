@@ -14,7 +14,10 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return Inertia::render('customers/index');
+        $customers = Customer::with('wallet')
+            ->latest()
+            ->paginate(15);
+        return Inertia::render('customers/index', compact("customers"));
     }
 
     /**
@@ -23,6 +26,8 @@ class CustomerController extends Controller
     public function create()
     {
         //
+        return Inertia::render('customers/create');
+
     }
 
     /**

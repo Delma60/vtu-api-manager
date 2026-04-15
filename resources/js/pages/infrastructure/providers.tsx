@@ -1,6 +1,12 @@
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { Provider } from '@/types';
-import { router } from '@inertiajs/react';
+import { router, useForm, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
 interface Props {
     providers: Provider[];
@@ -11,6 +17,8 @@ interface Props {
 }
 
 export default function ProvidersPage({ providers, routingConfig }: Props) {
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
     // Fallback data if props are missing during UI dev
     const activeProviders = (providers || []).map((provider) => ({
         ...provider,
@@ -47,12 +55,12 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                         <p className="text-sm text-slate-400">Manage upstream connections, balances, and failover routing.</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500">
+                        <Button onClick={() => setIsAddDialogOpen(true)}>
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                             </svg>
                             Add New Provider
-                        </button>
+                        </Button>
                     </div>
                 </header>
 
@@ -184,6 +192,138 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                     ))}
                 </div>
             </div>
+            <CreateProvider isAddDialogOpen={isAddDialogOpen} setIsAddDialogOpen={setIsAddDialogOpen} />
         </AppLayout>
     );
 }
+
+const CreateProvider = ({
+    isAddDialogOpen,
+    setIsAddDialogOpen,
+}: {
+    isAddDialogOpen: boolean;
+    setIsAddDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+    const {
+        props: { auth },
+    } = usePage();
+
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
+        name: '',
+        code: '',
+        base_url: '',
+        api_key: '',
+        secret_key: '',
+        user_id: auth?.user?.id?.toString(),
+        code: '',
+    });
+    const handleCreateProvider = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(route('providers.store'), {
+            onSuccess: () => {
+                setIsAddDialogOpen(false);
+                reset();
+            },
+        });
+    };
+
+    useEffect(() => {
+        //   code from name
+        if (data.name) {
+            const generatedCode = data.name
+                .toLowerCase()
+                .replace(/\s+/g, '_')
+                .replace(/[^a-z0-9_]/g, '');
+            setData('code', generatedCode);
+        }
+    }, [data.name]);
+
+    console.log('Form Errors:', errors);
+    return (
+        <Dialog
+            open={isAddDialogOpen}
+            onOpenChange={(open) => {
+                setIsAddDialogOpen(open);
+                if (!open) {
+                    reset();
+                    clearErrors();
+                }
+            }}
+        >
+            <DialogContent className="sm:max-w-[425px]">
+                <form onSubmit={handleCreateProvider}>
+                    <DialogHeader>
+                        <DialogTitle>Add New Provider</DialogTitle>
+                        <DialogDescription>
+                            Register a new upstream VTU vendor. You can configure API keys and webhooks on the next page.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-5 py-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">
+                                Provider Name <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                id="name"
+                                value={data.name}
+                                onChange={(e) => setData('name', e.target.value)}
+                                placeholder="e.g., VTpass Aggregator"
+                                autoFocus
+                            />
+                            <p className="text-muted-foreground text-[10px]">A recognizable display name for this connection.</p>
+                            <InputError message={errors.name} />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="base_url">
+                                Base API URL <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                id="base_url"
+                                type="url"
+                                value={data.base_url}
+                                onChange={(e) => setData('base_url', e.target.value)}
+                                placeholder="https://api.vendor.com/v1"
+                            />
+                            <InputError message={errors.base_url} />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="api_key">
+                                Api key / Username <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                id="api_key"
+                                type="text"
+                                value={data.api_key}
+                                onChange={(e) => setData('api_key', e.target.value)}
+                                placeholder="Your API Key"
+                            />
+                            <InputError message={errors.api_key} />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="secret_key">Secret Key / Password</Label>
+                            <Input
+                                id="secret_key"
+                                type="text"
+                                value={data.secret_key}
+                                onChange={(e) => setData('secret_key', e.target.value)}
+                                placeholder="Your Secret Key (if applicable)"
+                            />
+                            <InputError message={errors.base_url} />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={processing} className="bg-indigo-600 text-white hover:bg-indigo-700">
+                            {processing ? 'Creating...' : 'Create Provider'}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};

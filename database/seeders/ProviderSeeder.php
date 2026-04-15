@@ -3,8 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\Provider;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class ProviderSeeder extends Seeder
 {
@@ -13,9 +16,25 @@ class ProviderSeeder extends Seeder
      */
     public function run(): void
     {
+        $user = User::first();
+
+        // 3. If the database is completely empty (e.g., fresh migration), create a system admin dummy user
+        if (!$user) {
+            $user = User::create([
+                'name' => 'System Admin',
+                'email' => 'admin@vtu-manager.local',
+                'password' => Hash::make('password'),
+            ]);
+
+            // If you are still using the HasRole trait from earlier:
+            // $user->assignRole('super_admin');
+        }
+
+        $userId = Auth::id() ?? 1; //\App\Models\User::first()->id ?? 1;
+
         Provider::insert([
             [
-                'user_id' => 1,
+                'user_id' => $userId,
                 'name' => 'MTN Direct API',
                 'code' => 'mtn_direct',
                 'base_url' => 'https://api.mtn.com/v1',
@@ -30,7 +49,7 @@ class ProviderSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'user_id' => 1,
+                'user_id' => $userId,
                 'name' => 'VTpass Aggregator',
                 'code' => 'vtpass',
                 'base_url' => 'https://api.vtpass.com/api',
@@ -45,7 +64,7 @@ class ProviderSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'user_id' => 1,
+                'user_id' => $userId,
                 'name' => 'MobileVTU Backup',
                 'code' => 'mobilevtu',
                 'base_url' => 'https://api.mobilevtu.com/gateway',
@@ -60,7 +79,7 @@ class ProviderSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'user_id' => 1,
+                'user_id' => $userId,
                 'name' => 'Airtel Bulk Access',
                 'code' => 'airtel_bulk',
                 'base_url' => 'https://api.airtel.com/bulk',
@@ -75,7 +94,7 @@ class ProviderSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'user_id' => 1,
+                'user_id' => $userId,
                 'name' => 'Glo Direct Feed',
                 'code' => 'glo_direct',
                 'base_url' => 'https://api.glo.com/direct',

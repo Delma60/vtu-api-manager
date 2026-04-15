@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { FormEventHandler, useRef } from 'react';
+import React, { FormEventHandler, useRef } from 'react';
 
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ interface DeleteButtonProps {
     buttonText?: string;
     buttonSize?: 'sm' | 'md' | 'lg' | 'icon';
     className?: string;
+    children?:React.ReactNode
 }
 
 export default function DeleteButton({
@@ -25,6 +26,7 @@ export default function DeleteButton({
     onSuccess,
     buttonText = 'Delete',
     buttonSize = 'md',
+    children,
     className,
 }: DeleteButtonProps) {
     const passwordInput = useRef<HTMLInputElement>(null);
@@ -64,7 +66,7 @@ export default function DeleteButton({
         <Dialog>
             <DialogTrigger asChild>
                 <Button variant="destructive" size={buttonSize === 'icon' ? 'icon' : 'default'} className={className}>
-                    {buttonSize === 'icon' ? <Trash2 className="h-4 w-4" /> : buttonText}
+                    {buttonSize === 'icon' ? <Trash2 className="h-4 w-4" /> : children ? children :(buttonText)}
                 </Button>
             </DialogTrigger>
             <DialogContent>

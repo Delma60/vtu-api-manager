@@ -1,4 +1,5 @@
 // resources/js/pages/customers/show.tsx
+import DeleteButton from '@/components/delete-button';
 import InputError from '@/components/input-error';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -88,6 +89,17 @@ export default function CustomerShow({ customer, metrics }: PageProps) {
         }
     };
 
+    const handleDelete = () => {
+        if (
+            confirm(
+                'WARNING: Are you absolutely sure you want to permanently delete this customer? This action cannot be undone and will erase their wallet and access.',
+            )
+        ) {
+            // Use router.delete and specify the route
+            router.delete(route('customers.destroy', customer.id));
+        }
+    };
+
     const handleEditSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         // Use the put method to hit the update route
@@ -160,6 +172,16 @@ export default function CustomerShow({ customer, metrics }: PageProps) {
                                         <CheckCircle className="mr-2 h-4 w-4" /> Reactivate Account
                                     </DropdownMenuItem>
                                 )}
+                                <DropdownMenuItem asChild className="px-3">
+                                    <DeleteButton
+                                        resourceName="customer"
+                                        route={route("customers.destroy", customer.id)}
+                                        className="text-red-600 focus:text-red-600 bg-inherit m-0 p-0 hover:bg-inherit"
+                                        buttonText=""
+                                    >
+                                        <Ban className="mr-2 h-4 w-4" /> Delete Customer
+                                    </DeleteButton>
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
@@ -332,7 +354,6 @@ export default function CustomerShow({ customer, metrics }: PageProps) {
                                 <Input id="edit-phone" value={data.phone} onChange={(e) => setData('phone', e.target.value)} />
                                 <InputError message={errors.phone} />
                             </div>
-                        
                         </div>
                         <DialogFooter>
                             <Button type="button" variant="ghost" onClick={() => setIsEditDialogOpen(false)}>

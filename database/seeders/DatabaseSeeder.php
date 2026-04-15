@@ -13,9 +13,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        
         // Seed providers after user exists
         $this->call([
+            UserSeeder::class,
             ProviderSeeder::class,
             RoleSeeder::class,
             TransactionSeeder::class

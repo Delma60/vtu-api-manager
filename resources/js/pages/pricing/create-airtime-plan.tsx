@@ -128,22 +128,7 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
 
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Settings</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="flex items-center justify-between px-3 py-2">
-                                        <Label>Active Status</Label>
-                                        <Switch checked={data.is_active} onCheckedChange={(v: boolean) => setData('is_active', v)} />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-
-                        {/* Column 2: Financials & Margins */}
-                        <div className="space-y-3">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Financials & Margins</CardTitle>
+                                    <CardTitle>Pricing</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     {/* Direct VTU Discount */}
@@ -177,6 +162,13 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                     </div>
                                 </CardContent>
                             </Card>
+
+                           
+                        </div>
+
+                        {/* Column 2: Financials & Margins */}
+                        <div className="space-y-3">
+                            
 
                             <Card title="Server">
                                 <CardHeader>
@@ -249,6 +241,18 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                                 }
                                             }}
                                         />
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle>Settings</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex items-center justify-between px-3 py-2">
+                                        <Label>Active Status</Label>
+                                        <Switch checked={data.is_active} onCheckedChange={(v: boolean) => setData('is_active', v)} />
                                     </div>
                                 </CardContent>
                             </Card>

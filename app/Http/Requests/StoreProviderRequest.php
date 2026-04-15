@@ -12,7 +12,7 @@ class StoreProviderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,6 +24,15 @@ class StoreProviderRequest extends FormRequest
     {
         return [
             //
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['nullable', 'string', 'max:255', 'unique:providers,code'],
+            'base_url' => ['required', 'url', 'max:255'],
+            'api_key' => ['required', 'string', 'max:255'],
+            'secret_key' => ['nullable', 'string', 'max:255'],
+            'priority' => ['nullable', 'integer', 'min:1'],
+            'timeout_ms' => ['nullable', 'integer', 'min:1000'],
+            'is_active' => ['nullable', 'boolean'],
+            'user_id' => ['required', 'string']
         ];
     }
 }

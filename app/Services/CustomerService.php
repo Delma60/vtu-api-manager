@@ -99,4 +99,21 @@ class CustomerService
             'status' => $customer->is_active ? 'active' : 'suspended',
         ];
     }
+
+    /**
+     * Permanently delete a customer and their associated data.
+     */
+    public function deleteCustomer(Customer $customer): void
+    {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($customer) {
+            // Explicitly delete the wallet to prevent orphaned records 
+            // (if your database foreign keys aren't set to cascadeOnDelete)
+            if ($customer->wallet) {
+                $customer->wallet->delete();
+            }
+            
+            // Delete the customer record
+            $customer->delete();
+        });
+    }
 }

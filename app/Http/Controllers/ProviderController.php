@@ -6,6 +6,8 @@ use App\Models\Provider;
 use App\Http\Requests\StoreProviderRequest;
 use App\Http\Requests\UpdateProviderRequest;
 use App\Models\Service;
+use App\Services\ProviderService;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ProviderController extends Controller
@@ -40,6 +42,9 @@ class ProviderController extends Controller
     public function store(StoreProviderRequest $request)
     {
         //
+        Log::info("Creating provider with data: " . json_encode($request->validated()));
+        ProviderService::createProvider($request->validated());
+        return redirect()->route('providers.index')->with('success', 'Provider created successfully.');
     }
 
     /**

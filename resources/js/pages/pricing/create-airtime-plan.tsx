@@ -16,23 +16,30 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
         vendor_api_code: '',
         discount_percentage: '',
         pin_discount_percentage: '',
+        type: 'airtime',
         is_active: true,
         provider: '1',
         plan_type: '',
         providerable_cost_price: '0.00',
         use_provider_as_providerable: false,
+        min_amount: '',
+        max_amount: '',
         providerable: {
             provider_id: 0,
             cost_price: '0.00',
             server_id: '',
+            margin_value: '0.00',
+            margin_type: 'fiat',
         },
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Submitting Airtime Plan:', data);
-        // post('/pricing/airtime-plan');
+        post(route('discounts.store'));
     };
+
+    console.log(errors)
 
     const costPrice = useMemo(() => {
         const cp = data?.providerable.cost_price;
@@ -69,7 +76,7 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                     <h1 className="text-2xl font-bold tracking-tight">Create Airtime Configuration</h1>
                     <p className="mt-1 text-sm text-slate-400">Set up routing and discount margins for VTU and Airtime PINs.</p>
                 </header>
-                
+
                 <form onSubmit={handleSubmit} className="space-y-3">
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                         {/* Column 1: Identity & Vendor Routing */}
@@ -95,7 +102,6 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                         </Select>
                                         {errors.network_id && <p className="text-xs text-red-400">{errors.network_id}</p>}
                                     </div>
-                                    
 
                                     <div className="space-y-1">
                                         <Select value={data.plan_type} onValueChange={(value) => setData('plan_type', value)}>
@@ -114,15 +120,6 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                     </div>
 
                                     {/* Vendor API Code */}
-                                    <div className="space-y-1">
-                                        <Input
-                                            placeholder="e.g., mtn_custom_vtu"
-                                            value={data.vendor_api_code}
-                                            onChange={(e) => setData('vendor_api_code', e.target.value)}
-                                        />
-                                        <p className="text-[10px] text-slate-500">The exact payload code the vendor expects.</p>
-                                        {errors.vendor_api_code && <p className="text-xs text-red-400">{errors.vendor_api_code}</p>}
-                                    </div>
                                 </CardContent>
                             </Card>
 
@@ -132,44 +129,63 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     {/* Direct VTU Discount */}
-                                    <div className="space-y-2">
-                                        <Input
-                                            type="number"
-                                            step="0.1"
-                                            placeholder="e.g., 2.5"
-                                            value={data.discount_percentage}
-                                            onChange={(e) => setData('discount_percentage', e.target.value)}
-                                        />
-                                        <span className="block text-xs font-medium text-slate-500">
-                                            User pays {100 - (Number(data.discount_percentage) || 0)}%
-                                        </span>
-                                        {errors.discount_percentage && <p className="text-xs text-red-400">{errors.discount_percentage}</p>}
-                                    </div>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div className="col-span-2 space-y-2">
+                                            <Input
+                                                type="number"
+                                                step="0.1"
+                                                placeholder="e.g., 2.5"
+                                                value={data.providerable.margin_value}
+                                                onChange={(e) => setData('providerable', { ...data.providerable, margin_value: e.target.value })}
+                                            />
 
-                                    {/* Airtime PIN Discount */}
-                                    <div className="space-y-2">
-                                        <Input
-                                            type="number"
-                                            step="0.1"
-                                            placeholder="e.g., 2.0"
-                                            value={data.pin_discount_percentage}
-                                            onChange={(e) => setData('pin_discount_percentage', e.target.value)}
-                                        />
-                                        <span className="block text-xs font-medium text-slate-500">
-                                            User pays {100 - (Number(data.pin_discount_percentage) || 0)}%
-                                        </span>
-                                        {errors.pin_discount_percentage && <p className="text-xs text-red-400">{errors.pin_discount_percentage}</p>}
+                                            {errors.providerable && <p className="text-xs text-red-400">{errors.providerable}</p>}
+                                        </div>
+                                        <div className="">
+                                            <Select
+                                                value={data.providerable.margin_type}
+                                                onValueChange={(value) => setData('providerable', { ...data.providerable, margin_type: value })}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select discount type" />
+                                                    <SelectContent>
+                                                        <SelectItem value="fiat">Fiat</SelectItem>
+                                                        <SelectItem value="Percent">Percent</SelectItem>
+                                                    </SelectContent>
+                                                </SelectTrigger>
+                                            </Select>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
-
-                           
                         </div>
 
                         {/* Column 2: Financials & Margins */}
                         <div className="space-y-3">
-                            
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Range</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-1">
+                                        <Label className="text-sm font-medium">Min Amount</Label>
+                                        <Input
+                                            placeholder="e.g. 100"
+                                            value={data.min_amount}
+                                            onChange={(e) => setData('min_amount', e.target.value)}
+                                        />
+                                        <InputError message={errors.min_amount} />
+                                    </div>
 
+                                    <div className="space-y-1">
+                                        <Label className="text-sm font-medium">Max Amount</Label>
+                                        <Input placeholder="e.g. 1000" value={data.max_amount} onChange={(e) => setData('max_amount', e.target.value)} />
+                                        <InputError message={errors.max_amount} />
+                                    </div>
+                                    {/* <PriceField name="min" register={register} /> */}
+                                    {/* <PriceField name="max" register={register} /> */}
+                                </CardContent>
+                            </Card>
                             <Card title="Server">
                                 <CardHeader>
                                     <CardTitle>Servers</CardTitle>
@@ -181,7 +197,7 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                         </SelectTrigger>
                                         <SelectContent>
                                             {providers.map((provider) => (
-                                                <SelectItem key={provider.id} value={provider.id.toString()}>
+                                                <SelectItem key={provider.id} disabled={!provider.is_active} value={provider.id.toString()}>
                                                     {provider.name}
                                                 </SelectItem>
                                             ))}
@@ -245,7 +261,7 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                 </CardContent>
                             </Card>
 
-                             <Card>
+                            <Card>
                                 <CardHeader>
                                     <CardTitle>Settings</CardTitle>
                                 </CardHeader>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\ProviderController;
@@ -25,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('providers', ProviderController::class);
     Route::resource('network-types', NetworkTypeController::class);
     Route::resource('customers', CustomerController::class);
+    Route::resource('discounts', DiscountController::class);
     
     Route::post('customers/{customer}/suspend', [CustomerController::class, 'suspend'])->name('customers.suspend');
     Route::post('customers/{customer}/activate', [CustomerController::class, 'activate'])->name('customers.activate');

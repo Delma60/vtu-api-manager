@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('discounts', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->string('type'); // e.g., 'airtime', 'data',
+            $table->enum('type', ['airtime','exam','airtimeToCash','user_upgrade','bulksms','airtimePin','electricity', 'airtime2cash'])->nullable();
             $table->decimal('min_amount', 15, 2)->default(0);
             $table->decimal('max_amount', 15, 2)->default(0);
             

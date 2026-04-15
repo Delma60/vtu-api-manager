@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('data_plans', function (Blueprint $table) {
             $table->id();
+            $table->string('network');
+            $table->string('plan_name');
+            $table->string('plan_type');
+            $table->string('plan_size');
+            $table->string('validity');
             $table->timestamps();
         });
     }

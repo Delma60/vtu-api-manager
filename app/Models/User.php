@@ -72,12 +72,20 @@ class User extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
-        return $this->type === 'super_admin';
+        if ($this->relationLoaded('role')) {
+            return $this->role && $this->role->slug === 'super_admin';
+        }
+
+        return $this->role_id === 1;
     }
 
     public function isBusinessAdmin(): bool
     {
-        return $this->type === 'business_admin';
+        if ($this->relationLoaded('role')) {
+            return $this->role && $this->role->slug === 'owner';
+        }
+        // Assuming role_id 2 is ALWAYS Business Admin
+        return $this->role_id === 2;
     }
     
     public function isCustomer(): bool

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import { Provider } from '@/types';
 import { router, useForm, usePage } from '@inertiajs/react';
@@ -18,14 +19,15 @@ interface Props {
 
 export default function ProvidersPage({ providers, routingConfig }: Props) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    console.log(providers);
 
     // Fallback data if props are missing during UI dev
     const activeProviders = (providers || []).map((provider) => ({
         ...provider,
         // Map database fields to UI fields
-        upstream_balance: provider.cached_balance || 0,
-        success_rate: provider.success_rate_7d || 0,
-        status: provider.is_active ? (provider.success_rate_7d >= 95 ? 'operational' : 'degraded') : 'disabled',
+        upstream_balance: parseFloat(provider.cached_balance) || 0,
+        success_rate: parseFloat(provider.success_rate_7d) || 0,
+        status: provider.is_active ? (parseFloat(provider.success_rate_7d) >= 95 ? 'operational' : 'degraded') : 'disabled',
         latency: `${provider.timeout_ms}ms`,
     }));
 
@@ -141,9 +143,9 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                                     <p className="mb-1 text-xs font-medium text-slate-500">Upstream Balance</p>
                                     {/* Visual warning if balance is low */}
                                     <p
-                                        className={`font-mono text-lg font-bold ${provider.upstream_balance < 20000 ? 'text-rose-400' : 'text-white'}`}
+                                        className={`font-mono text-lg font-bold ${parseFloat(provider.balance) < 20000 ? 'text-rose-400' : 'text-white'}`}
                                     >
-                                        ₦{provider.upstream_balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                        ₦{parseFloat(provider.balance)?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </p>
                                 </div>
 
@@ -160,7 +162,7 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                             {/* Card Footer - Actions */}
                             <div className="flex items-center justify-between border-t border-slate-800/60 bg-slate-900/30 p-4">
                                 <div className="flex items-center gap-2">
-                                    <div
+                                    {/* <div
                                         className={`flex h-4 w-8 cursor-pointer items-center rounded-full px-0.5 transition-colors ${provider.status !== 'disabled' ? 'bg-emerald-500' : 'bg-slate-700'}`}
                                     >
                                         <div
@@ -169,7 +171,9 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                                     </div>
                                     <span className="text-xs font-medium text-slate-400">
                                         {provider.status !== 'disabled' ? 'Active' : 'Offline'}
-                                    </span>
+                                    </span> */}
+
+                                    <IsActiveSwitch {...provider} />
                                 </div>
 
                                 <button
@@ -213,9 +217,8 @@ const CreateProvider = ({
         code: '',
         base_url: '',
         api_key: '',
-        secret_key: '',
+        api_secret: '',
         user_id: auth?.user?.id?.toString(),
-        code: '',
     });
     const handleCreateProvider = (e: React.FormEvent) => {
         e.preventDefault();
@@ -237,8 +240,6 @@ const CreateProvider = ({
             setData('code', generatedCode);
         }
     }, [data.name]);
-
-    console.log('Form Errors:', errors);
     return (
         <Dialog
             open={isAddDialogOpen}
@@ -303,15 +304,15 @@ const CreateProvider = ({
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="secret_key">Secret Key / Password</Label>
+                            <Label htmlFor="api_secret">Secret Key / Password</Label>
                             <Input
-                                id="secret_key"
+                                id="api_secret"
                                 type="text"
-                                value={data.secret_key}
-                                onChange={(e) => setData('secret_key', e.target.value)}
+                                value={data.api_secret}
+                                onChange={(e) => setData('api_secret', e.target.value)}
                                 placeholder="Your Secret Key (if applicable)"
                             />
-                            <InputError message={errors.base_url} />
+                            <InputError message={errors.api_secret} />
                         </div>
                     </div>
                     <DialogFooter>
@@ -325,5 +326,22 @@ const CreateProvider = ({
                 </form>
             </DialogContent>
         </Dialog>
+    );
+};
+
+const IsActiveSwitch = (provider?: Provider) => {
+    const { data, setData, patch, errors } = useForm<Provider>(provider);
+    console.log(errors);
+    const handleChecked = (checked: boolean) => {
+        setData('is_active', checked);
+        patch(route('providers.update', provider?.id));
+    };
+
+    return (
+        <div className="flex items-center justify-center gap-3 rounded-lg border border-slate-800/50 bg-slate-900/50 px-3 py-1">
+            <Label className='text-sm'> Active </Label>
+            {/* small switch */}
+            <Switch checked={data.is_active} onCheckedChange={handleChecked} className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-red-500 border" />
+        </div>
     );
 };

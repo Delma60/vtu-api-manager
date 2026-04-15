@@ -6,6 +6,7 @@ use App\Class\Providers\ProviderAbstract;
 use App\Models\CablePlan;
 use App\Models\DataPlan;
 use App\Models\Discount;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -15,6 +16,7 @@ class Adex extends ProviderAbstract
     /**
      * Create a new class instance.
      */
+    private string $accessToken;
     public function __construct()
     {
         //
@@ -424,7 +426,7 @@ class Adex extends ProviderAbstract
         // $adminController->universalGet($payload['request'], $payload['table']);
     }
 
-    function callback(Request $request)
+    function callback(Request $request):array
     {
 
         return [

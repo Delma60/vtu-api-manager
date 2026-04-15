@@ -14,7 +14,7 @@ trait BelongsToBusiness
         // Automatically scope queries to the currently authenticated user's business
         static::addGlobalScope('business_tenant', function (Builder $builder) {
             // CRITICAL FIX: Use Auth::hasUser() to prevent infinite DB loops!
-            if (Auth::hasUser() && !Auth::user()->isSuperAdmin()) {
+            if (Auth::hasUser() && Auth::user()->business_id !== null) {
                 $builder->where('business_id', Auth::user()->business_id);
             }
         });
@@ -22,7 +22,7 @@ trait BelongsToBusiness
         // Automatically assign the business_id when creating new records
         static::creating(function ($model) {
             // CRITICAL FIX: Use Auth::hasUser()
-            if (Auth::hasUser() && !Auth::user()->isSuperAdmin() && empty($model->business_id)) {
+            if (Auth::hasUser() && Auth::user()->business_id !== null && empty($model->business_id)) {
                 $model->business_id = Auth::user()->business_id;
             }
         });

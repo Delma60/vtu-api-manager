@@ -17,8 +17,8 @@ class ProviderService
     static function make (Provider $provider) {
         $useSandbox = env('USE_SANDBOX', false);
 
-        $match = "adex" //$useSandbox ? "sandbox":($provider->sub_category === "simhost" ? $provider->name : $provider->sub_category);
-        Log::info($provider);
+        $match = "adex" ;//$useSandbox ? "sandbox":($provider->sub_category === "simhost" ? $provider->name : $provider->sub_category);
+        // Log::info($provider);
         return match ($match) {
             "adex"=> new Adex($provider),
             // "sandbox"=> new SandboxService() ,
@@ -31,6 +31,13 @@ class ProviderService
     public static function createProvider(array $data): Provider
     {
         return Provider::create($data);
+    }
+
+    public static function updateProvider(array $data): Provider
+    {
+        $provider = Provider::findOrFail($data['id']);
+        $provider->update($data);
+        return $provider;
     }
 
     public static function sumAllBalances(): float

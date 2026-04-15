@@ -12,7 +12,7 @@ class UpdateProviderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,6 +24,15 @@ class UpdateProviderRequest extends FormRequest
     {
         return [
             //
+            'name' => ['nullable', 'string', 'max:255'],
+            'code' => ['nullable', 'string', 'max:255'],
+            'base_url' => ['nullable', 'url', 'max:255'],
+            'api_key' => ['nullable', 'string', 'max:255'],
+            'secret_key' => ['nullable', 'string', 'max:255'],
+            'priority' => ['nullable', 'integer', 'min:1'],
+            'timeout_ms' => ['nullable', 'integer', 'min:1000'],
+            'is_active' => ['nullable', 'boolean'],
+            'user_id' => ['nullable']
         ];
     }
 }

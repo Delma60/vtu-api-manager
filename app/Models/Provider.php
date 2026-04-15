@@ -7,6 +7,7 @@ use App\Services\ProviderService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class Provider extends Model
 {
@@ -48,19 +49,19 @@ class Provider extends Model
 
     public function getConnectionAttribute()
     {
-        $key = md5($this->base_url . $this->username . $this->password."-123");
+        $key = md5($this->base_url . $this->api_key . $this->api_secret . "=password=");
         $provider = ProviderService::make($this);
-        return Cache::remember($key, now()->addMinutes(5), function() use($provider) {
+        return Cache::remember($key, now()->addSeconds(10), function() use($provider) {
+            // Log::info(["key" => $provider]);
             return $provider->isHealthy();
         });
     }
 
     public function getBalanceAttribute()
     {
-        $key = md5($this->base_url . $this->username . $this->password ."_balance");
-        Log:info(["key" => $key]);
+        $key = md5($this->base_url . $this->api_key . $this->api_secret . "__");
         $provider = ProviderService::make($this);
-        return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
+        return Cache::remember($key, now()->addMinutes(10), function() use($provider) {
             return $provider->checkBalance();
         });
     }

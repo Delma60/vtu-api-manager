@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 export function Sidebar() {
     // Mock state for active tab and environment mode
     const { props, url } = usePage();
+    const providerDownCount = props?.provider_down_count ?? 0;
     // const tab = url.includes();
     const [activeTab, setActiveTab] = useState(url);
     const [isLiveMode, setIsLiveMode] = useState(false);
@@ -123,7 +124,7 @@ export function Sidebar() {
                             />
                         }
                         label="API Providers"
-                        badge="1 Down"
+                        badge={`${providerDownCount} Down`}
                     />
                     <NavItemWithChildren
                         isExpanded={expandedItems.includes('pricing')}

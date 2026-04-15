@@ -49,6 +49,12 @@ export interface Provider {
         success_rate_7d: number;
         timeout_ms: number;
         is_active: boolean;
+        api_key:string;
+        api_secret:string;
+        base_url:string;
+        code:string;
+        connection:boolean;
+        balance:string
 }
 
 export interface Transaction {

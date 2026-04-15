@@ -84,7 +84,7 @@ class ProviderController extends Controller
         //
         Log::info("Updating provider [{$provider->name}] with data: " . json_encode($request->validated()));
         ProviderService::updateProvider(array_merge($request->validated(), ['id' => $provider->id]));
-        return redirect()->route('providers.index')->with('success', 'Provider updated successfully.');
+        return back()->with('success', 'Provider updated successfully.');
     }
 
     /**

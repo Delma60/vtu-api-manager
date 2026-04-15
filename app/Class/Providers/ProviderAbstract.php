@@ -6,7 +6,7 @@ use App\Interfaces\ProviderInterface;
 use App\Models\Provider;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
 
 abstract class ProviderAbstract implements ProviderInterface
 {
@@ -95,10 +95,12 @@ abstract class ProviderAbstract implements ProviderInterface
     {
         try {
             $response = $this->login();
+            if(!isset($response)) return false;
+            Log::info($response);
             return $response['status'] === 'success';
 
         } catch (\Throwable $e) {
-            // Log::warning("Vendor [{$this->providerName}] is unhealthy.");
+            Log::warning("Vendor  is unhealthy., error: " . $e->getMessage());
             return false;
         }
     }

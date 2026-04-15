@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Provider;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -45,6 +46,10 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'provider_down_count' => Provider::all()->map(function($provider) {
+                if(!$provider->connection) return $provider;
+            })->filter()->count(),
+
         ]);
     }
 }

@@ -9,18 +9,16 @@ use App\Models\Discount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\Facades\Log;
 
 class Adex extends ProviderAbstract
 {
     /**
      * Create a new class instance.
      */
-    private string $accessToken;
-    public function __construct()
-    {
-        //
-    }
+    protected string $providerName = 'adex';
+    private ?string $accessToken = null;
+    
 
      function sendRequest(string $service, array $payload): array
     {
@@ -40,6 +38,7 @@ class Adex extends ProviderAbstract
         try {
             $res = $this->login();
              $cleaned = preg_replace('/[^\d.]/', '', $res['balance']);
+             Log::info(["data" => $cleaned]);
             return (float) $cleaned;
         } catch (\Throwable $th) {
             // Log the exception if needed: error_log($th->getMessage());
@@ -54,12 +53,12 @@ class Adex extends ProviderAbstract
 
      function login(): array
     {
-        $key = md5($this->baseUrl() . $this->provider->username . $this->provider->password);
+        $key = md5($this->baseUrl() . $this->provider->api_key . $this->provider->api_secret);
         return Cache::remember($key, now()->addMinutes(5), function (){
                 try {
                     $response = Http::withHeaders([
                         'Authorization' => 'Basic ' . base64_encode(
-                            $this->provider->username . ':' . $this->provider->password
+                            $this->provider->api_key . ':' . $this->provider->api_secret
                         ),
                         'Content-Type' => 'application/json',
                     ])->post($this->baseUrl() . "/user");

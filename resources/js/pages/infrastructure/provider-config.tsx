@@ -1,27 +1,30 @@
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import { Provider } from '@/types';
+import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function ProviderConfig({ provider, services, recentErrors }) {
-    // Mock Data
-    const currentProvider = provider || {
-        name: 'VTpass Aggregator',
-        code: 'vtpass',
-        base_url: 'https://vtpass.com/api/v1',
-        priority: 2,
-        timeout_ms: 5000,
-        is_active: true,
-    };
-
+export default function ProviderConfig({
+    provider: currentProvider,
+    services,
+    recentErrors,
+}: {
+    provider: Provider;
+    services: any;
+    recentErrors: any;
+}) {
     const [activeTab, setActiveTab] = useState('credentials');
 
+    const { data: formData, setData, errors, patch, processing } = useForm<Provider>(currentProvider);
     // Inertia useForm equivalent state
-    const [formData, setFormData] = useState({
-        base_url: currentProvider.base_url,
-        api_key: 'sk_live_1234567890abcdef', // Mocked
-        api_secret: '••••••••••••••••',
-        priority: currentProvider.priority,
-        timeout_ms: currentProvider.timeout_ms,
-    });
+    const [changePassword, setChangePassword] = useState(true);
+
+    console.log(currentProvider)
+
+    const onSave = () => {
+        patch(route('providers.update', currentProvider.id));
+    };
 
     return (
         <AppLayout>
@@ -45,14 +48,25 @@ export default function ProviderConfig({ provider, services, recentErrors }) {
                                 >
                                     {currentProvider.is_active ? 'Active' : 'Disabled'}
                                 </span>
+                                <span
+                                    className={`rounded px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${currentProvider.connection ? 'border border-blue-500/20 bg-blue-500/10 text-blue-400' : 'border border-orange-500/20 bg-orange-500/10 text-orange-400'}`}
+                                >
+                                    {currentProvider.connection ? 'Connected' : 'Disconnected'}
+                                </span>
                             </h1>
                             <p className="mt-0.5 font-mono text-xs text-slate-400">Code: {currentProvider.code}</p>
+                            <p className="mt-1 text-xs text-slate-400">
+                                Balance: ₦{Number(currentProvider.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
                         <button className="px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:text-white">Cancel</button>
-                        <button className="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500">
-                            Save Configuration
+                        <button
+                            onClick={onSave}
+                            className="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500"
+                        >
+                            {processing ? 'Saving...' : 'Save Configuration'}
                         </button>
                     </div>
                 </header>
@@ -89,20 +103,6 @@ export default function ProviderConfig({ provider, services, recentErrors }) {
                             Routing & Failover
                         </button>
                         <button
-                            onClick={() => setActiveTab('mapping')}
-                            className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'mapping' ? 'bg-indigo-500/10 text-indigo-400' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}`}
-                        >
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                                />
-                            </svg>
-                            Service Mapping
-                        </button>
-                        <button
                             onClick={() => setActiveTab('diagnostics')}
                             className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'diagnostics' ? 'bg-indigo-500/10 text-indigo-400' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}`}
                         >
@@ -134,30 +134,36 @@ export default function ProviderConfig({ provider, services, recentErrors }) {
                                 </div>
                                 <div className="space-y-6 p-6">
                                     <div>
-                                        <label className="mb-2 block text-sm font-medium text-slate-300">Base URL</label>
-                                        <input
-                                            type="text"
+                                        <Label className="mb-2 block text-sm font-medium text-slate-300">Base URL</Label>
+                                        <Input
+                                            type="url"
                                             value={formData.base_url}
+                                            onChange={(e) => setData('base_url', e.target.value)}
                                             className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 font-mono text-sm text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                                         />
                                     </div>
                                     <div>
-                                        <label className="mb-2 block text-sm font-medium text-slate-300">Public Key / Username</label>
-                                        <input
+                                        <Label className="mb-2 block text-sm font-medium text-slate-300">Public Key / Username</Label>
+                                        <Input
                                             type="text"
                                             value={formData.api_key}
+                                            onChange={(e) => setData('api_key', e.target.value)}
                                             className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 font-mono text-sm text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                                         />
                                     </div>
                                     <div>
-                                        <label className="mb-2 block text-sm font-medium text-slate-300">Secret Key / Password</label>
+                                        <Label className="mb-2 block text-sm font-medium text-slate-300">Secret Key / Password</Label>
                                         <div className="relative">
-                                            <input
-                                                type="password"
+                                            <Input
+                                                type={changePassword ? 'password' : 'text'}
                                                 value={formData.api_secret}
+                                                onChange={(e) => setData('api_secret', e.target.value)}
                                                 className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 font-mono text-sm text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                                             />
-                                            <button className="absolute top-3 right-3 text-sm font-medium text-indigo-400 hover:text-indigo-300">
+                                            <button
+                                                onClick={() => setChangePassword(!changePassword)}
+                                                className="absolute top-3 right-3 text-sm font-medium text-indigo-400 hover:text-indigo-300"
+                                            >
                                                 Reveal
                                             </button>
                                         </div>
@@ -216,76 +222,6 @@ export default function ProviderConfig({ provider, services, recentErrors }) {
                                             <span className="text-xs font-semibold text-slate-500">ms</span>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* TAB 3: Service Mapping (Critical for VTU) */}
-                        {activeTab === 'mapping' && (
-                            <div className="overflow-hidden rounded-xl border border-slate-800 bg-[#0f172a] shadow-sm">
-                                <div className="flex items-center justify-between border-b border-slate-800 p-6">
-                                    <div>
-                                        <h2 className="text-lg font-semibold text-white">Service Mapping</h2>
-                                        <p className="mt-1 text-sm text-slate-400">
-                                            Map your standard internal service codes to {currentProvider.name}'s specific codes.
-                                        </p>
-                                    </div>
-                                    <button className="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800">
-                                        Import CSV
-                                    </button>
-                                </div>
-
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left text-sm text-slate-400">
-                                        <thead className="border-b border-slate-800 bg-slate-900/50 text-[11px] font-semibold text-slate-500 uppercase">
-                                            <tr>
-                                                <th className="px-6 py-3">Network</th>
-                                                <th className="px-6 py-3">Internal Code (Yours)</th>
-                                                <th className="px-6 py-3">Vendor Code (Theirs)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-800/60">
-                                            <tr>
-                                                <td className="px-6 py-4">
-                                                    <span className="mr-2 inline-block h-2 w-2 rounded-full bg-yellow-500"></span>MTN
-                                                </td>
-                                                <td className="px-6 py-4 font-mono text-indigo-300">data_mtn_1gb</td>
-                                                <td className="px-6 py-4">
-                                                    <input
-                                                        type="text"
-                                                        defaultValue="mtn-1g-corp"
-                                                        className="w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 font-mono text-xs text-white outline-none focus:border-indigo-500"
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-6 py-4">
-                                                    <span className="mr-2 inline-block h-2 w-2 rounded-full bg-yellow-500"></span>MTN
-                                                </td>
-                                                <td className="px-6 py-4 font-mono text-indigo-300">data_mtn_2gb</td>
-                                                <td className="px-6 py-4">
-                                                    <input
-                                                        type="text"
-                                                        defaultValue="mtn-2g-corp"
-                                                        className="w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 font-mono text-xs text-white outline-none focus:border-indigo-500"
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-6 py-4">
-                                                    <span className="mr-2 inline-block h-2 w-2 rounded-full bg-red-500"></span>Airtel
-                                                </td>
-                                                <td className="px-6 py-4 font-mono text-indigo-300">data_air_1.5gb</td>
-                                                <td className="px-6 py-4">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Enter vendor code..."
-                                                        className="w-full rounded border border-dashed border-slate-600 bg-slate-900 px-2 py-1.5 font-mono text-xs text-white outline-none focus:border-indigo-500"
-                                                    />
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
                                 </div>
                             </div>
                         )}

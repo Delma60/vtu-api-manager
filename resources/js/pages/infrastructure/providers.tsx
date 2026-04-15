@@ -130,11 +130,21 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                                         <p className="text-xs text-slate-500">Priority: {provider.priority}</p>
                                     </div>
                                 </div>
+                                <div className="flex flex-col gap-3">
                                 <span
                                     className={`rounded border px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${getStatusColor(provider.status)}`}
                                 >
                                     {provider.status}
                                 </span>
+
+                                {/* connection badge */}
+                                <div className="flex items-center gap-2">
+                                    <span className={`h-2 w-2 rounded-full ${provider.connection ? 'bg-emerald-400' : 'bg-slate-500'}`}></span>
+                                    <span className="text-xs text-slate-400">{provider.connection ? 'Connected' : 'Disconnected'}</span>
+                                </div>
+
+                                </div>
+
                             </div>
 
                             {/* Card Body - Metrics */}
@@ -330,18 +340,15 @@ const CreateProvider = ({
 };
 
 const IsActiveSwitch = (provider?: Provider) => {
-    const { data, setData, patch, errors } = useForm<Provider>(provider);
-    console.log(errors);
     const handleChecked = (checked: boolean) => {
-        setData('is_active', checked);
-        patch(route('providers.update', provider?.id));
+        router.put(route('providers.update', provider?.id), { is_active: checked });
     };
 
     return (
         <div className="flex items-center justify-center gap-3 rounded-lg border border-slate-800/50 bg-slate-900/50 px-3 py-1">
             <Label className='text-sm'> Active </Label>
             {/* small switch */}
-            <Switch checked={data.is_active} onCheckedChange={handleChecked} className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-red-500 border" />
+            <Switch checked={!!provider?.is_active} onCheckedChange={handleChecked} className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-red-500 border" />
         </div>
     );
 };

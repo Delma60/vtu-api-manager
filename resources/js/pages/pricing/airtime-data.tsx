@@ -2,12 +2,16 @@ import DeleteButton from '@/components/delete-button';
 import InputError from '@/components/input-error';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
-import { Link, useForm } from '@inertiajs/react';
+import { Link, router, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 //
 export default function PricingManager({ initialServices, networks, network_types, airtime_discounts }) {
+    // get tab frpm url
+    const url = new URL(window.location.href);
+    // const [activeTab, setActiveTab] = /useState(url.searchParams.get('tab') || 'network');
     const [services, setServices] = useState(
         initialServices || [
             { id: 1, network_name: 'MTN', type: 'data_plan', name: '1GB SME', cost: 235, price: 245, is_active: true },
@@ -33,18 +37,18 @@ export default function PricingManager({ initialServices, networks, network_type
         { id: 'data_plan', label: 'Data Plans' },
         { id: 'data_pin', label: 'Data PINs' },
     ];
-    const [activeTab, setActiveTab] = useState('network');
+    const [activeTab, setActiveTab] = useState(url.searchParams.get('tab') ?? 'network');
 
     // Input Handlers
-    const updateNetwork = (id, field, value) => {
-        setNetworks(networks.map((n) => (n.id === id ? { ...n, [field]: value } : n)));
+    const updateNetwork = (id: string, field: string, value: any) => {
+        router.patch(route('discounts.update', id), { [field]: value });
     };
 
-    const updateService = (id, field, value) => {
+    const updateService = (id: string, field: string, value: any) => {
         setServices(services.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
     };
 
-    const updateNetworkType = (id, field, value) => {
+    const updateNetworkType = (id: string, field: string, value: any) => {
         setNetworkTypes(networkTypes.map((nt) => (nt.id === id ? { ...nt, [field]: value } : nt)));
     };
 
@@ -99,6 +103,14 @@ export default function PricingManager({ initialServices, networks, network_type
         }
     }, [data.name]);
 
+    const handleChangeTabs = (tabName: string) => {
+        // url persistant
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('tab', tabName);
+        window.history.pushState({}, '', newUrl);
+        setActiveTab(tabName);
+    };
+
     return (
         <AppLayout>
             <div className="flex min-h-screen flex-1 flex-col bg-slate-950 font-sans text-slate-200">
@@ -131,7 +143,7 @@ export default function PricingManager({ initialServices, networks, network_type
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
+                                onClick={() => handleChangeTabs(tab.id)}
                                 className={`border-b-2 px-6 py-3 text-sm font-semibold whitespace-nowrap transition-all ${
                                     activeTab === tab.id
                                         ? 'border-indigo-500 bg-indigo-500/5 text-indigo-400'
@@ -515,35 +527,29 @@ export default function PricingManager({ initialServices, networks, network_type
                                     <thead className="border-b border-slate-800 bg-[#0f172a] text-[11px] font-semibold text-slate-500 uppercase">
                                         <tr>
                                             <th className="px-6 py-3">Network</th>
-                                            <th className="px-6 py-3">Current Discount (%)</th>
-                                            <th className="px-6 py-3">User Price</th>
+                                            <th className="px-6 py-3">Network</th>
+                                            <th className="px-6 py-3">Min/Max</th>
                                             <th className="px-6 py-3 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-800/60">
-                                        {networks.map((net) => {
+                                        {/* {JSON.stringify(airtime_discounts)} */}
+                                        {airtime_discounts.map((net) => {
                                             const field = activeTab === 'airtime' ? 'airtime_discount' : 'airtime_pin_discount';
                                             return (
                                                 <tr key={net.id} className={net.is_active ? 'hover:bg-slate-800/30' : 'opacity-50'}>
                                                     <td className="flex items-center gap-3 px-6 py-5">
-                                                        <span className={`h-3 w-3 rounded-full ${getNetworkColor(net.name)}`}></span>
-                                                        <span className="font-semibold text-white">{net.name}</span>
+                                                        {/* <span className={`h-3 w-3 rounded-full ${getNetworkColor(net.name)}`}></span> */}
+                                                        <span className="font-semibold text-white">{net.plan_type.name}</span>
                                                     </td>
                                                     <td className="px-6 py-5">
-                                                        <div className="flex items-center gap-2">
-                                                            <input
-                                                                type="number"
-                                                                step="0.1"
-                                                                value={net[field]}
-                                                                onChange={(e) => updateNetwork(net.id, field, Number(e.target.value))}
-                                                                className="w-20 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm font-bold text-white focus:border-indigo-500 focus:outline-none"
-                                                            />
-                                                            <span className="text-slate-400">%</span>
-                                                        </div>
+                                                        <span className="rounded-md border border-slate-700 bg-slate-900/50 px-2 py-1 font-mono text-xs text-slate-400">
+                                                            {net.name}
+                                                        </span>
                                                     </td>
                                                     <td className="px-6 py-5">
-                                                        <span className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400">
-                                                            {100 - net[field]}%
+                                                        <span className="rounded-md border border-slate-700 bg-slate-900/50 px-2 py-1 font-mono text-xs text-slate-400">
+                                                            {net.min_amount}|{net.max_amount}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-5 text-right">
@@ -552,14 +558,20 @@ export default function PricingManager({ initialServices, networks, network_type
                                                                 Edit
                                                             </button>
                                                             <div className="flex items-center gap-2 border-l border-slate-800 pl-6">
-                                                                <button
-                                                                    onClick={() => updateNetwork(net.id, 'is_active', !net.is_active)}
-                                                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${net.is_active ? 'bg-emerald-500' : 'bg-slate-700'}`}
+                                                                <DeleteButton
+                                                                    className="m-0 bg-transparent text-sm p-0 text-red-400 hover:bg-transparent"
+                                                                    route={route('discounts.destroy', net.id)}
+                                                                    resourceName={'discount plan'}
+                                                                    buttonSize='sm'
                                                                 >
-                                                                    <span
-                                                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${net.is_active ? 'translate-x-6' : 'translate-x-1'}`}
-                                                                    />
-                                                                </button>
+                                                                    Delete
+                                                                </DeleteButton>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 border-l border-slate-800 pl-6">
+                                                                <Switch
+                                                                    checked={net.is_active}
+                                                                    onCheckedChange={(check) => updateNetwork(net.id, 'is_active', check)}
+                                                                />
                                                             </div>
                                                         </div>
                                                     </td>

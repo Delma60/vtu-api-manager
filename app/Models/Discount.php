@@ -28,7 +28,9 @@ class Discount extends Model
             ->withTimestamps();
     }
 
-    public function planType(){
+    public function plan_type(){
         return $this->belongsTo(NetworkType::class, 'plan_type');
     }
+
+    // public function network (){}
 }

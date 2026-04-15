@@ -22,8 +22,8 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
         plan_type: '',
         providerable_cost_price: '0.00',
         use_provider_as_providerable: false,
-        min_amount: '',
-        max_amount: '',
+        min_amount: '50',
+        max_amount: '5000',
         providerable: {
             provider_id: 0,
             cost_price: '0.00',
@@ -60,7 +60,7 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                 {/* Header */}
                 <header className="mb-8">
                     <Link
-                        href="/pricing"
+                        href="/pricing/airtime-data"
                         className="group mb-2 inline-flex items-center text-sm font-medium text-slate-500 transition-colors hover:text-indigo-400"
                     >
                         <svg

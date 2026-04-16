@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\BelongsToBusiness;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Customer extends User
 {
     /** @use HasFactory<\Database\Factories\CustomerFactory> */
-
+    use BelongsToBusiness;
+    
     protected $table = 'users';
 
     protected static function booted(): void

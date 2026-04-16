@@ -18,7 +18,8 @@ class Discount extends Model
         'max_amount',
         'plan_type',
     ];
-    // boot ::create convert network_id from request to network name and save to name column
+    
+    protected $append = ['active_provider'];
     
     
     public function providers()
@@ -26,6 +27,11 @@ class Discount extends Model
         return $this->morphToMany(Provider::class, 'providerable', 'providerables', 'providerable_id', 'provider_id')
             ->withPivot(['cost_price', 'margin_value', 'margin_type', 'server_id'])
             ->withTimestamps();
+    }
+
+    public function setActiveProviderAttribute(){
+        $providerable = $this->providers()->first();
+        return $providerable ? $providerable : null;
     }
 
     public function plan_type(){

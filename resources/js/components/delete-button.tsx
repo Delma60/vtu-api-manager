@@ -17,6 +17,7 @@ interface DeleteButtonProps {
     buttonSize?: 'sm' | 'md' | 'lg' | 'icon';
     className?: string;
     children?:React.ReactNode
+    variant?: "destructive" | "link" | "default" | "outline" | "secondary" | "ghost" | null 
 }
 
 export default function DeleteButton({
@@ -28,6 +29,7 @@ export default function DeleteButton({
     buttonSize = 'md',
     children,
     className,
+    variant = 'ghost',
 }: DeleteButtonProps) {
     const passwordInput = useRef<HTMLInputElement>(null);
     const { data, setData, delete: destroy, processing, reset, errors, clearErrors } = useForm({ password: '' });
@@ -65,7 +67,7 @@ export default function DeleteButton({
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="destructive" size={buttonSize === 'icon' ? 'icon' : 'default'} className={className}>
+                <Button variant={variant} size={buttonSize === 'icon' ? 'icon' : 'default'} className={className}>
                     {buttonSize === 'icon' ? <Trash2 className="h-4 w-4" /> : children ? children :(buttonText)}
                 </Button>
             </DialogTrigger>

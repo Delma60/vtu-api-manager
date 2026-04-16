@@ -1,7 +1,10 @@
 import DeleteButton from '@/components/delete-button';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import { Link, router, useForm } from '@inertiajs/react';
@@ -113,11 +116,11 @@ export default function PricingManager({ initialServices, networks, network_type
 
     return (
         <AppLayout>
-            <div className="flex min-h-screen flex-1 flex-col bg-slate-950 font-sans text-slate-200">
+            <div className="flex min-h-screen flex-1 flex-col font-sans">
                 {/* Sticky Header */}
-                <header className="sticky top-0 z-20 flex shrink-0 items-center justify-between border-b border-slate-800 bg-slate-950/80 px-8 py-5 backdrop-blur-md">
+                <header className="sticky top-0 z-20 flex shrink-0 items-center justify-between border-b border-slate-300 dark:border-slate-800 px-8 py-5 backdrop-blur-md dark:bg-slate-950/80">
                     <div>
-                        <h1 className="text-xl font-bold tracking-tight text-white">Pricing & Routing Rules</h1>
+                        <h1 className="text-xl font-bold tracking-tight text-slate-600 dark:text-white">Pricing & Routing Rules</h1>
                         <p className="mt-0.5 text-xs text-slate-400">Manage global discounts and specific service margins.</p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -139,7 +142,7 @@ export default function PricingManager({ initialServices, networks, network_type
                 {/* Main Content Area */}
                 <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col p-8">
                     {/* The Requested Tabs */}
-                    <div className="custom-scrollbar mb-8 flex shrink-0 items-center gap-2 overflow-x-auto border-b border-slate-800 pb-px">
+                    <div className="custom-scrollbar mb-8 flex shrink-0 items-center gap-2 overflow-x-auto border-b border-slate-300 dark:border-slate-800 pb-px">
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
@@ -504,10 +507,10 @@ export default function PricingManager({ initialServices, networks, network_type
 
                         {/* TAB 3 & 4: Airtime & Airtime PINs (Using same table structure) */}
                         {(activeTab === 'airtime' || activeTab === 'airtime_pin') && (
-                            <div className="flex-1 overflow-x-auto">
-                                <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/50 p-5">
+                            <Card className="flex-1 overflow-x-auto h-min border-slate-200 dark:border-slate-800">
+                                <div className="flex items-center justify-between border-b border-slate-200 bg-slate-100/50 p-5 dark:border-slate-800 dark:bg-slate-900/50">
                                     <div>
-                                        <h2 className="text-base font-semibold text-white">
+                                        <h2 className="text-base font-semibold dark:text-slate-200 text-slate-800">
                                             {activeTab === 'airtime' ? 'Direct Airtime Discounts' : 'Airtime PIN Discounts'}
                                         </h2>
                                         <p className="mt-1 text-xs text-slate-400">
@@ -523,64 +526,73 @@ export default function PricingManager({ initialServices, networks, network_type
                                         </Link>
                                     )}
                                 </div>
-                                <table className="w-full text-left text-sm text-slate-400">
-                                    <thead className="border-b border-slate-800 bg-[#0f172a] text-[11px] font-semibold text-slate-500 uppercase">
-                                        <tr>
-                                            <th className="px-6 py-3">Network</th>
-                                            <th className="px-6 py-3">Network</th>
-                                            <th className="px-6 py-3">Min/Max</th>
-                                            <th className="px-6 py-3 text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-800/60">
-                                        {/* {JSON.stringify(airtime_discounts)} */}
-                                        {airtime_discounts.map((net) => {
-                                            const field = activeTab === 'airtime' ? 'airtime_discount' : 'airtime_pin_discount';
-                                            return (
-                                                <tr key={net.id} className={net.is_active ? 'hover:bg-slate-800/30' : 'opacity-50'}>
-                                                    <td className="flex items-center gap-3 px-6 py-5">
-                                                        {/* <span className={`h-3 w-3 rounded-full ${getNetworkColor(net.name)}`}></span> */}
-                                                        <span className="font-semibold text-white">{net.plan_type.name}</span>
-                                                    </td>
-                                                    <td className="px-6 py-5">
-                                                        <span className="rounded-md border border-slate-700 bg-slate-900/50 px-2 py-1 font-mono text-xs text-slate-400">
-                                                            {net.name}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-5">
-                                                        <span className="rounded-md border border-slate-700 bg-slate-900/50 px-2 py-1 font-mono text-xs text-slate-400">
-                                                            {net.min_amount}|{net.max_amount}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-5 text-right">
-                                                        <div className="flex items-center justify-end gap-6">
-                                                            <button className="text-xs font-medium text-slate-500 transition-colors hover:text-indigo-400">
-                                                                Edit
-                                                            </button>
-                                                            <div className="flex items-center gap-2 border-l border-slate-800 pl-6">
-                                                                <DeleteButton
-                                                                    className="m-0 bg-transparent text-sm p-0 text-red-400 hover:bg-transparent"
-                                                                    route={route('discounts.destroy', net.id)}
-                                                                    resourceName={'discount plan'}
-                                                                    buttonSize='sm'
-                                                                >
-                                                                    Delete
-                                                                </DeleteButton>
+                                <CardContent className="m-0 p-0 ">
+                                    <table className="w-full text-left text-sm text-slate-400">
+                                        <thead className="border-b border-slate-200 bg-slate-300 text-[11px] font-semibold text-slate-500 uppercase dark:border-slate-800 dark:bg-[#0f172a]">
+                                            <tr>
+                                                <th className="px-6 py-3">Network</th>
+                                                <th className="px-6 py-3">Network</th>
+                                                <th className="px-6 py-3">Min/Max</th>
+                                                <th className="px-6 py-3 text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-400/60 dark:divide-slate-200/60 ">
+                                            {/* {JSON.stringify(airtime_discounts)} */}
+                                            {airtime_discounts.map((net) => {
+                                                const field = activeTab === 'airtime' ? 'airtime_discount' : 'airtime_pin_discount';
+                                                return (
+                                                    <tr
+                                                        key={net.id}
+                                                        className={net.is_active ? 'hover:bg-slate-300/30 dark:hover:bg-slate-700/30' : 'opacity-50'}
+                                                    >
+                                                        <td className="flex items-center gap-3 px-6 py-5">
+                                                            {/* <span className={`h-3 w-3 rounded-full ${getNetworkColor(net.name)}`}></span> */}
+                                                            <span className="font-semibold dark:text-slate-200 text-slate-800">{net.plan_type.name}</span>
+                                                        </td>
+                                                        <td className="px-6 py-5">
+                                                            <span className="rounded-md border border-slate-300 bg-slate-100/50 px-2 py-1 font-mono text-xs text-slate-400 dark:border-slate-700 dark:bg-slate-900/50">
+                                                                {net.name}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-5">
+                                                            <span className="rounded-md border border-slate-300 bg-slate-100/50 px-2 py-1 font-mono text-xs text-slate-400 dark:border-slate-700 dark:bg-slate-900/50">
+                                                                {net.min_amount}|{net.max_amount}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-5 text-right">
+                                                            <div className="flex items-center justify-end gap-2">
+                                                                <Button variant="ghost" onClick={() => router.get(route("pricing.airtime-plan.edit", net.id))} className="text-xs font-medium text-slate-500 transition-colors hover:text-indigo-400">
+                                                                    Edit
+                                                                </Button>
+                                                                <Separator orientation='vertical' className="mr-2 h-5 dark:bg-slate-200 bg-slate-800" />
+                                                                <div className="flex items-center gap-2 pr-1">
+                                                                    <DeleteButton
+                                                                        className="m-0 bg-transparent p-0 text-sm text-red-400 hover:text-red-400"
+                                                                        route={route('discounts.destroy', net.id)}
+                                                                        resourceName={'discount plan'}
+                                                                        buttonSize="sm"
+                                                                        variant="link"
+                                                                    >
+                                                                        Delete
+                                                                    </DeleteButton>
+                                                                </div>
+                                                                <Separator orientation='vertical' className="mr-2 h-5 dark:bg-slate-200 bg-slate-800" />
+
+                                                                <div className="flex items-center gap-2 ">
+                                                                    <Switch
+                                                                        checked={net.is_active}
+                                                                        onCheckedChange={(check) => updateNetwork(net.id, 'is_active', check)}
+                                                                    />
+                                                                </div>
                                                             </div>
-                                                            <div className="flex items-center gap-2 border-l border-slate-800 pl-6">
-                                                                <Switch
-                                                                    checked={net.is_active}
-                                                                    onCheckedChange={(check) => updateNetwork(net.id, 'is_active', check)}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </CardContent>
+                            </Card>
                         )}
 
                         {/* TAB 5 & 6: Data Plans & Data PINs */}

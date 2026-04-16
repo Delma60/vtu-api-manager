@@ -9,43 +9,23 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useMemo } from 'react';
 
-export default function CreateAirtimePlan({ networks: activeNetworks, providers }: any) {
+export default function EditAirtimePlan({ networks: activeNetworks, providers, plan }: any) {
     const { data, setData, post, processing, errors } = useForm({
-        network_id: '',
-        // provider_id: '',
-        // vendor_api_code: '',
-        // discount_percentage: '',
-        // pin_discount_percentage: '',
-        type: 'airtime',
-        is_active: true,
-        // provider: '1',
-        plan_type: '',
         providerable_cost_price: '0.00',
         use_provider_as_providerable: false,
-        min_amount: '50',
-        max_amount: '5000',
-        providerable: {
-            provider_id: 1,
-            cost_price: '0.00',
-            server_id: '',
-            margin_value: '0.00',
-            margin_type: 'fixed',
-        },
+        ...plan,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Submitting Airtime Plan:', data);
-        post(route('discounts.store'));
+        post(route('discounts.update', plan.id));
     };
 
-    console.log(errors);
-
     const costPrice = useMemo(() => {
-        const cp = data?.providerable.cost_price;
+        const cp = data?.providerable?.cost_price;
         if (cp !== undefined && cp !== '') return parseFloat(String(cp)) || 0;
         return 0;
-    }, [data.providerable.cost_price]);
+    }, [data.providerable?.cost_price]);
 
     const plan_types = useMemo(() => {
         if (!data.network_id) return [];
@@ -56,7 +36,7 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
     return (
         <AppLayout>
             <div className="flex min-h-screen flex-1 flex-col space-y-6 p-6">
-                <Head title="Create Airtime Plan" />
+                <Head title="Edit Airtime Plan" />
                 {/* Header */}
                 <header className="mb-8">
                     <Link
@@ -73,7 +53,7 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                         </svg>
                         Back to Pricing
                     </Link>
-                    <h1 className="text-2xl font-bold tracking-tight">Create Airtime Configuration</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">Edit Airtime Configuration</h1>
                     <p className="mt-1 text-sm text-slate-400">Set up routing and discount margins for VTU and Airtime PINs.</p>
                 </header>
 
@@ -135,24 +115,25 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                                 type="number"
                                                 step="0.1"
                                                 placeholder="e.g., 2.5"
-                                                value={data.providerable.margin_value}
+                                                value={data.providerable?.margin_value}
                                                 onChange={(e) => setData('providerable', { ...data.providerable, margin_value: e.target.value })}
                                             />
 
-                                            {errors.providerable && <p className="text-xs text-red-400">{errors.providerable}</p>}
+                                            {/* {errors.providerable && <p className="text-xs text-red-400">{errors.providerable}</p>} */}
+                                            <InputError message={errors?.['providerable.margin_value']} />
                                         </div>
                                         <div className="">
                                             <Select
-                                                value={data.providerable.margin_type}
+                                                value={data.providerable?.margin_type}
                                                 onValueChange={(value) => setData('providerable', { ...data.providerable, margin_type: value })}
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select discount type" />
-                                                    <SelectContent>
-                                                        <SelectItem value="fixed">Fixed</SelectItem>
-                                                        <SelectItem value="percentage">Percentage</SelectItem>
-                                                    </SelectContent>
                                                 </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="fixed">Fixed</SelectItem>
+                                                    <SelectItem value="percentage">Percentage</SelectItem>
+                                                </SelectContent>
                                             </Select>
                                         </div>
                                     </div>
@@ -196,7 +177,7 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                 </CardHeader>
                                 <CardContent>
                                     <Select
-                                        value={data.providerable.provider_id?.toString() || ''}
+                                        value={data.providerable?.provider_id?.toString() || ''}
                                         onValueChange={(value) => setData('providerable', { ...data.providerable, provider_id: parseInt(value) })}
                                     >
                                         <SelectTrigger className="w-full">
@@ -210,14 +191,14 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {data.providerable.provider_id && (
+                                    {data.providerable?.provider_id && (
                                         <div className="mt-4 flex items-center gap-2">
                                             <div className="flex-1 space-y-2">
                                                 <Label className="text-sm font-medium">Server Plan ID</Label>
                                                 <Input
                                                     type="text"
                                                     placeholder="e.g. 101 or mt_500"
-                                                    value={data.providerable.server_id}
+                                                    value={data.providerable?.server_id}
                                                     className="w-full"
                                                     onChange={(e) => setData('providerable', { ...data.providerable, server_id: e.target.value })}
                                                 />
@@ -229,7 +210,7 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                                 <Input
                                                     type="text"
                                                     placeholder="e.g. 101 or mt_500"
-                                                    value={data.providerable.cost_price ?? costPrice ?? ''}
+                                                    value={data.providerable?.cost_price ?? costPrice ?? ''}
                                                     onChange={(e) => setData('providerable', { ...data.providerable, cost_price: e.target.value })}
                                                 />
                                                 <InputError message={errors?.['providerable.cost_price']} />
@@ -288,7 +269,7 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                             Cancel
                         </Link>
                         <Button type="submit" disabled={processing}>
-                            {processing ? 'Creating...' : 'Create Airtime Plan'}
+                            {processing ? 'Updating...' : 'Update Airtime Plan'}
                         </Button>
                     </div>
                 </form>

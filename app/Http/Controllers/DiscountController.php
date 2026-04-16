@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreDiscountPlanRequest;
+use App\Http\Requests\UpdateDiscountPlanRequest;
 use App\Models\Discount;
 use App\Models\Network;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class DiscountController extends Controller
@@ -28,22 +29,10 @@ class DiscountController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreDiscountPlanRequest $request)
     {
         //
-        $validated = $request->validate([
-            'network_id' => 'required|exists:networks,id',
-            'type' => 'required|in:airtime,exam,airtimeToCash,user_upgrade,bulksms,airtimePin,electricity,airtime2cash',
-            'plan_type' => 'required|exists:network_types,id',
-            'min_amount' => 'numeric|min:0',
-            'max_amount' => 'numeric|min:0',
-            'providerable' => 'required|array',
-            'providerable*.*.provider_id' => 'required|exists:providers,id',
-            'providerable*.*.cost_price' => 'required|numeric|min:0',
-            'providerable*.*.margin_value' => 'required|numeric|min:0',
-            'providerable*.*.margin_type' => 'required|in:percentage,fixed',
-            'providerable*.*.server_id' => 'nullable',
-        ]);
+        $validated = $request->validated();
         $network = Network::find($validated['network_id']);
         $discount = Discount::create([
             'name' => $network->name,
@@ -52,16 +41,17 @@ class DiscountController extends Controller
             'min_amount' => $validated['min_amount'] ?? null,
             'max_amount' => $validated['max_amount'] ?? null,
         ]);
-        $providerables = collect($validated['providerable'])->mapWithKeys(function ($item) {
-            return [$item['provider_id'] => [
-                'cost_price' => $item['cost_price'],
-                'margin_value' => $item['margin_value'],
-                'margin_type' => $item['margin_type'],
-                'server_id' => $item['server_id'],
-            ]];
-        });
-        $discount->providers()->attach($providerables);
-        Log::info($validated);
+        
+        $pivotData = [];
+        $item = $validated['providerable'];
+        $pivotData[$item['provider_id']] = [
+            'cost_price'   => $item['cost_price'],
+            'margin_value' => $item['margin_value'],
+            'margin_type'  => $item['margin_type'],
+            'server_id'    => $item['server_id'] ?? null,
+        ];
+        $discount->providers()->attach($pivotData);
+        // Log::info($validated);
         return back()->with("success", "Discount created successfully");
     }
 
@@ -84,23 +74,10 @@ class DiscountController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Discount $discount)
+    public function update(UpdateDiscountPlanRequest $request, Discount $discount)
     {
         //
-        $validated = $request->validate([
-            'network_id' => 'sometimes|exists:networks,id',
-            'type' => 'sometimes|in:airtime,exam,airtimeToCash,user_upgrade,bulksms,airtimePin,electricity,airtime2cash',
-            'plan_type' => 'sometimes|exists:network_types,id',
-            'min_amount' => 'numeric|min:0',
-            'max_amount' => 'numeric|min:0',
-            'providerable' => 'sometimes|array',
-            'providerable*.*.provider_id' => 'sometimes|exists:providers,id',
-            'providerable*.*.cost_price' => 'sometimes|numeric|min:0',
-            'providerable*.*.margin_value' => 'sometimes|numeric|min:0',
-            'providerable*.*.margin_type' => 'sometimes|in:percentage,fixed',
-            'providerable*.*.server_id' => 'nullable',
-            'is_active' => 'sometimes|boolean'
-        ]);
+        $validated = $request->validated();
 
         if (isset($validated['network_id'])) {
             $network = Network::find($validated['network_id']);
@@ -123,14 +100,15 @@ class DiscountController extends Controller
         }
         $discount->save();
         if (isset($validated['providerable'])) {
-            $providerables = collect($validated['providerable'])->mapWithKeys(function ($item) {
-                return [$item['provider_id'] => [
+            $item = $validated['providerable'];
+            $providerables = [
+                $item['provider_id'] => [
                     'cost_price' => $item['cost_price'],
                     'margin_value' => $item['margin_value'],
                     'margin_type' => $item['margin_type'],
                     'server_id' => $item['server_id'],
-                ]];
-            });
+                ]
+            ];
             $discount->providers()->sync($providerables);
         }
         Log::info($validated);

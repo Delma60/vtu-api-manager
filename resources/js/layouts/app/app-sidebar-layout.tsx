@@ -1,6 +1,6 @@
 import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
-import { Sidebar as AppSidebar } from '@/components/app-sidebar';
+import { SidebarComponent as AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
 import { FlashMessages } from '@/components/flash-messages';
 import { type BreadcrumbItem } from '@/types';

@@ -177,7 +177,7 @@ export function SidebarComponent() {
     };
 
     return (
-        <Sidebar collapsible="icon" variant="sidebar" className="border-r border-slate-300 dark:border-slate-800 bg-[#0f172a]">
+        <Sidebar collapsible="icon" variant="sidebar" className="border-r border-slate-300 bg-[#0f172a] dark:border-slate-800">
             {/* Logo Section */}
             <SidebarGroup className="border-b border-slate-200/60 dark:border-slate-800/60">
                 <div className="flex items-center justify-center gap-2 px-2 py-4">
@@ -189,7 +189,7 @@ export function SidebarComponent() {
                 <div className="px-2 py-3">
                     <button
                         onClick={() => setIsLiveMode(!isLiveMode)}
-                        className="flex w-full cursor-pointer items-center justify-between rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-900 p-1 text-xs font-semibold transition-all"
+                        className="flex w-full cursor-pointer items-center justify-between rounded-lg border border-slate-300 p-1 text-xs font-semibold transition-all dark:border-slate-700 dark:bg-slate-900"
                         title={`Switch to ${isLiveMode ? 'Test' : 'Live'} Mode`}
                     >
                         <div
@@ -207,7 +207,7 @@ export function SidebarComponent() {
             </SidebarGroup>
 
             {/* Main Navigation */}
-            <SidebarContent className="flex-1 overflow-y-auto no-scrollbar">
+            <SidebarContent className="no-scrollbar flex-1 overflow-y-auto">
                 {navItems.map((section) => (
                     <SidebarGroup key={section.section}>
                         {state === 'expanded' && (

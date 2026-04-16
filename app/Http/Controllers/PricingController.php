@@ -6,6 +6,7 @@ use App\Models\Discount;
 use App\Models\Network;
 use App\Models\NetworkType;
 use App\Models\Provider;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class PricingController extends Controller
@@ -28,6 +29,7 @@ class PricingController extends Controller
         $plan->load(['plan_type.typeable', 'providers']);
         
         // Transform the plan data to match frontend expectations
+        Log::info($plan);
         $transformedPlan = [
             'id' => $plan->id,
             'name' => $plan->name,

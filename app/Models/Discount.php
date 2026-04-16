@@ -34,7 +34,7 @@ class Discount extends Model
         return $providerable ? $providerable : null;
     }
 
-    public function plan_type(){
+    public function planType(){
         return $this->belongsTo(NetworkType::class, 'plan_type');
     }
 

@@ -3,15 +3,25 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { type BreadcrumbItem as BreadcrumbItemType } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { Bell, Command, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import AppearanceToggleDropdown from './appearance-dropdown';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Separator } from './ui/separator';
 import { UserInfo } from './user-info';
-import { useEffect, useState } from 'react';
+
+interface SearchResult {
+    type: string;
+    id: number;
+    title: string;
+    description: string;
+    url: string;
+}
 
 export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
     const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState<SearchResult[]>([]);
 
     // Keyboard shortcut (⌘K or Ctrl+K) to open search
     useEffect(() => {
@@ -24,6 +34,19 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
         document.addEventListener('keydown', down);
         return () => document.removeEventListener('keydown', down);
     }, []);
+
+    // Fetch search results
+    useEffect(() => {
+        if (query.length > 2) {
+            fetch(`/search?q=${encodeURIComponent(query)}`)
+                .then((res) => res.json())
+                .then(setResults)
+                .catch(() => setResults([]));
+        } else {
+            setResults([]);
+        }
+    }, [query]);
+
     const {
         props: { auth },
     } = usePage();
@@ -45,6 +68,8 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                     <Input
                         placeholder="Search transactions, customers..."
                         className="bg-muted/50 focus-visible:ring-primary/50 w-full border-none pr-12 pl-10 transition-all focus-visible:ring-1"
+                        readOnly
+                        onClick={() => setOpen(true)}
                     />
                     <div className="bg-background text-muted-foreground absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-medium opacity-60">
                         <Command className="h-2.5 w-2.5" /> K
@@ -75,14 +100,34 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
 
                 <UserInfo user={auth?.user} />
             </div>
-            <CommandDialog open={open} onOpenChange={setOpen}>
-                <CommandInput placeholder="Type to search..." />
+            <CommandDialog
+                open={open}
+                onOpenChange={(newOpen) => {
+                    setOpen(newOpen);
+                    if (newOpen) {
+                        setQuery('');
+                        setResults([]);
+                    }
+                }}
+            >
+                <CommandInput placeholder="Type to search..." value={query} onValueChange={setQuery} />
                 <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
-                    <CommandGroup heading="Suggestions">
-                        <CommandItem onSelect={() => (window.location.href = '/transactions')}>Transactions</CommandItem>
-                        <CommandItem onSelect={() => (window.location.href = '/customers')}>Customers</CommandItem>
-                    </CommandGroup>
+                    {results.length > 0 && (
+                        <CommandGroup heading="Results">
+                            {results.map((result) => (
+                                <CommandItem key={`${result.type}-${result.id}`} onSelect={() => (window.location.href = result.url)}>
+                                    {result.title} - {result.description}
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    )}
+                    {query.length <= 2 && (
+                        <CommandGroup heading="Suggestions">
+                            <CommandItem onSelect={() => (window.location.href = '/transactions')}>Transactions</CommandItem>
+                            <CommandItem onSelect={() => (window.location.href = '/customers')}>Customers</CommandItem>
+                        </CommandGroup>
+                    )}
                 </CommandList>
             </CommandDialog>
         </header>

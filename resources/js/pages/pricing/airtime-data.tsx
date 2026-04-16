@@ -140,7 +140,7 @@ export default function PricingManager({ initialServices, networks, network_type
                 </header>
 
                 {/* Main Content Area */}
-                <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col p-8">
+                <div className="flex w-full flex-1 flex-col p-8">
                     {/* The Requested Tabs */}
                     <div className="custom-scrollbar mb-8 flex shrink-0 items-center gap-2 overflow-x-auto border-b border-slate-300 dark:border-slate-800 pb-px">
                         {tabs.map((tab) => (

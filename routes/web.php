@@ -5,6 +5,7 @@ use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\ProviderController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\NetworkTypeController;
@@ -30,6 +31,8 @@ Route::middleware(['auth'])->group(function () {
     
     Route::post('customers/{customer}/suspend', [CustomerController::class, 'suspend'])->name('customers.suspend');
     Route::post('customers/{customer}/activate', [CustomerController::class, 'activate'])->name('customers.activate');
+
+    Route::get('search', [SearchController::class, 'index'])->name('search');
 
     Route::get('pricing/airtime-data', [PricingController::class, 'airtimeAndData'])->name('pricing.airtime-data');
     Route::get('pricing/airtime-plan/create', [PricingController::class, 'createAirtimePlan'])->name('pricing.airtime-plan.create');

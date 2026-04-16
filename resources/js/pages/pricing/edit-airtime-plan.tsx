@@ -10,7 +10,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useMemo } from 'react';
 
 export default function EditAirtimePlan({ networks: activeNetworks, providers, plan }: any) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, put, processing, errors } = useForm({
         providerable_cost_price: '0.00',
         use_provider_as_providerable: false,
         ...plan,
@@ -18,7 +18,7 @@ export default function EditAirtimePlan({ networks: activeNetworks, providers, p
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('discounts.update', plan.id));
+        put(route('discounts.update', plan.id));
     };
 
     const costPrice = useMemo(() => {
@@ -68,14 +68,14 @@ export default function EditAirtimePlan({ networks: activeNetworks, providers, p
                                 <CardContent className="space-y-4">
                                     {/* Target Network */}
                                     <div className="space-y-1">
-                                        <Select value={data.network_id} onValueChange={(value) => setData('network_id', value)}>
+                                        <Select value={data.network_id.toString()} onValueChange={(value) => setData('network_id', value)}>
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Select Network" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {activeNetworks.map((net) => (
                                                     <SelectItem key={net.id} value={net.id.toString()}>
-                                                        {net.name} {net.id}
+                                                        {net.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -84,7 +84,7 @@ export default function EditAirtimePlan({ networks: activeNetworks, providers, p
                                     </div>
 
                                     <div className="space-y-1">
-                                        <Select value={data.plan_type} onValueChange={(value) => setData('plan_type', value)}>
+                                        <Select value={data.plan_type.toString()} onValueChange={(value) => setData('plan_type', value)}>
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Select Plan Type" />
                                             </SelectTrigger>

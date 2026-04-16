@@ -26,16 +26,18 @@ class PricingController extends Controller
 
     public function editAirtimePlan(Discount $plan)
     {
-        $plan->load(['plan_type.typeable', 'providers']);
+        $plan->load(['planType', 'providers']);
         
         // Transform the plan data to match frontend expectations
         Log::info($plan);
+        Log::info($plan->planType);
+        Log::info($plan['name']);
         $transformedPlan = [
             'id' => $plan->id,
             'name' => $plan->name,
             'type' => $plan->type,
-            'network_id' => $plan->plan_type?->typeable?->id,
-            'plan_type' => $plan->plan_type?->id,
+            'network_id' => $plan->planType?->typeable?->id,
+            'plan_type' => $plan->planType?->id,
             'min_amount' => $plan->min_amount,
             'max_amount' => $plan->max_amount,
             'is_active' => $plan->is_active ?? true,
@@ -67,7 +69,7 @@ class PricingController extends Controller
     {
 
         return Inertia::render('pricing/airtime-data', [
-            'airtime_discounts' => Discount::where('type', 'airtime')->with(['plan_type'])->get(),
+            'airtime_discounts' => Discount::where('type', 'airtime')->with(['planType'])->get(),
             'networks' => Network::all(),
             'network_types' => NetworkType::with("typeable")->get(),
         ]);

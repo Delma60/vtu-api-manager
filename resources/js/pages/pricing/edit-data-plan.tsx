@@ -10,32 +10,12 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useMemo } from 'react';
 
-export default function CreateDataPlan({ networks: activeNetworks, providers }: any) {
-    const { data, setData, post, processing, errors } = useForm({
-        network_id: '',
-        name: '', // e.g., "1GB SME"
-        validity: '30 Days',
-        // volume: '', // e.g., "1024" (MB)
-        volume: '',
-        selling_price: '',
-        plan_size: '',
-        plan_type: '',
-        is_active: true,
-        use_provider_as_providerable: false,
-        provider: '',
-        providerable: {
-            provider_id: '1',
-            cost_price: '0.00',
-            server_id: '',
-            margin_value: '0.00',
-            margin_type: 'fixed',
-        },
-    });
+export default function EditDataPlan({ networks: activeNetworks, providers, plan }: any) {
+    const { data, setData, patch, processing, errors } = useForm(plan);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Assuming your route is data-plans.store
-        post(route('data-plans.store'));
+        patch(route('data-plans.update', { data_plan: data.id }));
     };
 
     const plan_types = useMemo(() => {
@@ -47,11 +27,11 @@ export default function CreateDataPlan({ networks: activeNetworks, providers }: 
     return (
         <AppLayout>
             <div className="flex min-h-screen flex-1 flex-col space-y-6 p-6">
-                <Head title="Create Airtime Plan" />
+                <Head title="Edit Data Plan" />
                 {/* Header */}
                 <header className="mb-8">
                     <Link
-                        href={route('pricing.airtime-data', { tab: 'airtime' })}
+                        href={route('pricing.airtime-data', { tab: 'data_plan' })}
                         className="group mb-2 inline-flex items-center text-sm font-medium text-slate-500 transition-colors hover:text-indigo-400"
                     >
                         <svg

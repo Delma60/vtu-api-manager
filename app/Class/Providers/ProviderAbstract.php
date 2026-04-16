@@ -96,7 +96,6 @@ abstract class ProviderAbstract implements ProviderInterface
         try {
             $response = $this->login();
             if(!isset($response)) return false;
-            Log::info($response);
             return $response['status'] === 'success';
 
         } catch (\Throwable $e) {

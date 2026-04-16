@@ -6,8 +6,10 @@ use App\Models\DataPlan;
 use App\Http\Requests\StoreDataPlanRequest;
 use App\Http\Requests\UpdateDataPlanRequest;
 use App\Models\Network;
+use App\Models\NetworkType;
 use App\Models\Provider;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class DataPlanController extends Controller
@@ -81,6 +83,37 @@ class DataPlanController extends Controller
     public function edit(DataPlan $dataPlan)
     {
         //
+        Log::info("Editing data plan: " . $dataPlan->id);
+        $dataPlan->load(['providers']);
+        $transformedPlan = [
+            'id' => $dataPlan->id,
+            'network_id' => Network::where('name', $dataPlan->network)->first()?->id,
+            'plan_name' => $dataPlan->plan_name,
+            'plan_type' => NetworkType::where('name', $dataPlan->plan_type)->first()?->id,
+            'plan_size' => $dataPlan->plan_size,
+            'validity' => $dataPlan->validity,
+            'is_active' => $dataPlan->is_active ?? true,
+            'providerable' => $dataPlan->providers->first() ? [
+                'provider_id' => $dataPlan->providers->first()->id,
+                'server_id' => $dataPlan->providers->first()->pivot->server_id,
+                'cost_price' => $dataPlan->providers->first()->pivot->cost_price,
+                'margin_value' => $dataPlan->providers->first()->pivot->margin_value,
+                'margin_type' => $dataPlan->providers->first()->pivot->margin_type,
+            ] : [
+                'provider_id' => null,
+                'server_id' => null,
+                'cost_price' => '0.00',
+                'margin_value' => '0.00',
+                'margin_type' => 'fixed',
+            ],
+        ];
+
+        return Inertia::render('pricing/edit-data-plan', [
+            'networks' => Network::with('networkTypes')->get(),
+            'providers' => Provider::all(),
+            "plan_types" => NetworkType::airtime()->get(),
+            'plan' => $transformedPlan,
+        ]);
     }
 
     /**
@@ -112,5 +145,7 @@ class DataPlanController extends Controller
     public function destroy(DataPlan $dataPlan)
     {
         //
+        $dataPlan->delete();
+        return back()->with("success", "Data plan deleted successfully");
     }
 }

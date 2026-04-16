@@ -1,5 +1,6 @@
 import DeleteButton from '@/components/delete-button';
 import InputError from '@/components/input-error';
+import { IsActiveSwitch } from '@/components/is-active-switch';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
@@ -44,15 +45,20 @@ export default function PricingManager({ initialServices, networks, network_type
 
     // Input Handlers
     const updateNetwork = (id: string, field: string, value: any) => {
+        router.patch(route('networks.update', id), { [field]: value });
+    };
+
+    const updateDiscount = (id: string, field: string, value: any) => {
         router.patch(route('discounts.update', id), { [field]: value });
     };
 
     const updateService = (id: string, field: string, value: any) => {
         router.patch(route('data-plans.update', id), { [field]: value });
-
     };
 
     const updateNetworkType = (id: string, field: string, value: any) => {
+        console.log(field);
+        router.patch(route('network-types.update', id), { [field]: value });
         // setNetworkTypes(networkTypes.map((nt) => (nt.id === id ? { ...nt, [field]: value } : nt)));
     };
 
@@ -326,14 +332,12 @@ export default function PricingManager({ initialServices, networks, network_type
                                                             />
                                                         </div>
                                                         <div className="flex items-center gap-2 border-l border-slate-800 pl-6">
-                                                            <button
-                                                                onClick={() => updateNetwork(net.id, 'is_active', !net.is_active)}
-                                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${net.is_active ? 'bg-emerald-500' : 'bg-slate-700'}`}
-                                                            >
-                                                                <span
-                                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${net.is_active ? 'translate-x-6' : 'translate-x-1'}`}
-                                                                />
-                                                            </button>
+                                                            <IsActiveSwitch
+                                                                checked={net.is_active}
+                                                                onCheckedChange={(checked) => updateNetwork(net.id, 'is_active', checked)}
+                                                                label=""
+                                                                className="justify-end"
+                                                            />
                                                         </div>
                                                     </div>
                                                 </td>
@@ -393,7 +397,7 @@ export default function PricingManager({ initialServices, networks, network_type
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {networks.map((network) => (
-                                                                <SelectItem key={network.id} value={network.id}>
+                                                                <SelectItem disabled={!network.is_active} key={network.id} value={network.id}>
                                                                     {network.name}
                                                                 </SelectItem>
                                                             ))}
@@ -488,14 +492,12 @@ export default function PricingManager({ initialServices, networks, network_type
                                                             />
                                                         </div>
                                                         <div className="flex items-center gap-2 border-l border-slate-800 pl-6">
-                                                            <button
-                                                                onClick={() => updateNetworkType(type.id, 'is_active', !type.is_active)}
-                                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${type.is_active ? 'bg-emerald-500' : 'bg-slate-700'}`}
-                                                            >
-                                                                <span
-                                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${type.is_active ? 'translate-x-6' : 'translate-x-1'}`}
-                                                                />
-                                                            </button>
+                                                            <IsActiveSwitch
+                                                                checked={type.is_active}
+                                                                onCheckedChange={(checked) => updateNetworkType(type.id, 'is_active', checked)}
+                                                                label=""
+                                                                className="justify-end"
+                                                            />
                                                         </div>
                                                     </div>
                                                 </td>
@@ -594,7 +596,7 @@ export default function PricingManager({ initialServices, networks, network_type
                                                                 <div className="flex items-center gap-2">
                                                                     <Switch
                                                                         checked={net.is_active}
-                                                                        onCheckedChange={(check) => updateNetwork(net.id, 'is_active', check)}
+                                                                        onCheckedChange={(check) => updateDiscount(net.id, 'is_active', check)}
                                                                     />
                                                                 </div>
                                                             </div>
@@ -630,10 +632,10 @@ export default function PricingManager({ initialServices, networks, network_type
                                         <thead className="sticky top-0 z-10 border-b border-slate-800 bg-[#0f172a] text-[11px] font-semibold text-slate-500 uppercase shadow-sm">
                                             <tr>
                                                 <th className="px-6 py-3">Network</th>
-                                                <th className="px-6 py-3">Plan Name</th>
-                                                <th className="w-32 px-6 py-3">Your Cost (₦)</th>
-                                                <th className="w-32 px-6 py-3">Selling Price (₦)</th>
-                                                <th className="w-24 px-6 py-3">Margin</th>
+                                                <th className="w-32 px-6 py-3">Plan Type</th>
+                                                <th className="px-6 py-3">Plan</th>
+                                                {/* <th className="w-32 px-6 py-3">Selling Price (₦)</th> */}
+                                                {/* <th className="w-24 px-6 py-3">Margin</th> */}
                                                 <th className="px-6 py-3 text-right">Active</th>
                                             </tr>
                                         </thead>
@@ -653,40 +655,53 @@ export default function PricingManager({ initialServices, networks, network_type
                                                                 </div>
                                                             </td>
                                                             <td className="px-6 py-3 font-semibold text-white uppercase">{service.plan_name}</td>
-                                                            <td className="px-6 py-3">
-                                                                <input
-                                                                    type="number"
-                                                                    value={service.cost}
-                                                                    onChange={(e) => updateService(service.id, 'cost', Number(e.target.value))}
-                                                                    className="w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 font-mono text-sm text-slate-400 outline-none focus:border-indigo-500"
-                                                                />
-                                                            </td>
-                                                            <td className="px-6 py-3">
-                                                                <input
-                                                                    type="number"
-                                                                    value={service.price}
-                                                                    onChange={(e) => updateService(service.id, 'price', Number(e.target.value))}
-                                                                    className="w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 font-mono text-sm font-bold text-white shadow-inner outline-none focus:border-indigo-500"
-                                                                />
-                                                            </td>
-                                                            <td className="px-6 py-3">
-                                                                <span
-                                                                    className={`font-mono text-sm ${profit > 0 ? 'text-emerald-400' : 'text-rose-400'}`}
-                                                                >
-                                                                    {profit > 0 ? '+' : ''}₦{profit.toFixed(2)}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-6 py-3 text-right">
-                                                                <button
-                                                                    onClick={() => updateService(service.id, 'is_active', !service.is_active)}
-                                                                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${service.is_active ? 'bg-primary' : 'bg-slate-700'}`}
-                                                                >
-                                                                    <span
-                                                                        className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${service.is_active ? 'translate-x-5' : 'translate-x-1'}`}
-                                                                    />
-                                                                </button>
-                                                                {/* <Switch checked={service.is_active} onCheckedChange={(checked) => updateService(service.id, 'is_active', checked)} /> */}
+                                                            <td className="px-6 py-3">{service.plan_type}</td>
 
+                                                            <td className="px-6 py-3 text-right">
+                                                                <div className="flex items-center justify-end gap-2">
+                                                                    <Link
+                                                                        href={route('data-plans.edit', { data_plan: service.id })}
+                                                                        className="text-xs font-medium text-slate-500 transition-colors hover:text-indigo-400"
+                                                                    >
+                                                                        Edit plan
+                                                                    </Link>
+                                                                    <Separator
+                                                                        orientation="vertical"
+                                                                        className="mr-2 h-5 bg-slate-800 dark:bg-slate-200"
+                                                                    />
+                                                                    <div className="flex items-center gap-2 pr-1">
+                                                                        <DeleteButton
+                                                                            className="m-0 bg-transparent p-0 text-sm text-red-400 hover:text-red-400"
+                                                                            route={route('data-plans.destroy', { data_plan: service.id })}
+                                                                            resourceName={'data plan'}
+                                                                            buttonSize="sm"
+                                                                            variant="link"
+                                                                        >
+                                                                            Delete
+                                                                        </DeleteButton>
+                                                                    </div>
+                                                                    <Separator
+                                                                        orientation="vertical"
+                                                                        className="mr-2 h-5 bg-slate-800 dark:bg-slate-200"
+                                                                    />
+
+                                                                    <div className="flex items-center gap-2">
+                                                                        <IsActiveSwitch
+                                                                            checked={service.is_active}
+                                                                            onCheckedChange={(checked) =>
+                                                                                updateService(service.id, 'is_active', checked)
+                                                                            }
+                                                                            label=""
+                                                                            className="justify-end"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                {/* <IsActiveSwitch
+                                                                    checked={service.is_active}
+                                                                    onCheckedChange={(checked) => updateService(service.id, 'is_active', checked)}
+                                                                    label=""
+                                                                    className="justify-end"
+                                                                /> */}
                                                             </td>
                                                         </tr>
                                                     );

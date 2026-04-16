@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import { IsActiveSwitch } from '@/components/is-active-switch';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -254,10 +255,11 @@ export default function EditAirtimePlan({ networks: activeNetworks, providers, p
                                     <CardTitle>Settings</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="flex items-center justify-between px-3 py-2">
-                                        <Label>Active Status</Label>
-                                        <Switch checked={data.is_active} onCheckedChange={(v: boolean) => setData('is_active', v)} />
-                                    </div>
+                                    <IsActiveSwitch
+                                        checked={data.is_active}
+                                        onCheckedChange={(v: boolean) => setData('is_active', v)}
+                                        className="px-3 py-2"
+                                    />
                                 </CardContent>
                             </Card>
                         </div>

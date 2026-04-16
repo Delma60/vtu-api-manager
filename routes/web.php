@@ -38,8 +38,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('pricing/airtime-data', [PricingController::class, 'airtimeAndData'])->name('pricing.airtime-data');
     Route::get('pricing/airtime-plan/create', [PricingController::class, 'createAirtimePlan'])->name('pricing.airtime-plan.create');
     Route::get('pricing/airtime-plan/edit/{plan}', [PricingController::class, 'editAirtimePlan'])->name('pricing.airtime-plan.edit');
-    // Route::get('pricing/data-plan/create', [DataPlanController::class, 'create'])->name('pricing.data-plan.create');
-    // Route::get('pricing/data-plan/edit/{plan}', [DataPlanController::class, 'edit'])->name('pricing.data-plan.edit');
    Route::prefix("pricing")->group(function() {
        Route::resource('data-plans', DataPlanController::class);
    });

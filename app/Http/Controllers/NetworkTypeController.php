@@ -22,7 +22,7 @@ class NetworkTypeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|unique:network_types,name',
+            'name' => 'required|string',
             'is_active' => 'sometimes|boolean',
             'network_id' => 'required|exists:networks,id',
             'type' => 'nullable|string|in:airtime,data',
@@ -55,7 +55,7 @@ class NetworkTypeController extends Controller
     public function update(Request $request, NetworkType $networkType)
     {
         $validated = $request->validate([
-            'name' => 'sometimes|string|unique:network_types,name,' . $networkType->id,
+            'name' => 'sometimes|string',
             'is_active' => 'sometimes|boolean',
             'network_id' => 'sometimes|exists:networks,id',
             'type' => 'nullable|string|in:airtime,data',

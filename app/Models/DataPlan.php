@@ -2,11 +2,28 @@
 
 namespace App\Models;
 
+use App\BelongsToBusiness;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DataPlan extends Model
 {
     /** @use HasFactory<\Database\Factories\DataPlanFactory> */
-    use HasFactory;
+    use HasFactory, BelongsToBusiness;
+
+    protected $fillable = [
+        'network',
+        'plan_type',
+        'plan_name',
+        'plan_size',
+        'validity',
+        'is_active'
+    ];
+
+    public function providers()
+    {
+        return $this->morphToMany(Provider::class, 'providerable', 'providerables', 'providerable_id', 'provider_id')
+            ->withPivot(['cost_price', 'margin_value', 'margin_type', 'server_id'])
+            ->withTimestamps();
+    }
 }

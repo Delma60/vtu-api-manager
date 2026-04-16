@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('plan_type');
             $table->string('plan_size');
             $table->string('validity');
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }

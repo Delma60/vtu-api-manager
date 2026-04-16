@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DataPlan;
 use App\Models\Discount;
 use App\Models\Network;
 use App\Models\NetworkType;
@@ -27,11 +28,6 @@ class PricingController extends Controller
     public function editAirtimePlan(Discount $plan)
     {
         $plan->load(['planType', 'providers']);
-        
-        // Transform the plan data to match frontend expectations
-        Log::info($plan);
-        Log::info($plan->planType);
-        Log::info($plan['name']);
         $transformedPlan = [
             'id' => $plan->id,
             'name' => $plan->name,
@@ -72,6 +68,7 @@ class PricingController extends Controller
             'airtime_discounts' => Discount::where('type', 'airtime')->with(['planType'])->get(),
             'networks' => Network::all(),
             'network_types' => NetworkType::with("typeable")->get(),
+            'data_plans' => DataPlan::all(),
         ]);
     }
 }

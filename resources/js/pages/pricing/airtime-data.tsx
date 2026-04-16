@@ -11,7 +11,7 @@ import { Link, router, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 //
-export default function PricingManager({ initialServices, networks, network_types, airtime_discounts }) {
+export default function PricingManager({ initialServices, networks, network_types, airtime_discounts, data_plans }) {
     // get tab frpm url
     const url = new URL(window.location.href);
     // const [activeTab, setActiveTab] = /useState(url.searchParams.get('tab') || 'network');
@@ -24,12 +24,12 @@ export default function PricingManager({ initialServices, networks, network_type
         ],
     );
 
-    const [networkTypes, setNetworkTypes] = useState([
-        { id: 1, name: 'SME', code: 'sme', description: 'Small and Medium Enterprise', is_active: true },
-        { id: 2, name: 'SMS', code: 'sms', description: 'SMS Services', is_active: true },
-        { id: 3, name: 'Gifting', code: 'gifting', description: 'Gift Card Services', is_active: true },
-        { id: 4, name: 'VUT', code: 'vut', description: 'Voucher & Top-up', is_active: true },
-    ]);
+    // const [networkTypes, setNetworkTypes] = useState([
+    //     { id: 1, name: 'SME', code: 'sme', description: 'Small and Medium Enterprise', is_active: true },
+    //     { id: 2, name: 'SMS', code: 'sms', description: 'SMS Services', is_active: true },
+    //     { id: 3, name: 'Gifting', code: 'gifting', description: 'Gift Card Services', is_active: true },
+    //     { id: 4, name: 'VUT', code: 'vut', description: 'Voucher & Top-up', is_active: true },
+    // ]);
 
     // Tab State
     const tabs = [
@@ -48,11 +48,12 @@ export default function PricingManager({ initialServices, networks, network_type
     };
 
     const updateService = (id: string, field: string, value: any) => {
-        setServices(services.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
+        router.patch(route('data-plans.update', id), { [field]: value });
+
     };
 
     const updateNetworkType = (id: string, field: string, value: any) => {
-        setNetworkTypes(networkTypes.map((nt) => (nt.id === id ? { ...nt, [field]: value } : nt)));
+        // setNetworkTypes(networkTypes.map((nt) => (nt.id === id ? { ...nt, [field]: value } : nt)));
     };
 
     // Helper for network dots
@@ -118,7 +119,7 @@ export default function PricingManager({ initialServices, networks, network_type
         <AppLayout>
             <div className="flex min-h-screen flex-1 flex-col font-sans">
                 {/* Sticky Header */}
-                <header className="sticky top-0 z-20 flex shrink-0 items-center justify-between border-b border-slate-300 dark:border-slate-800 px-8 py-5 backdrop-blur-md dark:bg-slate-950/80">
+                <header className="sticky top-0 z-20 flex shrink-0 items-center justify-between border-b border-slate-300 px-8 py-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80">
                     <div>
                         <h1 className="text-xl font-bold tracking-tight text-slate-600 dark:text-white">Pricing & Routing Rules</h1>
                         <p className="mt-0.5 text-xs text-slate-400">Manage global discounts and specific service margins.</p>
@@ -142,7 +143,7 @@ export default function PricingManager({ initialServices, networks, network_type
                 {/* Main Content Area */}
                 <div className="flex w-full flex-1 flex-col p-8">
                     {/* The Requested Tabs */}
-                    <div className="custom-scrollbar mb-8 flex shrink-0 items-center gap-2 overflow-x-auto border-b border-slate-300 dark:border-slate-800 pb-px">
+                    <div className="custom-scrollbar mb-8 flex shrink-0 items-center gap-2 overflow-x-auto border-b border-slate-300 pb-px dark:border-slate-800">
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
@@ -507,10 +508,10 @@ export default function PricingManager({ initialServices, networks, network_type
 
                         {/* TAB 3 & 4: Airtime & Airtime PINs (Using same table structure) */}
                         {(activeTab === 'airtime' || activeTab === 'airtime_pin') && (
-                            <Card className="flex-1 overflow-x-auto h-min border-slate-200 dark:border-slate-800">
+                            <Card className="h-min flex-1 overflow-x-auto border-slate-200 dark:border-slate-800">
                                 <div className="flex items-center justify-between border-b border-slate-200 bg-slate-100/50 p-5 dark:border-slate-800 dark:bg-slate-900/50">
                                     <div>
-                                        <h2 className="text-base font-semibold dark:text-slate-200 text-slate-800">
+                                        <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">
                                             {activeTab === 'airtime' ? 'Direct Airtime Discounts' : 'Airtime PIN Discounts'}
                                         </h2>
                                         <p className="mt-1 text-xs text-slate-400">
@@ -526,7 +527,7 @@ export default function PricingManager({ initialServices, networks, network_type
                                         </Link>
                                     )}
                                 </div>
-                                <CardContent className="m-0 p-0 ">
+                                <CardContent className="m-0 p-0">
                                     <table className="w-full text-left text-sm text-slate-400">
                                         <thead className="border-b border-slate-200 bg-slate-300 text-[11px] font-semibold text-slate-500 uppercase dark:border-slate-800 dark:bg-[#0f172a]">
                                             <tr>
@@ -536,7 +537,7 @@ export default function PricingManager({ initialServices, networks, network_type
                                                 <th className="px-6 py-3 text-right">Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-400/60 dark:divide-slate-200/60 ">
+                                        <tbody className="divide-y divide-slate-400/60 dark:divide-slate-200/60">
                                             {/* {JSON.stringify(airtime_discounts)} */}
                                             {airtime_discounts.map((net) => {
                                                 const field = activeTab === 'airtime' ? 'airtime_discount' : 'airtime_pin_discount';
@@ -547,7 +548,9 @@ export default function PricingManager({ initialServices, networks, network_type
                                                     >
                                                         <td className="flex items-center gap-3 px-6 py-5">
                                                             {/* <span className={`h-3 w-3 rounded-full ${getNetworkColor(net.name)}`}></span> */}
-                                                            <span className="font-semibold dark:text-slate-200 text-slate-800">{net.plan_type.name}</span>
+                                                            <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                                                {net.plan_type.name}
+                                                            </span>
                                                         </td>
                                                         <td className="px-6 py-5">
                                                             <span className="rounded-md border border-slate-300 bg-slate-100/50 px-2 py-1 font-mono text-xs text-slate-400 dark:border-slate-700 dark:bg-slate-900/50">
@@ -561,10 +564,17 @@ export default function PricingManager({ initialServices, networks, network_type
                                                         </td>
                                                         <td className="px-6 py-5 text-right">
                                                             <div className="flex items-center justify-end gap-2">
-                                                                <Button variant="ghost" onClick={() => router.get(route("pricing.airtime-plan.edit", net.id))} className="text-xs font-medium text-slate-500 transition-colors hover:text-indigo-400">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    onClick={() => router.get(route('pricing.airtime-plan.edit', net.id))}
+                                                                    className="text-xs font-medium text-slate-500 transition-colors hover:text-indigo-400"
+                                                                >
                                                                     Edit
                                                                 </Button>
-                                                                <Separator orientation='vertical' className="mr-2 h-5 dark:bg-slate-200 bg-slate-800" />
+                                                                <Separator
+                                                                    orientation="vertical"
+                                                                    className="mr-2 h-5 bg-slate-800 dark:bg-slate-200"
+                                                                />
                                                                 <div className="flex items-center gap-2 pr-1">
                                                                     <DeleteButton
                                                                         className="m-0 bg-transparent p-0 text-sm text-red-400 hover:text-red-400"
@@ -576,9 +586,12 @@ export default function PricingManager({ initialServices, networks, network_type
                                                                         Delete
                                                                     </DeleteButton>
                                                                 </div>
-                                                                <Separator orientation='vertical' className="mr-2 h-5 dark:bg-slate-200 bg-slate-800" />
+                                                                <Separator
+                                                                    orientation="vertical"
+                                                                    className="mr-2 h-5 bg-slate-800 dark:bg-slate-200"
+                                                                />
 
-                                                                <div className="flex items-center gap-2 ">
+                                                                <div className="flex items-center gap-2">
                                                                     <Switch
                                                                         checked={net.is_active}
                                                                         onCheckedChange={(check) => updateNetwork(net.id, 'is_active', check)}
@@ -605,11 +618,13 @@ export default function PricingManager({ initialServices, networks, network_type
                                         </h2>
                                         <p className="mt-1 text-xs text-slate-400">Configure your cost price and your selling price.</p>
                                     </div>
-                                    <button className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-indigo-500">
+                                    <Link
+                                        href={route('data-plans.create')}
+                                        className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-indigo-500"
+                                    >
                                         + Add New Plan
-                                    </button>
+                                    </Link>
                                 </div>
-
                                 <div className="custom-scrollbar flex-1 overflow-y-auto">
                                     <table className="w-full text-left text-sm text-slate-400">
                                         <thead className="sticky top-0 z-10 border-b border-slate-800 bg-[#0f172a] text-[11px] font-semibold text-slate-500 uppercase shadow-sm">
@@ -623,8 +638,8 @@ export default function PricingManager({ initialServices, networks, network_type
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-800/60">
-                                            {services
-                                                .filter((s) => s.type === activeTab)
+                                            {data_plans
+                                                // .filter((s) => s.type === activeTab)
                                                 .map((service) => {
                                                     const profit = service.price - service.cost;
                                                     return (
@@ -632,12 +647,12 @@ export default function PricingManager({ initialServices, networks, network_type
                                                             <td className="px-6 py-3">
                                                                 <div className="flex items-center gap-2">
                                                                     <span
-                                                                        className={`h-2 w-2 rounded-full ${getNetworkColor(service.network_name)}`}
+                                                                        className={`h-2 w-2 rounded-full ${getNetworkColor(service.network)}`}
                                                                     ></span>
-                                                                    <span className="font-medium text-slate-300">{service.network_name}</span>
+                                                                    <span className="font-medium text-slate-300">{service.network}</span>
                                                                 </div>
                                                             </td>
-                                                            <td className="px-6 py-3 font-semibold text-white">{service.name}</td>
+                                                            <td className="px-6 py-3 font-semibold text-white uppercase">{service.plan_name}</td>
                                                             <td className="px-6 py-3">
                                                                 <input
                                                                     type="number"
@@ -664,12 +679,14 @@ export default function PricingManager({ initialServices, networks, network_type
                                                             <td className="px-6 py-3 text-right">
                                                                 <button
                                                                     onClick={() => updateService(service.id, 'is_active', !service.is_active)}
-                                                                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${service.is_active ? 'bg-indigo-500' : 'bg-slate-700'}`}
+                                                                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${service.is_active ? 'bg-primary' : 'bg-slate-700'}`}
                                                                 >
                                                                     <span
                                                                         className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${service.is_active ? 'translate-x-5' : 'translate-x-1'}`}
                                                                     />
                                                                 </button>
+                                                                {/* <Switch checked={service.is_active} onCheckedChange={(checked) => updateService(service.id, 'is_active', checked)} /> */}
+
                                                             </td>
                                                         </tr>
                                                     );

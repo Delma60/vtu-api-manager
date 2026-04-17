@@ -1,10 +1,16 @@
 <?php
 
 use App\Http\Middleware\HandleInertiaRequests;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -21,4 +27,54 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
+        $exceptions->render(function (ValidationException $e, Request $request) {
+            if ($request->is('api/*') || $request->wantsJson()) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Validation failed. Please check the provided data.',
+                    'errors'  => $e->errors(),
+                ], 422);
+            }
+        });
+
+        $exceptions->render(function (ModelNotFoundException $e, Request $request) {
+            if ($request->is('api/*') || $request->wantsJson()) {
+                // Get the model name (e.g., App\Models\Network -> Network)
+                $model = class_basename($e->getModel());
+                return response()->json([
+                    'status'  => false,
+                    'message' => "The requested {$model} was not found.",
+                ], 404);
+            }
+        });
+
+        // 3. Handle Bad Routes / Endpoints
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            if ($request->is('api/*') || $request->wantsJson()) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'The requested API endpoint does not exist.',
+                ], 404);
+            }
+        });
+
+        // 4. Handle Wrong HTTP Methods (e.g., sending GET to a POST route)
+        $exceptions->render(function (MethodNotAllowedHttpException $e, Request $request) {
+            if ($request->is('api/*') || $request->wantsJson()) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'HTTP Method not allowed for this endpoint.',
+                ], 405);
+            }
+        });
+
+        // 5. Handle Unauthenticated Users
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->is('api/*') || $request->wantsJson()) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Unauthenticated. Invalid or missing API Key.',
+                ], 401);
+            }
+        });
     })->create();

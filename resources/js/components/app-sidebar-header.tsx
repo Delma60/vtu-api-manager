@@ -143,7 +143,7 @@ export function AppSidebarHeader() {
             <div className="mx-4 hidden w-full max-w-xl flex-1 lg:block">
                 <div ref={searchRef} className="group relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Search className="text-muted-foreground h-4 w-4 transition-colors group-focus-within:text-primary" />
+                        <Search className="text-muted-foreground group-focus-within:text-primary h-4 w-4 transition-colors" />
                     </div>
                     <Input
                         placeholder="Search transactions, customers, providers..."
@@ -157,12 +157,12 @@ export function AppSidebarHeader() {
                             }
                         }}
                     />
-                    <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1 rounded-full border border-slate-700 bg-slate-950/80 px-2 py-1 text-[10px] font-medium text-slate-400">
+                    <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-1 rounded-full border border-slate-700 bg-slate-950/80 px-2 py-1 text-[10px] font-medium text-slate-400">
                         <Command className="h-3.5 w-3.5" /> K
                     </div>
 
                     {searchActive && (
-                        <div className="absolute left-0 right-0 top-full z-20 mt-2 rounded-2xl border border-slate-800/60 bg-slate-950/95 p-2 shadow-2xl shadow-black/30 backdrop-blur-xl">
+                        <div className="absolute top-full right-0 left-0 z-20 mt-2 rounded-2xl border border-slate-800/60 bg-slate-950/95 p-2 shadow-2xl shadow-black/30 backdrop-blur-xl">
                             {loading ? (
                                 <div className="px-3 py-3 text-sm text-slate-400">Loading search results…</div>
                             ) : error ? (

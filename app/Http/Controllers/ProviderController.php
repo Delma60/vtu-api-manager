@@ -7,6 +7,7 @@ use App\Http\Requests\StoreProviderRequest;
 use App\Http\Requests\UpdateProviderRequest;
 use App\Models\Service;
 use App\Services\ProviderService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
@@ -59,14 +60,20 @@ class ProviderController extends Controller
      */
     public function edit(Provider $provider)
     {
-        //
         // $services = Service::where('network', 'mtn')->get(); // Example filtering
 
-        // In a real app, you'd fetch this from your api_logs table
-        $recentErrors = [
-            ['time' => '10 mins ago', 'endpoint' => '/api/b2b/vtu', 'error' => 'HTTP 504 Gateway Timeout'],
-            ['time' => '2 hours ago', 'endpoint' => '/api/b2b/data', 'error' => 'Insufficient Balance'],
-        ];
+        // In a real app, you'd fetch this from your api_logs table, limit by 3 order by time
+
+        $recentErrors = collect($provider?->meta['diagnostics'] ?? [])
+            ->sortByDesc(function ($diagnostic) {
+                return Carbon::parse($diagnostic['time'] ?? now());
+            })
+            ->take(3)
+            ->map(function ($diagnostic) {
+                $diagnostic['time'] = Carbon::parse($diagnostic['time'] ?? now())->diffForHumans();
+                return $diagnostic;
+            })
+            ->values();
 
         return Inertia::render('infrastructure/provider-config', [
             'provider' => $provider,
@@ -91,5 +98,10 @@ class ProviderController extends Controller
     public function destroy(Provider $provider)
     {
         //
+    }
+
+    public function diagnose(Provider $provider){
+        ProviderService::diagnose($provider);
+        return back()->with('success', 'Provider diagnosis completed. Check logs for details.');
     }
 }

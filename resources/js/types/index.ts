@@ -54,7 +54,15 @@ export interface Provider {
         base_url:string;
         code:string;
         connection:boolean;
-        balance:string
+        balance:string;
+        meta?:{
+            diagnostics?:{
+                time:Date,
+                error:string;
+                endpoint:string;
+            }
+            [key:string]:string;
+        }
 }
 
 export interface Transaction {

@@ -30,6 +30,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('wallets', WalletController::class);
     Route::resource('networks', NetworkController::class);
     Route::resource('providers', ProviderController::class);
+    Route::get("/providers/{provider}/diagnose", [ProviderController::class, "diagnose"])->name("provders.diagnose");
     Route::resource('service-controls', ServiceControlController::class);
     Route::put('/service-controls/bulk-update', [ServiceControlController::class, 'bulkUpdate'])
     ->name('service-controls.bulk-update');

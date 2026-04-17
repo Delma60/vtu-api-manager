@@ -23,9 +23,10 @@ class Adex extends ProviderAbstract
      function sendRequest(string $service, array $payload): array
     {
         $response = Http::withHeaders($this->getAuthHeaders())
+        ->timeout($this->provider->timeout_ms)
+        // ->retry(2, 100) 
         ->post($this->buildEndpoint($service), $payload)->json();
 
-        // Log::info($response);
         return $response;
     }
     public function verifyTransaction(string $tx_ref): array
@@ -38,7 +39,7 @@ class Adex extends ProviderAbstract
         try {
             $res = $this->login();
              $cleaned = preg_replace('/[^\d.]/', '', $res['balance']);
-             Log::info(["data" => $cleaned]);
+            //  Log::info(["data" => $cleaned]);
             return (float) $cleaned;
         } catch (\Throwable $th) {
             // Log the exception if needed: error_log($th->getMessage());
@@ -103,6 +104,7 @@ class Adex extends ProviderAbstract
             'bulksms' => '/bulksms',
             'data_card' => '/data_card',
             'recharge_card' => '/recharge_card',
+            'Health Check' => "Health Check",
             default => throw new \InvalidArgumentException("No endpoint mapped for service [$service]")
             };
     }
@@ -434,5 +436,68 @@ class Adex extends ProviderAbstract
         ];
     }
 
+        protected function normalizeError(array $responseData, $service): string
+    {
+        $rawMessage = $responseData['message'] ?? '';
 
+        if (!$rawMessage) {
+            return 'Transaction failed. Please try again later.';
+        }
+
+        $messageLower = strtolower($rawMessage);
+
+        return match (true) {
+            // 1. Adex Wallet Exhausted (Note: comma acts as an OR operator in match)
+            str_contains($messageLower, 'insufficient account'), 
+            str_contains($messageLower, 'fund your wallet') 
+                => $this->handleEmptyWalletError($rawMessage, $service),
+
+            // 2. Adex Network Downtime
+            str_contains($messageLower, 'timeout'), 
+            str_contains($messageLower, 'unavailable') 
+                => 'The network provider is currently experiencing downtime. Please try again.',
+
+            // 3. Adex Invalid Number
+            str_contains($messageLower, 'invalid number') 
+                => 'The provided phone number is invalid for this network.',
+
+            // Default Fallback
+            default => 'Transaction failed at the provider network. Please contact support if this persists.',
+        };
+    }
+    private function handleEmptyWalletError(string $rawMessage, string $service): string
+    {
+        Log::critical('ADEX WALLET EMPTY: ' . $rawMessage);
+        $this->diagnose($service, 'Insufficient Balance', $rawMessage, 'warning');
+        
+        return 'This service is currently unavailable. Please try again later.';
+    }
+    public function diagnose (string $service, string $title, string $body, ?string $type = "error"): void{
+        $meta = $this->provider->meta ?? [];
+    
+                // 2. Ensure 'diagnostics' exists as an array
+                $diagnostics = $meta['diagnostics'] ?? [];
+    
+                // 3. Append the new error to the array
+                $diagnostics[] = [
+                    "time"     => now()->toDateTimeString(),
+                    "endpoint" => $this->endpoint($service), // Make sure to pass your actual variables here
+                    "body"    => $body,
+                    'title' => $title,
+                    'type' => $type,
+                ];
+    
+                // 4. PRO TIP: Prevent database bloat by keeping only the last 10 logs
+                // If there are more than 10, slice off the oldest ones from the front
+                if (count($diagnostics) > 10) {
+                    $diagnostics = array_slice($diagnostics, -10);
+                }
+    
+                // 5. Put it back into the meta array and update the model
+                $meta['diagnostics'] = $diagnostics;
+    
+                $this->provider->update([
+                    'meta' => $meta
+                ]);
+    }
 }

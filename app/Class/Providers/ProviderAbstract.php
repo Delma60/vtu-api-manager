@@ -37,15 +37,42 @@ abstract class ProviderAbstract implements ProviderInterface
         $this->provider = $provider;
     }
 
-     public function process(string $service, array $payload):mixed
-     {
+    public function process(string $service, array $payload): mixed
+    {
         try {
             $formattedPayload = $this->formatPayload($service, $payload);
             $response = $this->sendRequest($service, $formattedPayload);
+
+            $responseData = $response;
+            if (is_object($response) && method_exists($response, 'successful')) {
+                
+                if (!$response->successful()) {
+                    return [
+                        'status' => 'error',
+                        'message' => $this->normalizeError($response->json(), $service),
+                        'data' => null,
+                    ];
+                }
+                $responseData = $response->json();
+            }
+
+            if (($responseData['status'] ?? '') !== 'success') {
+                // add respoonse to provider meta diagnosis
+                // 1. Get the existing meta array, or an empty array if null
+                
+                return [
+                    'status' => 'error',
+                    'message' => $this->normalizeError($responseData, $service),
+                    'data' => null,
+                ];
+            }
+
+            $formattedData = $this->formatResponse($service, $responseData);
+
             return [
-                'status' => $response['status'] ?? 'success',
-                'message' => $response['message'] ?? $response['response_message'] ?? 'Request processed successfully',
-                'data' => $response['data'] ?? null,
+                'status' => 'success',
+                'message' => $formattedData['response_message'] ?? $responseData['message'] ?? 'Request processed successfully',
+                'data' => $formattedData,
             ];
         } catch (\Throwable $th) {
             return [
@@ -54,7 +81,7 @@ abstract class ProviderAbstract implements ProviderInterface
                 'data' => null,
             ];
         }
-     }
+    }
 
     abstract public function sendRequest(string $service, array $payload): array;
 
@@ -129,4 +156,7 @@ abstract class ProviderAbstract implements ProviderInterface
 
         return 0.0; // fallback if parsing fails
     }
+
+    abstract protected function normalizeError(array $responseData, string $service): string;
+    abstract public function diagnose (string $service, string $title, string $body, ?string $type = "error"): void;
 }

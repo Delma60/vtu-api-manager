@@ -20,7 +20,7 @@ class ProviderService
     static function make (Provider $provider):ProviderAbstract {
         $useSandbox = env('USE_SANDBOX', false);
 
-        $match = "ADEX DEVELOPER"; //$useSandbox ? "sandbox":($provider->sub_category === "simhost" ? $provider->meta?->meta_author : $provider->sub_category);
+        $match = $useSandbox ? "sandbox": $provider->meta['meta_author'];
         // Log::info($provider);
         return match ($match) {
             "ADEX DEVELOPER"=> new Adex($provider),
@@ -31,11 +31,21 @@ class ProviderService
         } ;
     }
 
+    
+    // this is where the i get to put provider to make and get provder
+    static function diagnose(Provider $provider): bool
+    {
+        $providerInstance = self::make($provider);
+        $isHealthy = $providerInstance->isHealthy();
+        $providerInstance->diagnose('Health Check', 'Provider Health Status', "Provider is " . ($isHealthy ? 'healthy' : 'unhealthy'), "success");
+        return $isHealthy;
+    }
+
+
     // this is where the i get to put provider to make and get provder
     static function getProviderInstance($identifier): ?ProviderAbstract
     {
         $provider = Provider::serviceProvider($identifier)->first();
-        Log::info($identifier);
         return $provider ? self::make($provider) : null;
     }
 

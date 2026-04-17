@@ -12,6 +12,11 @@ class ServiceController extends Controller
     function airtime(AirtimeServiceRequest $request){
 
         $response = service()->airtime()->process($request->validated());
-        return response()->json($response, 201);
+        return $this->success(
+            $data = $response['data'] ?? null, 
+            $message = $response['message'] ?? 'Airtime purchase successful', 
+            $code = $response['code'] ?? 200,
+            $meta = $response
+        );
     }
 }

@@ -80,7 +80,7 @@ export default function EditDataPlan({ networks: activeNetworks, providers, plan
 
                                     <div className="space-y-1">
                                         <Label>Data Type</Label>
-                                        <Select value={data.plan_type.toString()} onValueChange={(value) => setData('plan_type', value)}>
+                                        <Select value={data.plan_type?.toString()} onValueChange={(value) => setData('plan_type', value)}>
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Select Data Type (e.g. SME, CG)" />
                                             </SelectTrigger>

@@ -72,13 +72,12 @@ class Provider extends Model
     function scopeServiceProvider($query, $service)
     {
         return $query->whereHas('netWorkTypeService', function ($q) use ($service) {
-            $q->netWorkTypeService()->where(function($sub_q) use($service){
+            $q->where(function($sub_q) use($service){
                 $sub_q->where('name', 'like', '%'.$service.'%')
-                ->orWhere('type', 'like', '%'.$service.'%');
+                      ->orWhere('type', 'like', '%'.$service.'%');
             });
         });
     }
-
     function netWorkTypeService(){
         return $this->hasMany(NetworkType::class);
     }

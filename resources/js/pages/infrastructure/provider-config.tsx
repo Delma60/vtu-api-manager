@@ -1,8 +1,10 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import { cn } from '@/lib/utils';
 import { Provider } from '@/types';
-import { useForm } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
+import { CheckCircle, Info } from 'lucide-react';
 import { useState } from 'react';
 
 export default function ProviderConfig({
@@ -19,8 +21,6 @@ export default function ProviderConfig({
     const { data: formData, setData, errors, patch, processing } = useForm<Provider>(currentProvider);
     // Inertia useForm equivalent state
     const [changePassword, setChangePassword] = useState(true);
-
-    console.log(currentProvider)
 
     const onSave = () => {
         patch(route('providers.update', currentProvider.id));
@@ -234,7 +234,10 @@ export default function ProviderConfig({
                                         <h2 className="text-lg font-semibold text-white">Provider Diagnostics</h2>
                                         <p className="mt-1 text-sm text-slate-400">Recent connection errors and health checks.</p>
                                     </div>
-                                    <button className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800">
+                                    <button
+                                        onClick={() => router.get(route('provders.diagnose', currentProvider.id))}
+                                        className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800"
+                                    >
                                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path
                                                 strokeLinecap="round"
@@ -248,42 +251,76 @@ export default function ProviderConfig({
                                 </div>
 
                                 <div className="space-y-4 p-6">
-                                    <div className="flex items-start gap-3 rounded-lg border border-rose-500/20 bg-rose-500/10 p-4">
-                                        <svg className="mt-0.5 h-5 w-5 shrink-0 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                            />
-                                        </svg>
-                                        <div>
-                                            <h4 className="text-sm font-semibold text-rose-400">HTTP 504 Gateway Timeout</h4>
-                                            <p className="mt-1 text-xs text-slate-400">
-                                                The provider failed to respond within your configured 5000ms timeout window. Transaction was routed to
-                                                backup provider.
-                                            </p>
-                                            <p className="mt-2 font-mono text-[10px] text-slate-500">10 mins ago • Endpoint: /api/b2b/vtu</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-start gap-3 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4">
-                                        <svg className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                            />
-                                        </svg>
-                                        <div>
-                                            <h4 className="text-sm font-semibold text-amber-400">Insufficient Balance</h4>
-                                            <p className="mt-1 text-xs text-slate-400">
-                                                Vendor returned error code '03'. Please top up your wallet with {currentProvider.name}.
-                                            </p>
-                                            <p className="mt-2 font-mono text-[10px] text-slate-500">2 hours ago • Endpoint: /api/b2b/data</p>
-                                        </div>
-                                    </div>
+                                    {
+                                        // JSON.stringify(recentErrors)
+                                        recentErrors.map(function (error, idx) {
+                                            return (
+                                                <div
+                                                    key={idx}
+                                                    className={cn(
+                                                        'flex items-start gap-3 rounded-lg border p-4',
+                                                        error?.type === 'warning'
+                                                            ? 'border-amber-500/20 bg-amber-500/10'
+                                                            : error?.type === 'error'
+                                                              ? 'border-rose-500/20 bg-rose-500/10'
+                                                              : error?.type === 'success'
+                                                                ? 'border-green-500/20 bg-green-500/10'
+                                                                : 'border-blue-700/20 bg-blue-700/10',
+                                                    )}
+                                                >
+                                                    {error?.type === 'warning' ? (
+                                                        <svg
+                                                            className="mt-0.5 h-5 w-5 shrink-0 text-amber-400"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke="currentColor"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                                            />
+                                                        </svg>
+                                                    ) : error?.type === "error"?(
+                                                        <svg
+                                                            className="mt-0.5 h-5 w-5 shrink-0 text-rose-400"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke="currentColor"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                            />
+                                                        </svg>
+                                                    ): error?.type === "success"?<CheckCircle className="text-green-500" />: <Info className="text-blue-500" />}
+                                                    <div>
+                                                        <h4
+                                                            className={cn(
+                                                                'text-sm font-semibold text-amber-400',
+                                                                error?.type === 'success'
+                                                                    ? 'text-green-400'
+                                                                    : error.type === 'warning'
+                                                                      ? 'text-amber-400'
+                                                                      : error?.type === 'error'
+                                                                        ? 'text-rose-400'
+                                                                        : 'text-blue-400',
+                                                            )}
+                                                        >
+                                                            {error?.title}
+                                                        </h4>
+                                                        <p className="mt-1 text-xs text-slate-400">{error?.body}</p>
+                                                        <p className="mt-2 font-mono text-[10px] text-slate-500">
+                                                            {error.time} • Endpoint: {error.endpoint}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    }
                                 </div>
                             </div>
                         )}

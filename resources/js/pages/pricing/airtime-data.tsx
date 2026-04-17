@@ -660,7 +660,7 @@ export default function PricingManager({ initialServices, networks, network_type
                                                             <td className="px-6 py-3 text-right">
                                                                 <div className="flex items-center justify-end gap-2">
                                                                     <Link
-                                                                        href={route('data-plans.edit', { data_plan: service.id })}
+                                                                        href={route('data-plans.edit', service.id)}
                                                                         className="text-xs font-medium text-slate-500 transition-colors hover:text-indigo-400"
                                                                     >
                                                                         Edit plan

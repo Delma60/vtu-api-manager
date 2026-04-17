@@ -2,7 +2,7 @@ import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, C
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { SharedData, type BreadcrumbItem as BreadcrumbItemType } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { Bell, Command, Search } from 'lucide-react';
+import { Bell, Building, Command, Network, Receipt, Search, Settings, User, Wifi } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import AppearanceToggleDropdown from './appearance-dropdown';
 import { Button } from './ui/button';
@@ -80,7 +80,24 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
         props: { auth },
     } = usePage<SharedData>();
 
-    void breadcrumbs;
+    const getIcon = (type: string) => {
+        switch (type) {
+            case 'transaction':
+                return <Receipt className="h-4 w-4" />;
+            case 'customer':
+                return <User className="h-4 w-4" />;
+            case 'provider':
+                return <Building className="h-4 w-4" />;
+            case 'network':
+                return <Network className="h-4 w-4" />;
+            case 'service':
+                return <Settings className="h-4 w-4" />;
+            case 'data_plan':
+                return <Wifi className="h-4 w-4" />;
+            default:
+                return <Search className="h-4 w-4" />;
+        }
+    };
 
     const pageLinks: SearchResult[] = [
         { type: 'page', id: 1, title: 'Transactions', description: 'Manage transaction history', url: '/transactions' },
@@ -126,7 +143,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
             {/* Right Section: Actions & Profile */}
             <div className="flex items-center gap-2 md:gap-4">
                 {/* Mobile Search Button */}
-                <Button variant="ghost" size="icon" className="lg:hidden">
+                <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}>
                     <Search className="h-5 w-5" />
                 </Button>
 
@@ -171,7 +188,8 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                                     value={result.title}
                                     onSelect={() => (window.location.href = result.url)}
                                 >
-                                    <div className="flex flex-col gap-0.5">
+                                    {getIcon(result.type)}
+                                    <div className="ml-2 flex flex-col gap-0.5">
                                         <span>{result.title}</span>
                                         <span className="text-muted-foreground text-sm">{result.description}</span>
                                     </div>

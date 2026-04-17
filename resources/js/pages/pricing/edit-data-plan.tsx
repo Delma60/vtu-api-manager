@@ -11,7 +11,11 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useMemo } from 'react';
 
 export default function EditDataPlan({ networks: activeNetworks, providers, plan }: any) {
-    const { data, setData, patch, processing, errors } = useForm(plan);
+    const { data, setData, patch, processing, errors } = useForm({
+        providerable_cost_price: '0.00',
+        use_provider_as_providerable: false,
+        ...plan,
+    });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,13 +63,13 @@ export default function EditDataPlan({ networks: activeNetworks, providers, plan
                                 <CardContent className="space-y-4">
                                     <div className="space-y-1">
                                         <Label>Network</Label>
-                                        <Select value={data.network_id} onValueChange={(value) => setData('network_id', value)}>
+                                        <Select value={data.network_id.toString()} onValueChange={(value) => setData('network_id', value)}>
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Select Network" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {activeNetworks.map((net: any) => (
-                                                    <SelectItem key={net.id} value={net.id.toString()}>
+                                                    <SelectItem key={net.id.toString()} value={net.id.toString()}>
                                                         {net.name}
                                                     </SelectItem>
                                                 ))}
@@ -76,7 +80,7 @@ export default function EditDataPlan({ networks: activeNetworks, providers, plan
 
                                     <div className="space-y-1">
                                         <Label>Data Type</Label>
-                                        <Select value={data.plan_type} onValueChange={(value) => setData('plan_type', value)}>
+                                        <Select value={data.plan_type.toString()} onValueChange={(value) => setData('plan_type', value)}>
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Select Data Type (e.g. SME, CG)" />
                                             </SelectTrigger>

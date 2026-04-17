@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DataPlanController;
 use App\Http\Controllers\DiscountController;
@@ -10,6 +11,8 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\NetworkTypeController;
+use App\Http\Controllers\ServiceControlController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -26,6 +29,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('wallets', WalletController::class);
     Route::resource('networks', NetworkController::class);
     Route::resource('providers', ProviderController::class);
+    Route::resource('service-controls', ServiceControlController::class);
     Route::resource('network-types', NetworkTypeController::class);
     Route::resource('customers', CustomerController::class);
     Route::resource('discounts', DiscountController::class);
@@ -41,6 +45,11 @@ Route::middleware(['auth'])->group(function () {
    Route::prefix("pricing")->group(function() {
        Route::resource('data-plans', DataPlanController::class);
    });
+
+    Route::prefix('developers')->group(function() {
+        Route::resource('api-keys', ApiKeyController::class);
+        Route::resource('webhooks', WebhookController::class);
+    });
 });
 
 require __DIR__.'/settings.php';

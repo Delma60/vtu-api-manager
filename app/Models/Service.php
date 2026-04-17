@@ -10,4 +10,10 @@ class Service extends Model
 {
     use HasFactory;
     use BelongsToBusiness;
+
+    protected $fillable = [
+        'name',
+        'type',
+        'provider_id',
+    ];
 }

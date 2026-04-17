@@ -92,6 +92,7 @@ class DataPlanController extends Controller
             'plan_type' => NetworkType::where('name', $dataPlan->plan_type)->first()?->id,
             'plan_size' => $dataPlan->plan_size,
             'validity' => $dataPlan->validity,
+            'volume' => intval($dataPlan->plan_name),
             'is_active' => $dataPlan->is_active ?? true,
             'providerable' => $dataPlan->providers->first() ? [
                 'provider_id' => $dataPlan->providers->first()->id,
@@ -100,13 +101,15 @@ class DataPlanController extends Controller
                 'margin_value' => $dataPlan->providers->first()->pivot->margin_value,
                 'margin_type' => $dataPlan->providers->first()->pivot->margin_type,
             ] : [
-                'provider_id' => null,
+                'provider_id' => "1",
                 'server_id' => null,
                 'cost_price' => '0.00',
                 'margin_value' => '0.00',
                 'margin_type' => 'fixed',
             ],
         ];
+
+        Log::info("Transformed data plan: " . json_encode($transformedPlan));
 
         return Inertia::render('pricing/edit-data-plan', [
             'networks' => Network::with('networkTypes')->get(),

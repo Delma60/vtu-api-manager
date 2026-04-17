@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use App\Models\Transaction;
-use App\Models\Provider;
+use App\Models\DataPlan;
 use App\Models\Network;
+use App\Models\Provider;
+use App\Models\Service;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -91,6 +93,25 @@ class SearchController extends Controller
                 'url' => route('networks.show', $n->id),
             ]);
 
-        return response()->json($results->concat($transactions)->concat($customers)->concat($providers)->concat($networks));
+       
+
+        $dataPlans = DataPlan::where(function ($q) use($query) {
+            $q->where('plan_name', 'like', "%{$query}%")
+              ->orWhere('network', 'like', "%{$query}%")
+              ->orWhere('plan_type', 'like', "%{$query}%")
+              ->orWhere('plan_size', 'like', "%{$query}%");
+            //   ->orWhere('price', 'like', "%{$query}%");
+        })
+            ->limit(4)
+            ->get()
+            ->map(fn ($d) => [
+                'type' => 'data_plan',
+                'id' => $d->id,
+                'title' => "Data Plan: {$d->network}",
+                'description' => '₦' . number_format($d->price, 2) . ' • ' . $d->plan_name,
+                'url' => route('data-plans.show', $d->id),
+            ]);
+
+        return response()->json($results->concat($transactions)->concat($customers)->concat($providers)->concat($networks)->concat($dataPlans));
     }
 }

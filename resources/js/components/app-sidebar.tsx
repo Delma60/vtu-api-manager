@@ -133,6 +133,20 @@ export function SidebarComponent() {
                         { label: 'Bill Payments', id: 'pricing-bill' },
                     ],
                 },
+                // for service control engine
+                {
+                
+                    icon: (
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                    ),
+                    label: 'Service Control',
+                    href: '/service-controls',
+                }
             ],
         },
         {
@@ -148,12 +162,12 @@ export function SidebarComponent() {
                         />
                     ),
                     label: 'API Keys',
-                    href: 'apikeys',
+                    href: 'developers/api-keys',
                 },
                 {
                     icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />,
                     label: 'Webhooks',
-                    href: 'webhooks',
+                    href: 'developers/webhooks',
                 },
                 {
                     icon: (

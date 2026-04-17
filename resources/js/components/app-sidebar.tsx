@@ -28,9 +28,9 @@ export function SidebarComponent() {
     const [expandedItems, setExpandedItems] = useState<string[]>(['pricing']);
     const { state } = useSidebar();
 
-    const handleChange = (tabName: string) => {
-        setActiveTab(tabName);
-        router.visit(tabName);
+    const handleChange = (routeName: string) => {
+        setActiveTab(routeName);
+        router.visit(route(routeName));
     };
 
     const toggleExpanded = (itemName: string) => {
@@ -42,9 +42,9 @@ export function SidebarComponent() {
         items: Array<{
             icon: React.ReactNode;
             label: string;
-            href: string;
+            routeName: string;
             badge?: string;
-            children?: Array<{ label: string; id: string }>;
+            children?: Array<{ label: string; routeName: string }>;
         }>;
     }> = [
         {
@@ -60,7 +60,7 @@ export function SidebarComponent() {
                         />
                     ),
                     label: 'Dashboard',
-                    href: '/dashboard',
+                    routeName: 'dashboard',
                 },
                 {
                     icon: (
@@ -72,7 +72,7 @@ export function SidebarComponent() {
                         />
                     ),
                     label: 'Transactions',
-                    href: '/transactions',
+                    routeName: 'transactions.index',
                 },
                 {
                     icon: (
@@ -84,7 +84,7 @@ export function SidebarComponent() {
                         />
                     ),
                     label: 'Customers',
-                    href: '/customers',
+                    routeName: 'customers.index',
                 },
                 {
                     icon: (
@@ -96,7 +96,7 @@ export function SidebarComponent() {
                         />
                     ),
                     label: 'Wallets & Balances',
-                    href: '/wallets',
+                    routeName: 'wallets.index',
                 },
             ],
         },
@@ -113,7 +113,7 @@ export function SidebarComponent() {
                         />
                     ),
                     label: 'API Providers',
-                    href: '/providers',
+                    routeName: 'providers.index',
                     badge: `${providerDownCount} Down`,
                 },
                 {
@@ -126,16 +126,15 @@ export function SidebarComponent() {
                         />
                     ),
                     label: 'Pricing & Margins',
-                    href: '#',
+                    routeName: 'pricing.airtime-data',
                     children: [
-                        { label: 'Airtime & Data', id: 'pricing/airtime-data' },
-                        { label: 'Cable', id: 'pricing-cable' },
-                        { label: 'Bill Payments', id: 'pricing-bill' },
+                        { label: 'Airtime & Data', routeName: 'pricing.airtime-data' },
+                        { label: 'Cable', routeName: 'pricing.airtime-data' },
+                        { label: 'Bill Payments', routeName: 'pricing.airtime-data' },
                     ],
                 },
                 // for service control engine
                 {
-                
                     icon: (
                         <path
                             strokeLinecap="round"
@@ -145,8 +144,8 @@ export function SidebarComponent() {
                         />
                     ),
                     label: 'Service Control',
-                    href: '/service-controls',
-                }
+                    routeName: 'service-controls.index',
+                },
             ],
         },
         {
@@ -162,12 +161,12 @@ export function SidebarComponent() {
                         />
                     ),
                     label: 'API Keys',
-                    href: 'developers/api-keys',
+                    routeName: 'api-keys.index',
                 },
                 {
                     icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />,
                     label: 'Webhooks',
-                    href: 'developers/webhooks',
+                    routeName: 'webhooks.index',
                 },
                 {
                     icon: (
@@ -179,15 +178,15 @@ export function SidebarComponent() {
                         />
                     ),
                     label: 'API Logs',
-                    href: 'developers/api-logs',
+                    routeName: 'api-logs.index',
                 },
             ],
         },
     ];
 
-    const isItemActive = (href: string): boolean => {
-        if (!href || href === '#') return false;
-        return activeTab.includes(href);
+    const isItemActive = (routeName: string): boolean => {
+        if (!routeName) return false;
+        return activeTab.includes(routeName);
     };
 
     return (
@@ -269,12 +268,12 @@ export function SidebarComponent() {
                                                     <CollapsibleContent>
                                                         <SidebarMenu className="ml-2 border-l border-slate-700/50 pl-2">
                                                             {item.children.map((child) => (
-                                                                <SidebarMenuItem key={child.id}>
+                                                                <SidebarMenuItem key={child.routeName}>
                                                                     <SidebarMenuButton
-                                                                        onClick={() => handleChange(child.id)}
-                                                                        isActive={activeTab.includes(child.id)}
+                                                                        onClick={() => handleChange(child.routeName)}
+                                                                        isActive={activeTab.includes(child.routeName)}
                                                                         className={`text-xs ${
-                                                                            activeTab.includes(child.id)
+                                                                            activeTab.includes(child.routeName)
                                                                                 ? 'bg-indigo-500/10 text-indigo-400'
                                                                                 : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
                                                                         }`}
@@ -290,10 +289,10 @@ export function SidebarComponent() {
                                             </Collapsible>
                                         ) : (
                                             <SidebarMenuButton
-                                                onClick={() => handleChange(item.href)}
-                                                isActive={isItemActive(item.href)}
+                                                onClick={() => handleChange(item.routeName)}
+                                                isActive={isItemActive(item.routeName)}
                                                 className={`group relative ${
-                                                    isItemActive(item.href)
+                                                    isItemActive(item.routeName)
                                                         ? 'bg-indigo-500/10 text-indigo-400'
                                                         : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
                                                 }`}

@@ -10,18 +10,18 @@ class ApiLogController extends Controller
 {
     public function index(Request $request)
     {
+        $query = ApiLog::query()->latest();
         // Handle Search functionality
-        // if ($request->filled('search')) {
-        //     $search = $request->input('search');
-        //     $query->where(function($q) use ($search) {
-        //         $q->where('endpoint', 'LIKE', "%{$search}%")
-        //           ->orWhere('id', 'LIKE', "%{$search}%");
-        //     });
-        // }
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('endpoint', 'LIKE', "%{$search}%")
+                  ->orWhere('id', 'LIKE', "%{$search}%");
+            });
+        }
 
         // Paginate results
-        $logs = ApiLog::latest()
-            ->paginate(20)
+        $logs = $query->where("business_id", $request->user()->business_id)->paginate(20)
             ->withQueryString();
 
         return Inertia::render('developers/api-logs', [

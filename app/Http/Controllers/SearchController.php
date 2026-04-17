@@ -6,7 +6,6 @@ use App\Models\Customer;
 use App\Models\DataPlan;
 use App\Models\Network;
 use App\Models\Provider;
-use App\Models\Service;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 
@@ -93,7 +92,46 @@ class SearchController extends Controller
                 'url' => route('networks.show', $n->id),
             ]);
 
-       
+        $docs = collect([
+            [
+                'type' => 'doc',
+                'id' => 1,
+                'title' => 'Docs: Introduction',
+                'description' => 'Read the NexusVTU introduction guide',
+                'url' => route('docs.introduction'),
+            ],
+            [
+                'type' => 'doc',
+                'id' => 2,
+                'title' => 'Docs: Quick Start',
+                'description' => 'Get started with NexusVTU quickly',
+                'url' => route('docs.quick-start'),
+            ],
+            [
+                'type' => 'doc',
+                'id' => 3,
+                'title' => 'Docs: Airtime & Data',
+                'description' => 'Learn how to manage airtime and data',
+                'url' => route('docs.airtime'),
+            ],
+            [
+                'type' => 'doc',
+                'id' => 4,
+                'title' => 'Docs: Authentication',
+                'description' => 'Understand API authentication',
+                'url' => route('docs.authentication'),
+            ],
+            [
+                'type' => 'doc',
+                'id' => 5,
+                'title' => 'Docs: API Keys',
+                'description' => 'Learn how to manage API keys',
+                'url' => route('docs.api-keys'),
+            ],
+        ])->filter(fn ($item) =>
+            str_contains(strtolower($item['title']), strtolower($query)) ||
+            str_contains(strtolower($item['description']), strtolower($query))
+        );
 
         $dataPlans = DataPlan::where(function ($q) use($query) {
             $q->where('plan_name', 'like', "%{$query}%")
@@ -112,6 +150,6 @@ class SearchController extends Controller
                 'url' => route('data-plans.show', $d->id),
             ]);
 
-        return response()->json($results->concat($transactions)->concat($customers)->concat($providers)->concat($networks)->concat($dataPlans));
+        return response()->json($results->concat($transactions)->concat($customers)->concat($providers)->concat($networks)->concat($docs)->concat($dataPlans));
     }
 }

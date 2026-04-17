@@ -2,7 +2,7 @@ import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, C
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { Bell, Building, Command, Network, Receipt, Search, Settings, User, Wifi } from 'lucide-react';
+import { Bell, BookOpen, Building, Command, Network, Receipt, Search, Settings, User, Wifi } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import AppearanceToggleDropdown from './appearance-dropdown';
 import { Button } from './ui/button';
@@ -109,19 +109,30 @@ export function AppSidebarHeader() {
                 return <Settings className="h-4 w-4" />;
             case 'data_plan':
                 return <Wifi className="h-4 w-4" />;
+            case 'doc':
+                return <BookOpen className="h-4 w-4" />;
             default:
                 return <Search className="h-4 w-4" />;
         }
     };
 
     const pageLinks: SearchResult[] = [
-        { type: 'page', id: 1, title: 'Transactions', description: 'Manage transaction history', url: '/transactions' },
-        { type: 'page', id: 2, title: 'Customers', description: 'Manage customer accounts', url: '/customers' },
-        { type: 'page', id: 3, title: 'Providers', description: 'Manage service providers', url: '/providers' },
-        { type: 'page', id: 4, title: 'Networks', description: 'Manage networks and connectivity', url: '/networks' },
-        { type: 'page', id: 5, title: 'Wallets', description: 'View wallet balances', url: '/wallets' },
-        { type: 'page', id: 6, title: 'Discounts', description: 'View active discounts', url: '/discounts' },
-        { type: 'page', id: 7, title: 'Airtime & Data', description: 'Manage pricing plans', url: '/pricing/airtime-data' },
+        { type: 'page', id: 1, title: 'Transactions', description: 'Manage transaction history', url: route('transactions.index') },
+        { type: 'page', id: 2, title: 'Customers', description: 'Manage customer accounts', url: route('customers.index') },
+        { type: 'page', id: 3, title: 'Providers', description: 'Manage service providers', url: route('providers.index') },
+        { type: 'page', id: 4, title: 'Networks', description: 'Manage networks and connectivity', url: route('networks.index') },
+        { type: 'page', id: 5, title: 'Wallets', description: 'View wallet balances', url: route('wallets.index') },
+        { type: 'page', id: 6, title: 'Discounts', description: 'View active discounts', url: route('discounts.index') },
+        { type: 'page', id: 7, title: 'Airtime & Data', description: 'Manage pricing plans', url: route('pricing.airtime-data') },
+        { type: 'doc', id: 101, title: 'Docs: Introduction', description: 'Read the NexusVTU introduction guide', url: route('docs.introduction') },
+        { type: 'doc', id: 102, title: 'Docs: Quick Start', description: 'Get started with NexusVTU quickly', url: route('docs.quick-start') },
+        { type: 'doc', id: 103, title: 'Docs: Airtime & Data', description: 'Learn how to manage airtime and data', url: route('docs.airtime') },
+        { type: 'doc', id: 104, title: 'Docs: Authentication', description: 'Understand API authentication', url: route('docs.authentication') },
+        { type: 'doc', id: 105, title: 'Docs: API Keys', description: 'Learn how to manage API keys', url: route('docs.api-keys') },
+        { type: 'page', id: 8, title: 'API Logs', description: 'View API request logs', url: route('api-logs.index') },
+        { type: 'page', id: 9, title: 'API Keys', description: 'Manage API credentials', url: route('api-keys.index') },
+        { type: 'page', id: 10, title: 'Webhooks', description: 'Manage webhook integrations', url: route('webhooks.index') },
+        { type: 'page', id: 11, title: 'Service Control', description: 'Manage service control rules', url: route('service-controls.index') },
     ].filter((item) =>
         debouncedQuery.length > 2
             ? item.title.toLowerCase().includes(debouncedQuery.toLowerCase()) || item.description.toLowerCase().includes(debouncedQuery.toLowerCase())
@@ -146,7 +157,7 @@ export function AppSidebarHeader() {
                         <Search className="text-muted-foreground group-focus-within:text-primary h-4 w-4 transition-colors" />
                     </div>
                     <Input
-                        placeholder="Search transactions, customers, providers..."
+                        placeholder="Search transactions, customers, providers, docs, and more..."
                         className="bg-muted/50 focus-visible:ring-primary/50 w-full border-none pr-12 pl-10 transition-all focus-visible:ring-1"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
@@ -188,12 +199,12 @@ export function AppSidebarHeader() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="px-3 py-3 text-sm text-slate-400">No results found. Try another keyword.</div>
+                                    <div className="px-3 py-3 text-sm text-slate-400">No results found. Try another keyword or search the docs.</div>
                                 )
                             ) : (
                                 <div className="space-y-2">
                                     <div className="px-3 py-3 text-sm text-slate-400">
-                                        Search across transactions, customers, providers, networks, and more.
+                                        Search across transactions, customers, providers, docs, and admin pages.
                                     </div>
                                     <div className="grid gap-2 px-1 pb-1 sm:grid-cols-2">
                                         {pageLinks.slice(0, 4).map((page) => (
@@ -275,20 +286,26 @@ export function AppSidebarHeader() {
 
                     {!loading && debouncedQuery.length <= 2 && (
                         <CommandGroup heading="Suggestions">
-                            <CommandItem value="Transactions" onSelect={() => (window.location.href = '/transactions')}>
+                            <CommandItem value="Transactions" onSelect={() => (window.location.href = route('transactions.index'))}>
                                 Transactions
                             </CommandItem>
-                            <CommandItem value="Customers" onSelect={() => (window.location.href = '/customers')}>
+                            <CommandItem value="Customers" onSelect={() => (window.location.href = route('customers.index'))}>
                                 Customers
                             </CommandItem>
-                            <CommandItem value="Providers" onSelect={() => (window.location.href = '/providers')}>
+                            <CommandItem value="Providers" onSelect={() => (window.location.href = route('providers.index'))}>
                                 Providers
+                            </CommandItem>
+                            <CommandItem value="Documentation" onSelect={() => (window.location.href = route('docs.introduction'))}>
+                                Documentation
+                            </CommandItem>
+                            <CommandItem value="API Logs" onSelect={() => (window.location.href = route('api-logs.index'))}>
+                                API Logs
                             </CommandItem>
                         </CommandGroup>
                     )}
 
                     {!loading && debouncedQuery.length > 2 && pageLinks.length > 0 && (
-                        <CommandGroup heading="Pages">
+                        <CommandGroup heading="Pages & Docs">
                             {pageLinks.map((page) => (
                                 <CommandItem key={`page-${page.id}`} value={page.title} onSelect={() => (window.location.href = page.url)}>
                                     <div className="flex flex-col gap-0.5">

@@ -11,10 +11,15 @@ trait BelongsToBusiness
     protected static function bootedBelongsToBusiness()
     {
         static::addGlobalScope('business_tenant', function (Builder $builder) {
-            if ($user = static::getTenantUser()) {
-                if ($user->business_id !== null) {
-                    $builder->where((new static)->getTable() . '.business_id', $user->business_id);
-                }
+            $user = static::getTenantUser();
+            $tableName = (new static)->getTable();
+            
+            if ($user && $user->business_id !== null) {
+                // User is authenticated and has a business_id - filter by it
+                $builder->where("{$tableName}.business_id", $user->business_id);
+            } else {
+                // No authenticated user or user has no business_id - return empty results
+                $builder->whereNull("{$tableName}.id");
             }
         });
 

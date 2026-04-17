@@ -62,13 +62,7 @@ return [
     |
     */
 
-    'token_prefix' => function () {
-        $user = auth()->user();
-        if ($user) {
-            return 'sk_' . ($user->business->mode === 'live' ? 'live_' : 'test_') . $user->id . '|';
-        }
-        return null; // No prefix if user is not authenticated
-    },
+    'token_prefix' => env('SANCTUM_TOKEN_PREFIX', ''),
 
     /*
     |--------------------------------------------------------------------------

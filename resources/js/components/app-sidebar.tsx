@@ -179,7 +179,7 @@ export function SidebarComponent() {
                         />
                     ),
                     label: 'API Logs',
-                    href: 'logs',
+                    href: 'developers/api-logs',
                 },
             ],
         },

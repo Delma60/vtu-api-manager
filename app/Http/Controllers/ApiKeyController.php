@@ -14,20 +14,17 @@ class ApiKeyController extends Controller
      */
     public function index(Request $request)
     {
-        //
         $user = $request->user();
         
         // Fetch Sanctum tokens for the user
         $tokens = $user->tokens()->orderBy('created_at', 'desc')->get()->map(function ($token) use($user) {
-            Log::info($token);
             return [
                 'id' => $token->id,
                 'name' => $token->name,
-                
-                'token' => 'sk_' . ($user->business->mode === 'live' ? 'live' : 'test') . '_' . $user->id . "|" . $token->token, 
+                'token' => $token->plain_text_token ?? '••••••••••••••••••••••••••••••••',
                 'last_used_at' => $token->last_used_at,
                 'created_at' => $token->created_at,
-                'is_live' => $user->business->mode === 'live', // Assuming mode is tracked on Business model
+                'is_live' => $user->business->mode === 'live',
             ];
         });
 
@@ -49,22 +46,38 @@ class ApiKeyController extends Controller
      */
     public function store(Request $request)
     {
+        // 1. Validate the request. Ensure 'name' is provided.
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
         $user = $request->user();
-        
-        $newToken = $user->createToken($request->name);
-        
-        // 2. Grab the correct prefix
-        $prefix = $user->business->mode === 'live' ? 'sk_live_' : 'sk_test_';
 
-        // 3. Prepend the prefix to the native plain text token
-        // $newToken->plainTextToken already looks like "1|random40characterstring"
-        $apiKey = $prefix . $newToken->plainTextToken;
-        
-        return redirect()->back()->with('success', "API Key created successfully. Your key is: " . $apiKey . " (Copy this now, you won't be able to see it again.)");
+        // 2. Safely retrieve the validated input string
+        $keyName = trim($request->input('name', 'API Key'));
+
+        try {
+            // 3. Use Sanctum's createToken method which handles token creation properly
+            $newToken = $user->createToken($keyName);
+            
+            // 4. Get the plain text token (format: "id|hash")
+            $plainToken = $newToken->plainTextToken;
+            
+            // 5. Grab the correct prefix based on business mode
+            $prefix = $user->business->mode === 'live' ? 'sk_live_' : 'sk_test_';
+            
+            // 6. Create the final API key with custom prefix
+            $apiKey = $prefix . $plainToken;
+            
+            return redirect()->back()
+                ->with('success', "API Key created successfully. Your key is: {$apiKey} (Copy this now, you won't be able to see it again.)");
+        } catch (\Throwable $e) {
+            Log::error('Failed to create API token', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+            ]);
+            return redirect()->back()->with('error', 'Failed to create API key. Please try again.');
+        }
     }
 
     /**

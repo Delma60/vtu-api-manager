@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiKeyController;
+use App\Http\Controllers\ApiLogController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DataPlanController;
 use App\Http\Controllers\DiscountController;
@@ -52,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('developers')->group(function() {
         Route::resource('api-keys', ApiKeyController::class);
+        Route::resource('api-logs', ApiLogController::class);
         Route::resource('webhooks', WebhookController::class);
     });
 });

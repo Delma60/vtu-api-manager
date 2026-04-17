@@ -53,7 +53,7 @@ export default function ApiLogs({ logs, filters }: { logs: any, filters: any }) 
         <AppLayout breadcrumbs={[{ title: 'Developer Settings', href: '#' }, { title: 'API Logs' }]}>
             <Head title="API Logs" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className=" px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex items-center justify-between mb-8">
                     <div>
                         <h1 className="text-2xl font-bold text-white flex items-center gap-2">

@@ -8,25 +8,34 @@ use Illuminate\Support\Facades\Auth;
 
 trait BelongsToBusiness
 {
-    // Use the Laravel trait naming convention to avoid conflicts!
     protected static function bootedBelongsToBusiness()
     {
-        // Automatically scope queries to the currently authenticated user's business
         static::addGlobalScope('business_tenant', function (Builder $builder) {
-            // CRITICAL FIX: Use Auth::hasUser() to prevent infinite DB loops!
-            if (Auth::hasUser() && Auth::user()->business_id !== null) {
-                $builder->where('business_id', Auth::user()->business_id);
+            if ($user = static::getTenantUser()) {
+                if ($user->business_id !== null) {
+                    $builder->where((new static)->getTable() . '.business_id', $user->business_id);
+                }
             }
         });
 
         // Automatically assign the business_id when creating new records
         static::creating(function ($model) {
-            // CRITICAL FIX: Use Auth::hasUser()
-            if (Auth::hasUser() && Auth::user()->business_id !== null && empty($model->business_id)) {
-                $model->business_id = Auth::user()->business_id;
+            if (empty($model->business_id)) {
+                if ($user = static::getTenantUser()) {
+                    $model->business_id = $user->business_id;
+                }
             }
         });
     }
+
+
+    protected static function getTenantUser()
+    {
+        return Auth::guard('sanctum')->user() 
+            ?? Auth::guard('auth')->user() 
+            ?? Auth::user();
+    }
+
 
     public function business()
     {

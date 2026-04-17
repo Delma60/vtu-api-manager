@@ -40,14 +40,7 @@ class ApiLoggerMiddleware
         $responseContent = $response->getContent();
         $responsePayload = json_decode($responseContent, true) ?? $responseContent;
 
-        // 3. Save to database asynchronously (terminable)
-        Log::info('Logging API Request', [
-            'user_id' => $request->user()?->id,
-            'method' => $request->method(),
-            'endpoint' => $request->path(),
-            'status_code' => $response->getStatusCode(),
-            'duration_ms' => $duration,
-        ]);
+        
         ApiLog::create([
             'user_id'          => $request->user()?->id, 
             'business_id'      => $request->user()?->business_id, 

@@ -8,6 +8,7 @@ use App\Models\Provider;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ServiceControlController extends Controller
@@ -60,4 +61,39 @@ class ServiceControlController extends Controller
 
         return redirect()->back()->with('success', 'Global Routing updated successfully.');
     }
+
+    public function bulkUpdate(Request $request)
+{
+    $validated = $request->validate([
+        'services' => 'array',
+        'networkTypes' => 'array',
+        'networks' => 'array',
+    ]);
+
+    DB::transaction(function () use ($validated) {
+        // Update Services
+        foreach ($validated['services'] as $id => $providerId) {
+            Log::info("Updating Service ID $id to Provider ID $providerId");
+            \App\Models\Service::where('id', $id)->update([
+                'provider_id' => $providerId === 'none' ? null : $providerId
+            ]);
+        }
+
+        // Update Network Types (SME/CG/Gifting)
+        foreach ($validated['networkTypes'] as $id => $providerId) {
+            \App\Models\NetworkType::where('id', $id)->update([
+                'provider_id' => $providerId === 'none' ? null : $providerId
+            ]);
+        }
+
+        // Update Brands (MTN/Airtel)
+        foreach ($validated['networks'] as $id => $providerId) {
+            \App\Models\Network::where('id', $id)->update([
+                'provider_id' => $providerId === 'none' ? null : $providerId
+            ]);
+        }
+    });
+
+    return back()->with('message', 'Routing engine synchronized.');
+}
 }

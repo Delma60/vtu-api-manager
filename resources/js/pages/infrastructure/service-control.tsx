@@ -17,7 +17,7 @@ export default function ServiceControl({ providers, services, networkTypes, netw
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('service-controls.update', ));
+        put(route('service-controls.bulk-update', ));
     };
 
     // Group services by type
@@ -84,12 +84,7 @@ export default function ServiceControl({ providers, services, networkTypes, netw
                         <TabsTrigger value="others" className="data-[state=active]:bg-slate-800">
                             <MoreHorizontal className="mr-2 h-4 w-4" /> Others
                         </TabsTrigger>
-                        <TabsTrigger value="data-types" className="data-[state=active]:bg-slate-800">
-                            <Network className="mr-2 h-4 w-4" /> Data Types (SME/CG)
-                        </TabsTrigger>
-                        <TabsTrigger value="networks" className="data-[state=active]:bg-slate-800">
-                            <Layers className="mr-2 h-4 w-4" /> Brands
-                        </TabsTrigger>
+                        
                     </TabsList>
 
                     {/* AIRTIME TAB */}
@@ -105,8 +100,8 @@ export default function ServiceControl({ providers, services, networkTypes, netw
                                         </CardHeader>
                                         <CardContent>
                                             <RouteSelect
-                                                value={data.services[service.id]}
-                                                onChange={(val) => setData('services', { ...data.services, [service.id]: val })}
+                                                value={data.networkTypes[service.id]}
+                                                onChange={(val) => setData('networkTypes', { ...data.networkTypes, [service.id]: val })}
                                             />
                                         </CardContent>
                                     </Card>
@@ -131,8 +126,8 @@ export default function ServiceControl({ providers, services, networkTypes, netw
                                         </CardHeader>
                                         <CardContent>
                                             <RouteSelect
-                                                value={data.services[service.id]}
-                                                onChange={(val) => setData('services', { ...data.services, [service.id]: val })}
+                                                value={data.networkTypes[service.id]}
+                                                onChange={(val) => setData('networkTypes', { ...data.networkTypes, [service.id]: val })}
                                             />
                                         </CardContent>
                                     </Card>
@@ -197,45 +192,7 @@ export default function ServiceControl({ providers, services, networkTypes, netw
                         )}
                     </TabsContent>
 
-                    {/* DATA TYPES TAB (SME, Gifting, CG) */}
-                    <TabsContent value="data-types">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                            {networkTypes.map((type: any) => (
-                                <Card key={type.id} className="border-slate-800 bg-slate-900">
-                                    <CardHeader className="pb-3">
-                                        <CardTitle className="text-md text-white">{type.name.toUpperCase()}</CardTitle>
-                                        <CardDescription className="text-xs">Data Routing</CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <RouteSelect
-                                            value={data.networkTypes[type.id]}
-                                            onChange={(val) => setData('networkTypes', { ...data.networkTypes, [type.id]: val })}
-                                        />
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    </TabsContent>
-
-                    {/* NETWORKS TAB (DSTV, GOTV, MTN, Airtel) */}
-                    <TabsContent value="networks">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                            {networks.map((network: any) => (
-                                <Card key={network.id} className="border-slate-800 bg-slate-900">
-                                    <CardHeader className="pb-3">
-                                        <CardTitle className="text-md text-white">{network.name}</CardTitle>
-                                        <CardDescription className="text-xs">Brand Routing</CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <RouteSelect
-                                            value={data.networks[network.id]}
-                                            onChange={(val) => setData('networks', { ...data.networks, [network.id]: val })}
-                                        />
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    </TabsContent>
+                   
                 </Tabs>
             </div>
         </AppLayout>

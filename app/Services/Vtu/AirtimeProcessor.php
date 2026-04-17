@@ -18,9 +18,9 @@ class AirtimeProcessor
     public function process($request)
     {
         // Implement the logic to process airtime purchase here
-        // ProviderService::make();
-        return DB::transaction(function () {
-            
+        return DB::transaction(function () use ($request) {
+            $provider = ProviderService::getProviderInstance('airtime');
+            return $provider->process("airtime", $request);
         });
     }
 }

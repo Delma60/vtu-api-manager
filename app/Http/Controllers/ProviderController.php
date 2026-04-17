@@ -42,7 +42,6 @@ class ProviderController extends Controller
     public function store(StoreProviderRequest $request)
     {
         //
-        Log::info("Creating provider with data: " . json_encode($request->validated()));
         ProviderService::createProvider($request->validated());
         return redirect()->route('providers.index')->with('success', 'Provider created successfully.');
     }
@@ -82,7 +81,6 @@ class ProviderController extends Controller
     public function update(UpdateProviderRequest $request, Provider $provider)
     {
         //
-        Log::info("Updating provider [{$provider->name}] with data: " . json_encode($request->validated()));
         ProviderService::updateProvider(array_merge($request->validated(), ['id' => $provider->id]));
         return back()->with('success', 'Provider updated successfully.');
     }

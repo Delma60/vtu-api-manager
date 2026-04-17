@@ -23,4 +23,8 @@ class NetworkType extends Model
         return $query->where('type', 'airtime');
     }
 
+    function provider(){
+        return $this->belongsTo(Provider::class);
+    }
+
 }

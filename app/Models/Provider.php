@@ -27,12 +27,15 @@ class Provider extends Model
         'is_active',
         'cached_balance',
         'success_rate_7d',
+        'meta',
+        'logo_url',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'cached_balance' => 'decimal:2',
         'success_rate_7d' => 'decimal:2',
+        'meta' => 'array',
     ];
 
     protected $appends = ['connection', 'balance'];
@@ -66,5 +69,18 @@ class Provider extends Model
         });
     }
 
+    function scopeServiceProvider($query, $service)
+    {
+        return $query->whereHas('id', function ($q) use ($service) {
+            $q->netWorkTypeService()->where(function($sub_q) use($service){
+                $sub_q->where('name', 'like', '%'.$service.'%')
+                ->orWhere('type', 'like', '%'.$service.'%');
+            });
+        });
+    }
+
+    function netWorkTypeService(){
+        return $this->hasMany(NetworkType::class);
+    }
 
 }

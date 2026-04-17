@@ -9,6 +9,7 @@ class ServiceController extends Controller
 {
     //
     function airtime(Request $request){
-        service()->airtime()->process($request);
+        $response = service()->airtime()->process($request);
+        return response()->json($response, 201);
     }
 }

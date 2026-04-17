@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApiLog extends Model
 {
-    //
-    use BelongsToBusiness;
+    use BelongsToBusiness, HasUuids;
 
     protected $fillable = [
         'user_id',
@@ -42,6 +43,11 @@ class ApiLog extends Model
         return $this->belongsTo(Provider::class);
     }
 
+    public function prunable(): Builder
+    {
+        return static::where('created_at', '<=', now()->subDays(30));
+    }
+    
     public function scopeEntry(array $data){
         return self::create($data);
     }

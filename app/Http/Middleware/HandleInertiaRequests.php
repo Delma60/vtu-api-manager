@@ -50,6 +50,15 @@ class HandleInertiaRequests extends Middleware
                 if(!$provider->connection) return $provider;
             })->filter()->count(),
 
+            'flash' => function () {
+                return [
+                    'success' => session('success'),
+                    'error' => session('error'),
+                    'warning' => session('warning'),
+                    'info' => session('info'),
+                ];
+            },
+
         ]);
     }
 }

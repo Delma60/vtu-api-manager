@@ -58,9 +58,16 @@ class ApiKeyController extends Controller
         // You can attach abilities depending on user roles
         $token = $user->createToken($request->name, ['*']);
 
-        // Since Sanctum only returns the plain-text token exactly ONCE, you must flash it to the session 
-        // to be caught by the frontend (e.g. FlashMessages component) or return it directly.
-        return redirect()->back()->with('success', "API Key created successfully. Your key is: " . $token->plainTextToken . " (Copy this now, you won't be able to see it again.)");
+        // The plainTextToken is ONLY shown ONCE and must be used in API requests
+        // Format: Authorization: Bearer {plainTextToken}
+        // WARNING: The display version (sk_test_xxx) is for UI only, NOT for authentication
+        $message = "✅ API Key created successfully!\n\n"
+            . "🔐 Use THIS token in your API requests (shown only once):\n"
+            . "Authorization: Bearer " . $token->plainTextToken . "\n\n"
+            . "❌ DO NOT use the display version (sk_test_xxx) for authentication—it's just a reference.\n"
+            . "📝 Store the token safely now, you won't see it again.";
+
+        return redirect()->back()->with('success', $message);
     }
 
     /**

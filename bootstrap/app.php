@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ApiLoggerMiddleware;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -23,6 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+        ]);
+        $middleware->api(append: [
+            ApiLoggerMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -71,6 +75,15 @@ return Application::configure(basePath: dirname(__DIR__))
         // 5. Handle Unauthenticated Users
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*') || $request->wantsJson()) {
+                // Log auth failures for debugging
+                \Illuminate\Support\Facades\Log::warning('API Auth Failed', [
+                    'path' => $request->path(),
+                    'method' => $request->method(),
+                    'has_token' => !!$request->bearerToken(),
+                    'auth_header' => $request->header('Authorization') ? 'present' : 'missing',
+                    'ip' => $request->ip(),
+                ]);
+                
                 return response()->json([
                     'status'  => false,
                     'message' => 'Unauthenticated. Invalid or missing API Key.',

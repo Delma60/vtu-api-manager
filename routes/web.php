@@ -69,6 +69,15 @@ Route::prefix('docs')->group(function () {
         return Inertia::render('docs/airtime');
     })->name('docs.airtime');
     // Add more doc routes here as you build them
+    // authentication
+    Route::get('/authentication', function () {
+        return Inertia::render('docs/authentication');
+    })->name('docs.authentication');
+
+    Route::get('/api-keys', function () {
+        return Inertia::render('docs/api-keys');
+    })->name('docs.api-keys');
+
 });
 
 require __DIR__.'/settings.php';

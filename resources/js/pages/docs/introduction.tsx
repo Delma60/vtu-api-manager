@@ -3,9 +3,19 @@ import CodeBlock from '@/components/code-block';
 import Callout from '@/components/docs-callout';
 import DocsTabs from '@/components/docs-tabs';
 import DocsLayout from '@/layouts/docs-layout';
+import { usePage } from '@inertiajs/react';
 import { Lightbulb, Smartphone, Tv, Wifi } from 'lucide-react';
 
 export default function Introduction() {
+    const { props } = usePage<any>();
+
+    const baseUrl = props.app_url || (typeof window !== 'undefined' ? window.location.origin : 'https://api.your-domain.com');
+    const apiUrl = `${baseUrl}/api/v1`;
+    
+    // Optional: Auto-generate sandbox URL (or just keep it fixed if your sandbox is on a completely different domain)
+    const sandboxUrl = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')
+        ? `${baseUrl}/sandbox/api/v1` 
+        : baseUrl.replace('://', '://sandbox.') + '/api/v1';
     return (
         <DocsLayout title="Introduction" currentPath="/docs/introduction">
             <h1 className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">🎯 Welcome to VTU API Manager</h1>
@@ -20,7 +30,9 @@ export default function Introduction() {
                 sections.
             </Callout>
 
-            <h2>✨ Core Capabilities</h2>
+            <h2 id="core-capabilities" className="scroll-mt-28">
+                ✨ Core Capabilities
+            </h2>
             <p>Integrate once and instantly gain access to a comprehensive suite of bill payment services across Nigeria and beyond.</p>
 
             {/* Modern Feature Grid */}
@@ -88,11 +100,11 @@ export default function Introduction() {
             <div className="not-prose my-6 space-y-2">
                 <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
                     <p className="mb-2 text-xs font-semibold text-emerald-400">SANDBOX (Testing)</p>
-                    <ApiEndpoint method="POST" endpoint="https://sandbox.your-domain.com/api/v1" />
+                    <ApiEndpoint method="POST" endpoint={sandboxUrl} />
                 </div>
                 <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-4">
                     <p className="mb-2 text-xs font-semibold text-blue-400">PRODUCTION (Live)</p>
-                    <ApiEndpoint method="POST" endpoint="https://api.your-domain.com/api/v1" />
+                    <ApiEndpoint method="POST" endpoint={apiUrl} />
                 </div>
             </div>
 
@@ -109,7 +121,7 @@ export default function Introduction() {
                         content: (
                             <CodeBlock
                                 language="bash"
-                                code={`curl -X POST https://api.your-domain.com/api/v1/airtime \\
+                                code={`curl -X POST ${apiUrl}/airtime \\
   -H "Authorization: Bearer YOUR_SECRET_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -139,7 +151,7 @@ data = {
 }
 
 response = requests.post(
-    "https://api.your-domain.com/api/v1/airtime",
+    "${apiUrl}/airtime",
     headers=headers,
     json=data
 )`}
@@ -151,7 +163,7 @@ response = requests.post(
                         content: (
                             <CodeBlock
                                 language="javascript"
-                                code={`const response = await fetch('https://api.your-domain.com/api/v1/airtime', {
+                                code={`const response = await fetch('${apiUrl}/airtime', {
     method: 'POST',
     headers: {
         'Authorization': 'Bearer YOUR_SECRET_API_KEY',
@@ -175,7 +187,7 @@ console.log(result);`}
                             <CodeBlock
                                 language="php"
                                 code={`$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "https://api.your-domain.com/api/v1/airtime");
+curl_setopt($ch, CURLOPT_URL, "${apiUrl}/airtime");
 curl_setopt($ch, CURLOPT_POST, 1);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Authorization: Bearer YOUR_SECRET_API_KEY",

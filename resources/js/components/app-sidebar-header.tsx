@@ -1,9 +1,9 @@
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { SharedData, type BreadcrumbItem as BreadcrumbItemType } from '@/types';
+import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { Bell, Building, Command, Network, Receipt, Search, Settings, User, Wifi } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AppearanceToggleDropdown from './appearance-dropdown';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -18,13 +18,15 @@ interface SearchResult {
     url: string;
 }
 
-export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
+export function AppSidebarHeader() {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState('');
     const [results, setResults] = useState<SearchResult[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [searchActive, setSearchActive] = useState(false);
+    const searchRef = useRef<HTMLDivElement | null>(null);
 
     // Keyboard shortcut (⌘K or Ctrl+K) to open search
     useEffect(() => {
@@ -37,6 +39,19 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
         document.addEventListener('keydown', down);
         return () => document.removeEventListener('keydown', down);
     }, []);
+
+    useEffect(() => {
+        if (!searchActive) return;
+
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setSearchActive(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [searchActive]);
 
     // Debounce query input
     useEffect(() => {
@@ -125,18 +140,78 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
             </div>
 
             {/* Middle Section: Search Bar */}
-            <div className="mx-4 hidden max-w-md flex-1 lg:block">
-                <div className="group relative rounded-md border">
-                    <Search className="text-muted-foreground group-focus-within:text-primary absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transition-colors" />
-                    <Input
-                        placeholder="Search transactions, customers..."
-                        className="bg-muted/50 focus-visible:ring-primary/50 w-full border-none pr-12 pl-10 transition-all focus-visible:ring-1"
-                        readOnly
-                        onClick={() => setOpen(true)}
-                    />
-                    <div className="bg-background text-muted-foreground absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-medium opacity-60">
-                        <Command className="h-2.5 w-2.5" /> K
+            <div className="mx-4 hidden w-full max-w-xl flex-1 lg:block">
+                <div ref={searchRef} className="group relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <Search className="text-muted-foreground h-4 w-4 transition-colors group-focus-within:text-primary" />
                     </div>
+                    <Input
+                        placeholder="Search transactions, customers, providers..."
+                        className="bg-muted/50 focus-visible:ring-primary/50 w-full border-none pr-12 pl-10 transition-all focus-visible:ring-1"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onFocus={() => setSearchActive(true)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && results.length > 0) {
+                                window.location.href = results[0].url;
+                            }
+                        }}
+                    />
+                    <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1 rounded-full border border-slate-700 bg-slate-950/80 px-2 py-1 text-[10px] font-medium text-slate-400">
+                        <Command className="h-3.5 w-3.5" /> K
+                    </div>
+
+                    {searchActive && (
+                        <div className="absolute left-0 right-0 top-full z-20 mt-2 rounded-2xl border border-slate-800/60 bg-slate-950/95 p-2 shadow-2xl shadow-black/30 backdrop-blur-xl">
+                            {loading ? (
+                                <div className="px-3 py-3 text-sm text-slate-400">Loading search results…</div>
+                            ) : error ? (
+                                <div className="px-3 py-3 text-sm text-rose-400">{error}</div>
+                            ) : query.trim().length > 2 ? (
+                                results.length > 0 ? (
+                                    <div className="space-y-1">
+                                        {results.map((result) => (
+                                            <button
+                                                key={`${result.type}-${result.id}`}
+                                                type="button"
+                                                onClick={() => (window.location.href = result.url)}
+                                                className="w-full rounded-xl px-3 py-3 text-left transition hover:bg-slate-900/80"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-slate-400">{getIcon(result.type)}</span>
+                                                    <div>
+                                                        <p className="font-medium text-slate-100">{result.title}</p>
+                                                        <p className="text-sm text-slate-500">{result.description}</p>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="px-3 py-3 text-sm text-slate-400">No results found. Try another keyword.</div>
+                                )
+                            ) : (
+                                <div className="space-y-2">
+                                    <div className="px-3 py-3 text-sm text-slate-400">
+                                        Search across transactions, customers, providers, networks, and more.
+                                    </div>
+                                    <div className="grid gap-2 px-1 pb-1 sm:grid-cols-2">
+                                        {pageLinks.slice(0, 4).map((page) => (
+                                            <button
+                                                key={`suggestion-${page.id}`}
+                                                type="button"
+                                                onClick={() => (window.location.href = page.url)}
+                                                className="rounded-xl border border-slate-800/50 bg-slate-900/70 px-3 py-2 text-left text-sm text-slate-200 transition hover:border-slate-700 hover:bg-slate-900"
+                                            >
+                                                <div className="font-medium">{page.title}</div>
+                                                <div className="text-xs text-slate-500">{page.description}</div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 

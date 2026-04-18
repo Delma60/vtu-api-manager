@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\ApiLog;
+use App\Services\MetricsService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -29,9 +30,9 @@ class ApiLoggerMiddleware
 
         // 1. Sanitize the Request Payload (Never store sensitive data!)
         $requestPayload = $request->except([
-            'password', 
-            'password_confirmation', 
-            'pin', 
+            'password',
+            'password_confirmation',
+            'pin',
             'transaction_pin',
             'api_key'
         ]);
@@ -40,11 +41,11 @@ class ApiLoggerMiddleware
         $responseContent = $response->getContent();
         $responsePayload = json_decode($responseContent, true) ?? $responseContent;
 
-        
+
         ApiLog::create([
-            'user_id'          => $request->user()?->id, 
-            'business_id'      => $request->user()?->business_id, 
-            'provider_id'          => NULL, // $request->user()?->id, 
+            'user_id'          => $request->user()?->id,
+            'business_id'      => $request->user()?->business_id,
+            'provider_id'      => null,
             'method'           => $request->method(),
             'endpoint'         => $request->path(),
             'status_code'      => $response->getStatusCode(),
@@ -53,5 +54,25 @@ class ApiLoggerMiddleware
             'request_payload'  => $requestPayload,
             'response_payload' => $responsePayload,
         ]);
+
+        try {
+            $business = $request->user()?->business;
+            if ($business) {
+                $endpoint = $request->route()?->getName() ?? $request->path();
+                $statusCode = $response->getStatusCode();
+                $isSuccess = $statusCode >= 200 && $statusCode < 400;
+
+                app(MetricsService::class)->recordRouteMetric(
+                    business: $business,
+                    endpoint: $endpoint,
+                    isSuccess: $isSuccess
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to record API route metric', [
+                'endpoint' => $request->path(),
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

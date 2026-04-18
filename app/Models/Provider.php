@@ -52,9 +52,9 @@ class Provider extends Model
 
     public function getConnectionAttribute()
     {
-        $key = md5($this->base_url . $this->api_key . $this->api_secret . "=password=");
+        $key = md5($this->base_url . $this->api_key . $this->api_secret . "=passwor=");
         $provider = ProviderService::make($this);
-        return Cache::remember($key, now()->addSeconds(10), function() use($provider) {
+        return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
             // Log::info(["key" => $provider]);
             return $provider->isHealthy();
         });
@@ -62,9 +62,9 @@ class Provider extends Model
 
     public function getBalanceAttribute()
     {
-        $key = md5($this->base_url . $this->api_key . $this->api_secret . "__");
+        $key = md5($this->base_url . $this->api_key . $this->api_secret . "__-");
         $provider = ProviderService::make($this);
-        return Cache::remember($key, now()->addMinutes(10), function() use($provider) {
+        return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
             return $provider->checkBalance();
         });
     }

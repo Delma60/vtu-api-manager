@@ -14,6 +14,7 @@ class ApiMetric extends Model
     protected $fillable = [
         'business_id',
         'service_type',
+        'endpoint',
         'provider_id',
         'service_id',
         'network',

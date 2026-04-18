@@ -69,15 +69,15 @@ class MetricsService
         $date = now()->toDateString();
 
         // Update daily metrics
-        $this->updatePeriodMetrics($business, $serviceType, $provider, $service, $network, $date, 'daily', $isSuccess);
+        $this->updatePeriodMetrics($business, $serviceType, $endpoint, $provider, $service, $network, $date, 'daily', $isSuccess);
 
         // Update weekly metrics
         $weekStart = now()->startOfWeek()->toDateString();
-        $this->updatePeriodMetrics($business, $serviceType, $provider, $service, $network, $weekStart, 'weekly', $isSuccess);
+        $this->updatePeriodMetrics($business, $serviceType, $endpoint, $provider, $service, $network, $weekStart, 'weekly', $isSuccess);
 
         // Update monthly metrics
         $monthStart = now()->startOfMonth()->toDateString();
-        $this->updatePeriodMetrics($business, $serviceType, $provider, $service, $network, $monthStart, 'monthly', $isSuccess);
+        $this->updatePeriodMetrics($business, $serviceType, $endpoint, $provider, $service, $network, $monthStart, 'monthly', $isSuccess);
 
         // Update hourly metrics (optional performance optimization - only if needed)
         // $hourStart = now()->startOfHour()->toDateTimeString();
@@ -262,26 +262,81 @@ class MetricsService
     }
 
     /**
-     * Get success rate comparison between service types
+     * Get aggregated success rate for the requested business and filters.
      */
-    public function compareServiceTypes(
-        $query = ApiMetric::query();
+    public function getAggregatedSuccessRate(
+        ?Business $business = null,
+        ?string $serviceType = null,
+        ?Service $service = null,
+        ?Provider $provider = null,
+        ?string $network = null,
+        ?string $endpoint = null,
+        string $periodType = 'daily',
+        ?int $days = 30
+    ): array {
+        $query = ApiMetric::query()
+            ->where('period_type', $periodType);
+
+        if ($business) {
+            $query->where('business_id', $business->id);
+        }
 
         if ($serviceType) {
             $query->where('service_type', $serviceType);
-        }
-
-        if ($provider) {
-            $query->where('provider_id', $provider->id);
         }
 
         if ($service) {
             $query->where('service_id', $service->id);
         }
 
+        if ($provider) {
+            $query->where('provider_id', $provider->id);
+        }
+
         if ($network) {
             $query->where('network', $network);
         }
+
+        if ($endpoint) {
+            $query->where('endpoint', $endpoint);
+        }
+
+        if ($days) {
+            $query->where('period_date', '>=', now()->subDays($days)->toDateString());
+        }
+
+        $metrics = $query->select(
+                DB::raw('SUM(total_requests) as total_requests'),
+                DB::raw('SUM(successful_requests) as successful_requests'),
+                DB::raw('SUM(failed_requests) as failed_requests')
+            )
+            ->first();
+
+        $totalRequests = (int) ($metrics->total_requests ?? 0);
+        $successfulRequests = (int) ($metrics->successful_requests ?? 0);
+        $failedRequests = (int) ($metrics->failed_requests ?? 0);
+        $successRateRaw = $totalRequests > 0
+            ? round(($successfulRequests / $totalRequests) * 100, 2)
+            : 0;
+
+        return [
+            'total_requests' => $totalRequests,
+            'successful_requests' => $successfulRequests,
+            'failed_requests' => $failedRequests,
+            'success_rate_raw' => $successRateRaw,
+        ];
+    }
+
+    /**
+     * Get provider rankings by average success rate.
+     */
+    public function getRankedProviders(
+        ?Business $business = null,
+        string $periodType = 'daily',
+        ?int $days = 30
+    ): Collection {
+        $query = ApiMetric::whereNotNull('provider_id')
+            ->where('period_type', $periodType);
 
         if ($business) {
             $query->where('business_id', $business->id);
@@ -291,21 +346,16 @@ class MetricsService
             $query->where('period_date', '>=', now()->subDays($days)->toDateString());
         }
 
-        $metrics = $query->get();
-
-        $totalRequests = $metrics->sum('total_requests');
-        $successRequests = $metrics->sum('successful_requests');
-        $failedRequests = $metrics->sum('failed_requests');
-
-        $successRate = $totalRequests > 0 ? ($successRequests / $totalRequests) * 100 : 0;
-
-        return [
-            'total_requests' => $totalRequests,
-            'successful_requests' => $successRequests,
-            'failed_requests' => $failedRequests,
-            'success_rate' => number_format($successRate, 2),
-            'success_rate_raw' => $successRate,
-        ];
+        return $query->groupBy('provider_id')
+            ->select(
+                'provider_id',
+                DB::raw('AVG(success_rate) as avg_success_rate'),
+                DB::raw('SUM(total_requests) as total_requests'),
+                DB::raw('SUM(successful_requests) as successful_requests'),
+                DB::raw('SUM(failed_requests) as failed_requests')
+            )
+            ->orderBy('avg_success_rate', 'desc')
+            ->get();
     }
 
     /**

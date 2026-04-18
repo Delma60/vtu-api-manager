@@ -128,12 +128,12 @@ class Adex extends ProviderAbstract
                     'request-id' => $payload['tx_ref'],
                 ];
             case 'data':
-                $dataPlan = DataPlan::find($payload['data_plan']);
+                $dataPlan = DataPlan::with("providers")->find($payload['data_plan']);
                 return [
                     'network' => $this->networkIDs[$payload['network']],
                     'phone' => $payload['phone'],
                     'plan_type' => $payload['plan_type'] ?? 'GIFTING',
-                    'data_plan' => $dataPlan->{str_replace(" ", "_", $this->provider->name)},
+                    'data_plan' => $dataPlan->providers()->where('provider_id', $this->provider->id)->first()->pivot->server_id ?? null,
                     'bypass' => filter_var($payload['bypass'] ?? false, FILTER_VALIDATE_BOOLEAN),
                     'request-id' => $payload['tx_ref'],
                 ];

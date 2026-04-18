@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('network_types', function (Blueprint $table) {
-            $table->foreignId('provider_id')->nullable()->constrained('providers')->nullOnDelete();
+            $table->foreignId('provider_id')->nullable()->constrained('providers')->nullOnDelete()->default(1);
         });
 
         // 2. For DSTV, GOTV, Startimes (Assuming they are stored as Networks)
         Schema::table('networks', function (Blueprint $table) {
-            $table->foreignId('provider_id')->nullable()->constrained('providers')->nullOnDelete();
+            $table->foreignId('provider_id')->nullable()->constrained('providers')->nullOnDelete()->default(1);
         });
     }
 

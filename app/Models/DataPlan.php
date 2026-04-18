@@ -5,6 +5,7 @@ namespace App\Models;
 use App\BelongsToBusiness;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DataPlan extends Model
 {
@@ -25,5 +26,10 @@ class DataPlan extends Model
         return $this->morphToMany(Provider::class, 'providerable', 'providerables', 'providerable_id', 'provider_id')
             ->withPivot(['cost_price', 'margin_value', 'margin_type', 'server_id'])
             ->withTimestamps();
+    }
+
+    function planType():BelongsTo
+    {
+        return $this->belongsTo(NetworkType::class, 'plan_type');
     }
 }

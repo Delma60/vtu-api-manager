@@ -3,9 +3,11 @@
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\ApiLogController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataPlanController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\MetricsController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\ProviderController;
@@ -23,9 +25,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('transactions', TransactionController::class);
     Route::resource('wallets', WalletController::class);
@@ -38,7 +38,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('network-types', NetworkTypeController::class);
     Route::resource('customers', CustomerController::class);
     Route::resource('discounts', DiscountController::class);
-    
+
     Route::post('customers/{customer}/suspend', [CustomerController::class, 'suspend'])->name('customers.suspend');
     Route::post('customers/{customer}/activate', [CustomerController::class, 'activate'])->name('customers.activate');
 
@@ -56,6 +56,16 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('api-logs', ApiLogController::class);
         Route::resource('webhooks', WebhookController::class);
     });
+
+    Route::prefix('metrics')->group(function() {
+        Route::get('/dashboard', [MetricsController::class, 'dashboard'])->name('metrics.dashboard');
+        Route::get('/service-types/success-rate', [MetricsController::class, 'serviceTypeSuccessRate'])->name('metrics.service-type.success-rate');
+        Route::get('/services/{service}/success-rate', [MetricsController::class, 'serviceSuccessRate'])->name('metrics.service.success-rate');
+        Route::get('/networks/success-rate', [MetricsController::class, 'networkSuccessRate'])->name('metrics.network.success-rate');
+        Route::get('/service-types/compare', [MetricsController::class, 'compareServiceTypes'])->name('metrics.service-types.compare');
+        Route::get('/service-types/rankings', [MetricsController::class, 'serviceTypeRankings'])->name('metrics.service-types.rankings');
+        Route::post('/regenerate', [MetricsController::class, 'regenerate'])->name('metrics.regenerate');
+    });
 });
 
 // routes/web.php
@@ -67,7 +77,7 @@ Route::prefix('docs')->group(function () {
     Route::get('/quick-start', function () {
         return Inertia::render('docs/quick-start');
     })->name('docs.quick-start');
-    
+
     Route::get('/airtime', function () {
         return Inertia::render('docs/airtime');
     })->name('docs.airtime');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\DataPlan;
 use App\Models\Network;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -61,9 +62,54 @@ class DataPurchaseRequest extends FormRequest
                         }
                     }
                 },],
-            'data_plan' => ['required', 'string', 'exists:data_plans,id'],
+            'data_plan' => ['required', 'int',  function (string $attribute, mixed $value, Closure $fail) {
+                    $networkCode = $this->input('network');
+                    
+                    // Fetch the network using the code provided in the request
+                    $network = Network::with("networkTypes.dataPlans")->where('code', $networkCode)->first();
+
+                    // If network doesn't exist, skip this check (the 'network' exists rule will catch it)
+                    if (!$network) {
+                        return;
+                    }
+
+                    // Check if this specific Network has a NetworkType with the provided name
+                    // This automatically scopes to typeable_id and typeable_type behind the scenes!
+                    // find the data plan with data_plan which is and id
+                    $isValidDataPlan = DataPlan::where('id', $value)
+                        ->whereHas('planType', function ($query) use ($networkCode) {
+                            // The NetworkType must belong to the requested Network
+                            $query->whereHasMorph('typeable', [Network::class], function ($q) use ($networkCode) {
+                                $q->where('code', $networkCode);
+                            });
+                        })
+                        ->exists();
+
+                    if (!$isValidDataPlan) {
+                        $fail("The selected data plan '{$value}' is not available for the {$network->name} network.");
+                    }
+                }],
             'bypass' => 'sometimes|boolean',
-            'request_id' => 'required|string|unique:transactions,request_id',
+            'tx_ref' => 'required|string|unique:transactions,reference',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'network.required' => 'Network provider is required.',
+            'network.string' => 'Network must be a valid text value.',
+            'network.exists' => 'The selected network provider is not supported.',
+            'phone.required' => 'Phone number is required.',
+            'phone.string' => 'Phone number must be a valid text value.',
+            'phone.regex' => 'Phone number must be a valid Nigerian number format (e.g., 0803XXXXXXXX).',
+            'data_plan.required' => 'Data plan is required.',
+            'data_plan.string' => 'Data plan must be a valid text value.',
+            'data_plan.exists' => 'The selected data plan does not exist.',
+            'bypass.boolean' => 'Bypass must be a boolean value (true or false).',
+            'tx_ref.required' => 'Transaction reference is required.',
+            'tx_ref.string' => 'Transaction reference must be a valid text value.',
+            'tx_ref.unique' => 'This transaction reference has already been used. Please use a unique transaction reference.',
         ];
     }
 

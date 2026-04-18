@@ -96,8 +96,8 @@ class ProviderService
                 // throw an error or just log it and continue.
                 Log::warning("Could not fetch metadata for: " . $url);
             }
+            $data['base_url'] = $url;
         }
-        $data['base_url'] = $url;
 
         return $data;
     }

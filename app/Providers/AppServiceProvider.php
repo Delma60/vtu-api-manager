@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\PersonalAccessToken;
+use App\Models\Transaction;
+use App\Observers\TransactionObserver;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
@@ -24,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+
+        // Register model observers
+        Transaction::observe(TransactionObserver::class);
 
         Sanctum::getAccessTokenFromRequestUsing(function ($request) {
             $token = $request->bearerToken();

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('api_metrics', function (Blueprint $table) {
             $table->id();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('provider_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('provider_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('service_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('network')->nullable();
             $table->date('period_date'); // The date for which metrics are being tracked
@@ -27,7 +27,7 @@ return new class extends Migration
 
             // Create unique index with shorter name to prevent MySQL identifier length error
             $table->unique(['business_id', 'provider_id', 'service_id', 'network', 'period_date', 'period_type'], 'metrics_unique_idx');
-            
+
             // Index for querying metrics
             $table->index(['business_id', 'period_date']);
             $table->index(['provider_id', 'period_date']);

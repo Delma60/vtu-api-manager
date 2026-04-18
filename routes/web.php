@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\ApiLogController;
+use App\Http\Controllers\CablePlanController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataPlanController;
@@ -49,6 +50,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('pricing/airtime-plan/edit/{plan}', [PricingController::class, 'editAirtimePlan'])->name('pricing.airtime-plan.edit');
    Route::prefix("pricing")->group(function() {
        Route::resource('data-plans', DataPlanController::class);
+       Route::resource('cable-plans', CablePlanController::class)->except(['show']);
+       Route::post('/cable-plans/{cablePlan}/toggle-status', [CablePlanController::class, 'toggleStatus'])->name('cable-plans.toggle-status');
    });
 
     Route::prefix('developers')->group(function() {
@@ -90,6 +93,16 @@ Route::prefix('docs')->group(function () {
     Route::get('/api-keys', function () {
         return Inertia::render('docs/api-keys');
     })->name('docs.api-keys');
+
+    // data
+    Route::get('/data', function () {
+        return Inertia::render('docs/data');
+    })->name('docs.data');
+
+    Route::get('/data-plans', function () {
+        return Inertia::render('docs/data-plans');
+    })->name('docs.data-plans');
+    //
 
 });
 

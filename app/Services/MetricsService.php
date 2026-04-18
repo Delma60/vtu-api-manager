@@ -69,15 +69,18 @@ class MetricsService
         $date = now()->toDateString();
 
         // Update daily metrics
+        // $hourStart = now()->hour()->toDateString();
+        // $this->updatePeriodMetrics($business, $serviceType, $endpoint, $provider, $service, $network, $hourStart, 'hourly', $isSuccess);
+
         $this->updatePeriodMetrics($business, $serviceType, $endpoint, $provider, $service, $network, $date, 'daily', $isSuccess);
 
         // Update weekly metrics
-        $weekStart = now()->startOfWeek()->toDateString();
-        $this->updatePeriodMetrics($business, $serviceType, $endpoint, $provider, $service, $network, $weekStart, 'weekly', $isSuccess);
+        // $weekStart = now()->startOfWeek()->toDateString();
+        // $this->updatePeriodMetrics($business, $serviceType, $endpoint, $provider, $service, $network, $weekStart, 'weekly', $isSuccess);
 
-        // Update monthly metrics
-        $monthStart = now()->startOfMonth()->toDateString();
-        $this->updatePeriodMetrics($business, $serviceType, $endpoint, $provider, $service, $network, $monthStart, 'monthly', $isSuccess);
+        // // Update monthly metrics
+        // $monthStart = now()->startOfMonth()->toDateString();
+        // $this->updatePeriodMetrics($business, $serviceType, $endpoint, $provider, $service, $network, $monthStart, 'monthly', $isSuccess);
 
         // Update hourly metrics (optional performance optimization - only if needed)
         // $hourStart = now()->startOfHour()->toDateTimeString();

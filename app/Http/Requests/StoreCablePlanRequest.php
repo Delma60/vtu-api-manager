@@ -12,7 +12,7 @@ class StoreCablePlanRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,12 @@ class StoreCablePlanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'network_type_id' => 'required|exists:network_types,id',
+            'provider_id' => 'required|exists:providers,id',
+            'plan_id' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'is_active' => 'boolean',
         ];
     }
 }

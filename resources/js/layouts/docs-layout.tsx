@@ -36,7 +36,8 @@ export default function DocsLayout({ children, title, currentPath, nextPage, pre
             icon: Terminal,
             sublinks: [
                 { title: 'Buy Airtime', path: '/docs/airtime', icon: Terminal },
-                { title: 'Data Bundles', path: '/docs/data', icon: Terminal },
+                { title: 'Buy Data', path: '/docs/data', icon: Terminal },
+                { title: 'Data Bundles', path: '/docs/data-plans', icon: Terminal },
                 { title: 'Cable TV', path: '/docs/cable', icon: Terminal },
                 { title: 'Utilities', path: '/docs/utilities', icon: Terminal },
             ],
@@ -124,7 +125,7 @@ export default function DocsLayout({ children, title, currentPath, nextPage, pre
                     </div>
                 </aside>
                 {/* MAIN CONTENT */}
-                
+
                 <main className="flex min-w-0 flex-1 flex-col xl:pr-72">
                     {/* Top Bar */}
                     <div className="sticky top-0 z-20 border-b border-slate-800/30 bg-slate-950/70 px-6 py-3 backdrop-blur-xl lg:px-12">

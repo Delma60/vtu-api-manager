@@ -129,7 +129,7 @@ export function SidebarComponent() {
                     routeName: 'pricing.airtime-data',
                     children: [
                         { label: 'Airtime & Data', routeName: 'pricing.airtime-data' },
-                        { label: 'Cable', routeName: 'pricing.airtime-data' },
+                        { label: 'Cable', routeName: 'cable-plans.index' },
                         { label: 'Bill Payments', routeName: 'pricing.airtime-data' },
                     ],
                 },

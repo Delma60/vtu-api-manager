@@ -43,13 +43,13 @@ class DataPlanController extends Controller
     {
         //
         $validated = $request->validated();
-        $network = Network::find($validated['network_id']);
+        $network = Network::with("networkTypes")->find($validated['network_id']);
         $networkType = $network->networkTypes()->find($validated['plan_type']);
 
         DB::transaction(function() use ($validated, $networkType, $network) {
              $dataPlan = DataPlan::create([
             'network' => $network->name,
-            'plan_name' => $validated['volume'] . ' ' . $validated['plan_size'],
+            'plan_name' => "$network->name {$validated['volume']}" . strtoupper($validated['plan_size']) ."({$validated['validity']}),",
             'plan_type' => $networkType->name,
             'plan_size' => $validated['plan_size'],
             'validity' => $validated['validity'] ?? null,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApiLog;
 use App\Models\ApiMetric;
 use App\Models\Provider;
 use App\Models\Transaction;
@@ -27,20 +28,19 @@ class DashboardController extends Controller
 
         $metrics = [
             'totalBalance' => (float) ProviderService::sumAllBalances(),
-            'todayVolume' => (int) ApiMetric::where('business_id', $business->id)
-                ->where('period_type', 'daily')
-                ->where('period_date', $today)
-                ->sum('total_requests'),
+            'todayVolume' => (int) ApiLog::where('business_id', $business->id)
+                ->whereDate('created_at', $today)
+                ->count(),
             'successRate' => (float) $this->metricsService->getAggregatedSuccessRate(
                 business: $business,
                 days: 7,
             )['success_rate_raw'] ?? 0,
             'activeProviders' => (int) Provider::where('is_active', true)->count(),
             'totalProviders' => (int) Provider::count(),
-            'hourlyVolume' => (int) ApiMetric::where('business_id', $business->id)
-                ->where('period_type', 'hourly')
-                ->where('period_date', $today)
-                ->sum('total_requests'),
+            // should be the sum of api request within the hour, not the sum of hourly metrics because some requests may not have been aggregated into the hourly metrics yet
+            'hourlyVolume' => (int) ApiLog::where('business_id', $business->id)
+                ->where('created_at', '>=', now()->startOfHour())
+                ->count(),
         ];
 
         $providerHealth = Provider::with('transactions')

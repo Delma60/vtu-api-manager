@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CablePlan;
 use App\Models\DataPlan;
 use App\Models\Discount;
 use App\Models\Network;
@@ -69,6 +70,20 @@ class PricingController extends Controller
             'networks' => Network::all(),
             'network_types' => NetworkType::with("typeable")->get(),
             'data_plans' => DataPlan::all(),
+        ]);
+    }
+
+    /**
+     * Display the cable plans and networks.
+     */
+    public function cable()
+    {
+        $cablePlans = \App\Models\CablePlan::with(['networkType', 'provider'])->latest()->get();
+        $cableNetworks = \App\Models\NetworkType::where('type', 'cable')->get();
+
+        return inertia('pricing/cable', [
+            'cablePlans' => $cablePlans,
+            'cableNetworks' => $cableNetworks,
         ]);
     }
 }

@@ -24,19 +24,28 @@ class NetworkTypeController extends Controller
         $validated = $request->validate([
             'name' => 'required|string',
             'is_active' => 'sometimes|boolean',
-            'network_id' => 'required|exists:networks,id',
-            'type' => 'nullable|string|in:airtime,data',
+            'network_id' => 'required_unless:type,cable|nullable|exists:networks,id',
+            'type' => 'nullable|string|in:airtime,data,cable,bill',
         ]);
 
-       $network = Network::findOrFail($validated['network_id']);
+       if (isset($validated['type']) && $validated['type'] === 'cable') {
+            $networkType = NetworkType::create([
+                'name' => $validated['name'],
+                'is_active' => $validated['is_active'] ?? true,
+                'type' => 'cable',
+            ]);
+        } else {
+            // It's Airtime/Data, so it requires a base Network to attach to
+            $network = Network::findOrFail($validated['network_id']);
 
-        // 2. Create the NetworkType directly through the relationship.
-        // Laravel automatically fills in `typeable_id` and `typeable_type` for you!
-        $networkType = $network->networkTypes()->create([
-            'name' => $validated['name'],
-            'is_active' => $validated['is_active'] ?? true,
-            'type' => $validated['type'] ?? null,
-        ]);
+            // Create the NetworkType directly through the relationship.
+            // Laravel automatically fills in `typeable_id` and `typeable_type`
+            $networkType = $network->networkTypes()->create([
+                'name' => $validated['name'],
+                'is_active' => $validated['is_active'] ?? true,
+                'type' => $validated['type'] ?? null,
+            ]);
+        }
 
         return back()->with('success', 'Network type created successfully');
     }
@@ -58,7 +67,7 @@ class NetworkTypeController extends Controller
             'name' => 'sometimes|string',
             'is_active' => 'sometimes|boolean',
             'network_id' => 'sometimes|exists:networks,id',
-            'type' => 'nullable|string|in:airtime,data',
+            'type' => 'nullable|string|in:airtime,data,cable,bill',
         ]);
 
         // Update the network type directly

@@ -57,7 +57,6 @@ export default function PricingManager({ initialServices, networks, network_type
     };
 
     const updateNetworkType = (id: string, field: string, value: any) => {
-        console.log(field);
         router.patch(route('network-types.update', id), { [field]: value });
         // setNetworkTypes(networkTypes.map((nt) => (nt.id === id ? { ...nt, [field]: value } : nt)));
     };

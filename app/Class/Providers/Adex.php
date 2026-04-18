@@ -7,6 +7,7 @@ use App\Models\CablePlan;
 use App\Models\DataPlan;
 use App\Models\Discount;
 use App\Models\Network;
+use App\Models\NetworkType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -424,7 +425,24 @@ class Adex extends ProviderAbstract
     protected function getPlans(?array $payload = null): mixed
     {
         // $adminController = new AdminController();
-        $network_id = $payload['network_id'] ?? null;
+        if($payload['type'] === 'data'){
+            return $this->getDataPlans($payload['network_id'] ?? null);
+        } elseif($payload['type'] === 'cable') {
+            return $this->getCablePlans($payload['cable_network'] ?? null);
+        } else {
+            return [
+                'status' => 'error',
+                'message' => 'Invalid plan type requested',
+                'data' => null,
+            ];
+        }
+
+        // $adminController->universalGet($payload['request'], $payload['table']);
+    }
+
+
+    private function getDataPlans(string $network_id):mixed {
+        // $network_id = $payload['network_id'] ?? null;
         $network = Network::with("networkTypes.dataPlans")->find($network_id);
         if (!$network) {
             return [
@@ -441,7 +459,27 @@ class Adex extends ProviderAbstract
             'message' => 'Data plans retrieved successfully',
             'data' => $plans,
         ];
-        // $adminController->universalGet($payload['request'], $payload['table']);
+        
+    }
+
+    private function getCablePlans(string $cable_network):mixed {
+        $network = NetworkType::with("cablePlans")->find($cable_network);
+        if (!$network) {
+            return [
+                'status' => 'error',
+                'message' => 'Invalid network ID',
+                'data' => null,
+            ];
+        }
+        
+        $plans = $network->cablePlans()->get();
+
+        return [
+            'status' => 'success',
+            'message' => 'Cable plans retrieved successfully',
+            'data' => $plans,
+        ];
+        
     }
 
     function callback(Request $request):array

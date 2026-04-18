@@ -48,22 +48,22 @@ class DataPlanController extends Controller
 
         DB::transaction(function() use ($validated, $networkType, $network) {
              $dataPlan = DataPlan::create([
-            'network' => $network->name,
-            'plan_name' => "$network->name {$validated['volume']}" . strtoupper($validated['plan_size']) ."({$validated['validity']}),",
-            'plan_type' => $networkType->name,
-            'plan_size' => $validated['plan_size'],
-            'validity' => $validated['validity'] ?? null,
+                'network' => $network->name,
+                'plan_name' => "$network->name {$validated['volume']}" . strtoupper($validated['plan_size']) ."({$validated['validity']}),",
+                'plan_type' => $networkType->name,
+                'plan_size' => $validated['plan_size'],
+                'validity' => $validated['validity'] ?? null,
 
-        ]);
-        // Handle provider association if providerable data is provided
-        if (!empty($validated['providerable']['provider_id'])) {
-            $dataPlan->providers()->attach($validated['providerable']['provider_id'], [
-                'cost_price' => $validated['providerable']['cost_price'],
-                'margin_value' => $validated['providerable']['margin_value'],
-                'margin_type' => $validated['providerable']['margin_type'],
-                'server_id' => $validated['providerable']['server_id'],
             ]);
-        }
+            // Handle provider association if providerable data is provided
+            if (!empty($validated['providerable']['provider_id'])) {
+                $dataPlan->providers()->attach($validated['providerable']['provider_id'], [
+                    'cost_price' => $validated['providerable']['cost_price'],
+                    'margin_value' => $validated['providerable']['margin_value'],
+                    'margin_type' => $validated['providerable']['margin_type'],
+                    'server_id' => $validated['providerable']['server_id'],
+                ]);
+            }
         });
 
         return back()->with('success', 'Data plan created successfully');
@@ -109,7 +109,6 @@ class DataPlanController extends Controller
             ],
         ];
 
-        Log::info("Transformed data plan: " . json_encode($transformedPlan));
 
         return Inertia::render('pricing/edit-data-plan', [
             'networks' => Network::with('networkTypes')->get(),

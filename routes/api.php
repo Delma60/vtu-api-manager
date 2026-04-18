@@ -27,6 +27,12 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::get('/plans', [ServiceController::class, 'dataPlans'])->name('data.plans');
     });
 
+    Route::prefix("cable")->group(function(){
+        Route::post('', [ServiceController::class, 'cable'])->name('cable');
+        Route::get('/plans', [ServiceController::class, 'cablePlans'])->name('cable.plans');
+        Route::get('/verify', [ServiceController::class, 'cablePlans'])->name('cable-plans.verify');
+    });
+
     // Metrics API endpoints
     Route::prefix('metrics')->group(function () {
         Route::get('/service-types/success-rate', [MetricsController::class, 'serviceTypeSuccessRate']);

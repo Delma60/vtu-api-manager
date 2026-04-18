@@ -68,7 +68,9 @@ class PricingController extends Controller
         return Inertia::render('pricing/airtime-data', [
             'airtime_discounts' => Discount::where('type', 'airtime')->with(['planType'])->get(),
             'networks' => Network::all(),
-            'network_types' => NetworkType::with("typeable")->get(),
+            'network_types' => NetworkType::with("typeable")->whereHas('typeable', function ($q) {
+                $q->whereIn('type', ['airtime', 'data']);
+            })->get(),
             'data_plans' => DataPlan::all(),
         ]);
     }

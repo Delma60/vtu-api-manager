@@ -30,5 +30,8 @@ class NetworkType extends Model
     function dataPlans(){
         return $this->hasMany(DataPlan::class, 'plan_type');
     }
+    function cablePlans(){
+        return $this->hasMany(CablePlan::class, 'cable_network');
+    }
 
 }

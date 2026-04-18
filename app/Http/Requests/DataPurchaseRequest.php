@@ -32,7 +32,6 @@ class DataPurchaseRequest extends FormRequest
      */
     public function rules(): array
     {
-        Log::info("Validating data purchase request", ['request' => $this->all()]);
         return [
             //
             'network'   => ['required', 'string', 'exists:networks,code'],

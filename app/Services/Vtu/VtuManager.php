@@ -13,4 +13,9 @@ class VtuManager
     {
         return app(DataProcessor::class);
     }
+
+    public function cable(): CableProcessor
+    {
+        return app(CableProcessor::class);
+    }
 }

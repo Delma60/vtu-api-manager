@@ -5,42 +5,34 @@ namespace App\Services\Vtu;
 use App\Services\ProviderService;
 use Illuminate\Support\Facades\DB;
 
-class DataProcessor
+class CableProcessor
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    public function process($request)
+   public function process($request)
     {
         return DB::transaction(function () use ($request) {
-            $provider = ProviderService::getProviderInstance('data');
-            return $provider->process("data", $request);
+            $provider = ProviderService::getProviderInstance('cable');
+            return $provider->process("cable", $request);
         });
     }
 
-    public function getDataPlans($networkId)
+    public function getCablePlans($cable_network)
     {
         // Implement logic to retrieve data plans based on the network ID
-            $provider = ProviderService::getProviderInstance('data');
+            $provider = ProviderService::getProviderInstance('cable');
             if (!$provider) {
                 return [
                     'status' => 'error',
-                    'message' => 'No data provider configured',
+                    'message' => 'No cable provider configured',
                 ];
             }
             $response = $provider->plans([ 
-                'network_id' => $networkId,
-                'type' => 'data'
+                'cable_network' => $cable_network,
+                'type' => 'cable'
             ]);
             if (($response['status'] ?? '') !== 'success') {
                 return [
                     'status' => 'error',
-                    'message' => $response['message'] ?? 'Failed to retrieve data plans',
+                    'message' => $response['message'] ?? 'Failed to retrieve cable plans',
                     'data' => null,
                 ];
             }

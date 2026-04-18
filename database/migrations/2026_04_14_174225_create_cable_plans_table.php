@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('cable_plans', function (Blueprint $table) {
             $table->id();
+            
+            $table->string('cable_network');
+            $table->string('plan_name');
+            $table->boolean('is_active')->default(1);
             $table->timestamps();
         });
     }

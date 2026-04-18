@@ -12,17 +12,11 @@ import React, { useMemo } from 'react';
 
 export default function CreateDataPlan({ networks: activeNetworks, providers }: any) {
     const { data, setData, post, processing, errors } = useForm({
-        network_id: '',
-        name: '', // e.g., "1GB SME"
-        validity: '30 Days',
-        // volume: resources/js/pages/pricing/create-data-plan.tsx'', // e.g., "1024" (MB)
-        volume: '',
-        selling_price: '',
-        plan_size: '',
-        plan_type: '',
-        is_active: true,
+        cable_network: '',
+        plan_Name: '',
         use_provider_as_providerable: false,
         provider: '',
+        is_active:true,
         providerable: {
             provider_id: '1',
             cost_price: '0.00',
@@ -34,16 +28,10 @@ export default function CreateDataPlan({ networks: activeNetworks, providers }: 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Assuming your route is data-plans.store
-        post(route('data-plans.store'));
+        post(route('cable-plans.store'));
     };
 
-    const plan_types = useMemo(() => {
-        if (!data.network_id) return [];
-        const selectedNetwork = activeNetworks.find((net: any) => net.id.toString() === data.network_id.toString());
-        // Filter network types to only show Data related ones
-        return selectedNetwork?.network_types.filter((nt: any) => nt.type === 'data') || [];
-    }, [data.network_id, activeNetworks]);
+
     return (
         <AppLayout>
             <div className="flex min-h-screen flex-1 flex-col space-y-6 p-6">
@@ -51,7 +39,7 @@ export default function CreateDataPlan({ networks: activeNetworks, providers }: 
                 {/* Header */}
                 <header className="mb-8">
                     <Link
-                        href={route('pricing.airtime-data', { tab: 'airtime' })}
+                        href={route('cable-plans.index', { tab:"packages" })}
                         className="group mb-2 inline-flex items-center text-sm font-medium text-slate-500 transition-colors hover:text-indigo-400"
                     >
                         <svg
@@ -64,8 +52,8 @@ export default function CreateDataPlan({ networks: activeNetworks, providers }: 
                         </svg>
                         Back to Pricing
                     </Link>
-                    <h1 className="text-2xl font-bold tracking-tight">Create Airtime Configuration</h1>
-                    <p className="mt-1 text-sm text-slate-400">Set up routing and discount margins for VTU and Airtime PINs.</p>
+                    <h1 className="text-2xl font-bold tracking-tight">Create Cable Plan</h1>
+                    <p className="mt-1 text-sm text-slate-400">Set up routing and discount margins for cable plans.</p>
                 </header>
 
                 <form onSubmit={handleSubmit} className="space-y-3">
@@ -78,10 +66,10 @@ export default function CreateDataPlan({ networks: activeNetworks, providers }: 
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="space-y-1">
-                                        <Label>Network</Label>
-                                        <Select value={data.network_id} onValueChange={(value) => setData('network_id', value)}>
+                                        <Label>Cable Network</Label>
+                                        <Select value={data.cable_network} onValueChange={(value) => setData('cable_network', value)}>
                                             <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select Network" />
+                                                <SelectValue placeholder="Select Cable Network" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {activeNetworks.map((net: any) => (
@@ -91,61 +79,18 @@ export default function CreateDataPlan({ networks: activeNetworks, providers }: 
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                        <InputError message={errors.network_id} />
+                                        <InputError message={errors.cable_network} />
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <Label>Data Type</Label>
-                                        <Select value={data.plan_type} onValueChange={(value) => setData('plan_type', value)}>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select Data Type (e.g. SME, CG)" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {plan_types.map((netType: any) => (
-                                                    <SelectItem key={netType.id} value={netType.id.toString()}>
-                                                        {netType.name?.toUpperCase()}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <InputError message={errors.plan_type} />
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <Label>Volume</Label>
-                                        <Input
-                                            placeholder="e.g. 1, 500, 100..."
-                                            value={data.volume}
-                                            onChange={(e) => setData('volume', e.target.value)}
-                                        />
-                                        <InputError message={errors.volume} />
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-3">
                                         <div className="space-y-1">
-                                            <Label>Plan Size</Label>
-                                            {/* Select */}
-                                            <Select value={data.plan_size} onValueChange={(value) => setData('plan_size', value)}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select Plan Size" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="mb">MB</SelectItem>
-                                                    <SelectItem value="gb">GB</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <InputError message={errors.plan_size} />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <Label>Validity</Label>
+                                            <Label>Plan Name</Label>
                                             <Input
                                                 placeholder="e.g. 30 Days"
-                                                value={data.validity}
-                                                onChange={(e) => setData('validity', e.target.value)}
+                                                value={data.plan_name}
+                                                onChange={(e) => setData('plan_name', e.target.value)}
                                             />
-                                            <InputError message={errors.validity} />
+                                            <InputError message={errors.plan_name} />
                                         </div>
-                                    </div>
                                 </CardContent>
                             </Card>
 
@@ -287,7 +232,7 @@ export default function CreateDataPlan({ networks: activeNetworks, providers }: 
                             Cancel
                         </Link>
                         <Button type="submit" disabled={processing}>
-                            {processing ? 'Creating...' : 'Create Airtime Plan'}
+                            {processing ? 'Creating...' : 'Create Cable Plan'}
                         </Button>
                     </div>
                 </form>

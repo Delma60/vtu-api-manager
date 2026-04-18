@@ -24,7 +24,7 @@ export default function ServiceControl({ providers, services, networkTypes, netw
     const groupedServices = {
         airtime: networkTypes.filter((s: any) => s.type?.toLowerCase() === 'airtime' || s.type?.toLowerCase() === 'air-time'),
         data: networkTypes.filter((s: any) => s.type?.toLowerCase() === 'data'),
-        utility: services.filter((s: any) => s.type?.toLowerCase() === 'utility' || s.type?.toLowerCase() === 'utilities'),
+        utility: networkTypes.filter((s: any) => s.type?.toLowerCase() === 'cable' || s.type?.toLowerCase() === 'utilities'),
         others: services.filter((s: any) => {
             const typeLC = s.type?.toLowerCase() || '';
             return typeLC !== 'airtime' && typeLC !== 'air-time' && typeLC !== 'data' && typeLC !== 'utility' && typeLC !== 'utilities';
@@ -152,8 +152,8 @@ export default function ServiceControl({ providers, services, networkTypes, netw
                                         </CardHeader>
                                         <CardContent>
                                             <RouteSelect
-                                                value={data.services[service.id]}
-                                                onChange={(val) => setData('services', { ...data.services, [service.id]: val })}
+                                                value={data.networkTypes[service.id]}
+                                                onChange={(val) => setData('networkTypes', { ...data.networkTypes, [service.id]: val })}
                                             />
                                         </CardContent>
                                     </Card>

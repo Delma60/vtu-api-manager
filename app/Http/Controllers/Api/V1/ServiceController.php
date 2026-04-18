@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AirtimeServiceRequest;
+use App\Http\Requests\CablePurchaseRequest;
 use App\Http\Requests\DataPurchaseRequest;
 use App\Models\Discount;
 use App\Models\Network;
+use App\Models\NetworkType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -79,9 +81,38 @@ class ServiceController extends Controller
 
     }
 
+    function cablePlans(Request $request){
+        $validated = $request->validate([
+            'cable_network' => 'required|string',
+        ]);
+
+        $network = NetworkType::where('name', strtoupper($validated['cable_network']))->first();
+
+        if (!$network) {
+            return $this->fail(message: 'Invalid cable network', code: 400);
+        }
+
+        $cablePlan = service()->cable()->getCablePlans($network->id);
+
+        if (($cablePlan['status'] ?? '') === 'error' || empty($cablePlan['data'] ?? [])) {
+            return $this->fail(
+                message: $cablePlan['message'] ?? 'Failed to retrieve cable plans',
+                code: 500,
+                meta: $cablePlan
+            );
+        }
+        return $this->success(
+            data: $cablePlan['data'] ?? null, 
+            message: $cablePlan['message'] ?? 'Cable plans retrieved successfully', 
+            code: $cablePlan['code'] ?? 200,
+            meta: $cablePlan
+        );
+
+    }
+
     
     function data(DataPurchaseRequest $request){
-        Log::debug('Data purchase request received', ['request' => $request->validated()]);
+        // Log::debug('Data purchase request received', ['request' => $request->validated()]);
         $response = service()->data()->process($request->validated());
         
         // Check if the response indicates an error
@@ -100,4 +131,26 @@ class ServiceController extends Controller
             meta: $response
         );
     }
+
+    function cable(CablePurchaseRequest $request){
+        // Log::debug('Data purchase request received', ['request' => $request->validated()]);
+        $response = service()->cable()->process($request->validated());
+        
+        // Check if the response indicates an error
+        if (($response['status'] ?? '') === 'error') {
+            return $this->fail(
+                message: $response['message'] ?? 'Transaction failed',
+                code: 500,
+                meta: $response
+            );
+        }
+        
+        return $this->success(
+            data: $response['data'] ?? null, 
+            message: $response['message'] ?? 'Data purchase successful', 
+            code: $response['code'] ?? 200,
+            meta: $response
+        );
+    }
+
 }

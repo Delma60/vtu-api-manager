@@ -10,7 +10,7 @@ use App\Models\Discount;
 use App\Models\Network;
 use App\Models\NetworkType;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+// use Illuminate\Support\Facades\Log;
 
 class ServiceController extends Controller
 {
@@ -33,7 +33,7 @@ class ServiceController extends Controller
             return $this->fail(message: 'Amount must be between ' . $discount->min_amount . ' and ' . $discount->max_amount, code: 400);
         }
 
-        $response = service()->airtime()->process($request->validated());
+        $response = service()->airtime()->process($request->user(), $request->validated());
         
         // Check if the response indicates an error
         if (($response['status'] ?? '') === 'error') {
@@ -113,7 +113,7 @@ class ServiceController extends Controller
     
     function data(DataPurchaseRequest $request){
         // Log::debug('Data purchase request received', ['request' => $request->validated()]);
-        $response = service()->data()->process($request->validated());
+        $response = service()->data()->process($request->user(), $request->validated());
         
         // Check if the response indicates an error
         if (($response['status'] ?? '') === 'error') {
@@ -134,7 +134,7 @@ class ServiceController extends Controller
 
     function cable(CablePurchaseRequest $request){
         // Log::debug('Data purchase request received', ['request' => $request->validated()]);
-        $response = service()->cable()->process($request->validated());
+        $response = service()->cable()->process($request->user(), $request->validated());
         
         // Check if the response indicates an error
         if (($response['status'] ?? '') === 'error') {

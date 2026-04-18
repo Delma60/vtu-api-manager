@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\BelongsToBusiness;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Network extends Model
 {
@@ -25,7 +26,7 @@ class Network extends Model
     ];
 
    
-    public function networkTypes()
+    public function networkTypes():MorphMany
     {
         // Notice this is morphMany, not morphToMany!
         return $this->morphMany(NetworkType::class, 'typeable');

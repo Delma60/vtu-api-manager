@@ -21,4 +21,8 @@ Route::post('/debug', function (Request $request) {
 
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/airtime', [ServiceController::class, 'airtime']);
+    Route::prefix("data")->group(function(){
+        Route::post('', [ServiceController::class, 'data'])->name('data.purchase');
+        Route::get('/plans', [ServiceController::class, 'dataPlans'])->name('data.plans');
+    });
 });

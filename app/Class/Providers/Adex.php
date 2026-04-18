@@ -6,6 +6,7 @@ use App\Class\Providers\ProviderAbstract;
 use App\Models\CablePlan;
 use App\Models\DataPlan;
 use App\Models\Discount;
+use App\Models\Network;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -423,7 +424,23 @@ class Adex extends ProviderAbstract
     protected function getPlans(?array $payload = null): mixed
     {
         // $adminController = new AdminController();
-        return [];
+        $network_id = $payload['network_id'] ?? null;
+        $network = Network::with("networkTypes.dataPlans")->find($network_id);
+        if (!$network) {
+            return [
+                'status' => 'error',
+                'message' => 'Invalid network ID',
+                'data' => null,
+            ];
+        }
+        
+        $plans = $network->networkTypes()->with('dataPlans')->get()->pluck('dataPlans')->flatten();
+
+        return [
+            'status' => 'success',
+            'message' => 'Data plans retrieved successfully',
+            'data' => $plans,
+        ];
         // $adminController->universalGet($payload['request'], $payload['table']);
     }
 

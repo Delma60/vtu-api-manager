@@ -39,4 +39,8 @@ class Discount extends Model
     }
 
     // public function network (){}
+
+    function scopeAirtime(){
+        return $this->where("type", "airtime");
+    }
 }

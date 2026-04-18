@@ -27,4 +27,8 @@ class NetworkType extends Model
         return $this->belongsTo(Provider::class);
     }
 
+    function dataPlans(){
+        return $this->hasMany(DataPlan::class, 'plan_type');
+    }
+
 }

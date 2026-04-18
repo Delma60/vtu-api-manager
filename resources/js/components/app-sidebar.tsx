@@ -21,10 +21,11 @@ export function SidebarComponent() {
     const { props, url } = usePage<{
         auth: { user: { name: string; email: string } };
         provider_down_count?: number;
+        mode?: 'live' | 'test';
     }>();
     const providerDownCount = (props as Record<string, unknown>)?.provider_down_count ?? 0;
     const [activeTab, setActiveTab] = useState(url);
-    const [isLiveMode, setIsLiveMode] = useState(false);
+    const [isLiveMode, setIsLiveMode] = useState(props.mode === 'live');
     const [expandedItems, setExpandedItems] = useState<string[]>(['pricing']);
     const { state } = useSidebar();
 
@@ -189,6 +190,11 @@ export function SidebarComponent() {
         return activeTab.includes(routeName);
     };
 
+    const changeMode = () => {
+        const newMode = isLiveMode ? 'test' : 'live';
+        router.get(route('toggle-mode'), { mode: newMode }, { onSuccess: () => setIsLiveMode(!isLiveMode) });
+    };
+
     return (
         <Sidebar collapsible="icon" variant="sidebar" className="border-r border-slate-300 bg-[#0f172a] dark:border-slate-800">
             {/* Logo Section */}
@@ -201,7 +207,7 @@ export function SidebarComponent() {
                 {/* Environment Toggle */}
                 <div className="px-2 py-3">
                     <button
-                        onClick={() => setIsLiveMode(!isLiveMode)}
+                        onClick={changeMode}
                         className="flex w-full cursor-pointer items-center justify-between rounded-lg border border-slate-300 p-1 text-xs font-semibold transition-all dark:border-slate-700 dark:bg-slate-900"
                         title={`Switch to ${isLiveMode ? 'Test' : 'Live'} Mode`}
                     >

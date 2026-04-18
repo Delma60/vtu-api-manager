@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Class\Providers\Adex;
 use App\Class\Providers\ProviderAbstract;
+use App\Class\Providers\Sandbox;
 use App\Models\Provider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -18,13 +19,20 @@ class ProviderService
     public function __construct(){}
 
     static function make (Provider $provider):ProviderAbstract {
-        $useSandbox = env('USE_SANDBOX', false);
+        $useSandbox = false;
+
+        // Dynamically check if the current user/business is in test mode
+        // This assumes your API authentication (e.g., Sanctum or API Key Middleware) 
+        // logs in the user associated with the API request.
+        if (auth()->check() && auth()->user()->business) {
+            $useSandbox = auth()->user()->business->mode === 'test';
+        }
 
         $match = $useSandbox ? "sandbox": $provider->meta['meta_author'];
         // Log::info($provider);
         return match ($match) {
             "ADEX DEVELOPER"=> new Adex($provider),
-            // "sandbox"=> new SandboxService() ,
+            "sandbox"=> new Sandbox($provider) ,
             // "sme plug"=> new SMEPlug($provider),
             // "spurs"=> new Adex($provider),
             // "msorg"=> new Adex($provider),

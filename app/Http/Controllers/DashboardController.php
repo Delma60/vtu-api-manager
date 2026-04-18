@@ -77,4 +77,14 @@ class DashboardController extends Controller
             'recentTransactions' => $recentTransactions,
         ]);
     }
+    // toggleMode
+    public function toggleMode(Request $request)
+    {
+        $user = $request->user();
+        $business = $user->business;
+        $business->mode = $business->mode === 'live' ? 'test' : 'live';
+        $business->save();
+
+        return back()->with('success', 'Mode toggled successfully.');
+    }
 }

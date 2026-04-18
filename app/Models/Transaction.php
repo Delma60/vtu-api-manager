@@ -13,20 +13,11 @@ class Transaction extends Model
     use BelongsToBusiness;
 
     protected $fillable = [
-        'reference',
-        'vendor_reference',
-        'user_id',
-        'provider_id',
-        'service_id',
-        'type',
-        'network',
-        'destination',
-        'amount',
-        'cost',
-        'previous_balance',
-        'new_balance',
-        'status',
-        'meta_data',
+        'user_id', 'transaction_type', 'provider', 'account_or_phone', 'amount',
+        'quantity', 'status', 'transaction_reference', 'payment_reference',
+        'funding_method', 'balance_before', 'balance_after', 'completed_at',
+        'response_message', 'service_fee', 'platform', 'receiver', 'plan_type', 'token',
+        'promotion_id', 'discount_amount',
     ];
 
     protected $casts = [

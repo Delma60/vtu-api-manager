@@ -27,6 +27,8 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // toogle mode
+    Route::get('toggle-mode', [DashboardController::class, 'toggleMode'])->name('toggle-mode');
 
     Route::resource('transactions', TransactionController::class);
     Route::resource('wallets', WalletController::class);

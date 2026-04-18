@@ -11,50 +11,40 @@ return new class extends Migration
      */
     public function up(): void
     {
-        
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->uuid('reference')->unique(); // Your internal tracking ID (e.g., txn_12345)
-            $table->string('vendor_reference')->nullable(); // The ID returned by the upstream API (e.g., MTN's server ref)
-            
-            // 2. Relationships
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            // The specific upstream API used (null if it failed before reaching a provider)
-            $table->foreignId('provider_id')->nullable()->constrained('providers'); 
-            // The specific package bought (e.g., ID for "MTN 1GB Corporate")
-            $table->unsignedBigInteger('service_id')->nullable(); // No constraint - services table not yet created 
+            $table->uuid('user_id'); // or use $table->foreignId('user_id')->constrained()->onDelete('cascade');
 
-            // 3. Core Payload Data
-            $table->string('type')->index(); // 'airtime', 'data', 'electricity', 'cable'
-            $table->string('network'); // 'mtn', 'airtel', 'ikedc'
-            $table->string('destination'); // The phone number, meter number, or smartcard
+            $table->enum('transaction_type', [
+                'airtime_recharge', 'data_subscription', 'cable_subscription', 'electric_bill', 'exam',
+                'betting_funding', 'airtime_pin', 'data_pin', 'wallet_funding', 'manual_funding', 'bulksms'
+            ]);
 
-            // 4. Financial Audit Trail
-            $table->decimal('amount', 12, 2); // What you charged your user
-            $table->decimal('cost', 12, 2)->nullable(); // What the vendor charged you
-            $table->decimal('profit', 12, 2)->virtualAs('amount - cost'); // Auto-computed margin
-            
-            // Wallet state capture (prevents complex recalculations later)
-            $table->decimal('previous_balance', 12, 2); 
-            $table->decimal('new_balance', 12, 2);
+            $table->string('provider')->nullable();
+            $table->string('account_or_phone')->nullable();
+            $table->decimal('amount', 15, 2);
+            $table->decimal('discount_amount', 15, 2)->default(0);
+            $table->double('quantity', 8, 2)->default(1.00);
 
-            // 5. State Management
-            $table->enum('status', ['pending', 'processing', 'successful', 'failed', 'refunded'])
-                  ->default('pending')
-                  ->index();
+            $table->enum('status', ['pending', 'success', 'fail']);
+            $table->string('transaction_reference')->unique();
+            $table->string('payment_reference')->nullable();
 
-            // 6. Debugging / Raw Data
-            // Stores the exact JSON sent to and received from the vendor for dispute resolution
-            $table->json('meta_data')->nullable(); 
+            $table->enum('funding_method', ['bank_transfer', 'credit_card', 'manual', 'other'])->nullable();
+            $table->decimal('balance_before', 15, 2)->default(0.00);
+            $table->decimal('balance_after', 15, 2)->default(0.00);
 
-            $table->timestamps();
+            $table->timestamp('completed_at')->nullable();
+            $table->string('response_message')->nullable();
+            $table->decimal('service_fee', 15, 2)->default(0.00);
 
-            // Compound indexes for faster dashboard queries
-            $table->index(['user_id', 'created_at']);
-            $table->index(['status', 'created_at']);
+            $table->string('platform')->nullable();
+            $table->string('receiver')->nullable();
+            $table->string('plan_type')->nullable();
+
+            $table->string('token')->nullable();
+            $table->timestamps(); // includes created_at and updated_at
         });
-        
-        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -62,8 +52,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('transactions');
-        Schema::enableForeignKeyConstraints();
     }
 };

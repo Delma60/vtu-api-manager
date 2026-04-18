@@ -49,6 +49,7 @@ class HandleInertiaRequests extends Middleware
             'provider_down_count' => Provider::all()->map(function($provider) {
                 if(!$provider->connection) return $provider;
             })->filter()->count(),
+            'mode' => auth()->check() ? auth()->user()->business->mode : null,
 
             'flash' => function () {
                 return [

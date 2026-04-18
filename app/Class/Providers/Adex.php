@@ -139,11 +139,14 @@ class Adex extends ProviderAbstract
                     'request-id' => $payload['tx_ref'],
                 ];
             case 'cable':
-                $cablePlan = CablePlan::find($payload['cable_plan']);
+                $cablePlan = CablePlan::with("providers")->find($payload['cable_plan']);
+                Log::info($payload);
+                $cableName = $payload['cable_network'] ?? $payload['cable'] ?? '';
                 return [
-                    'cable' => $this->networkIDs[$payload['cable_network']],
+                    'cable' => $this->cableNetworkIDs[$cableName],
                     'iuc' => $payload['iuc'],
-                    'cable_plan' => $cablePlan->{str_replace(" ", "_", $this->provider->name)},
+                    'cable_plan' => $cablePlan->providers()->where("provider_id", $this->provider->id)->first()->pivot->server_id ?? null,
+                    // {str_replace(" ", "_", $this->provider->name)},
                     'bypass' => filter_var($payload['bypass'] ?? false, FILTER_VALIDATE_BOOLEAN),
                     'request-id' => $payload['tx_ref'],
                 ];
@@ -500,6 +503,7 @@ class Adex extends ProviderAbstract
         }
 
         $messageLower = strtolower($rawMessage);
+        Log::info($messageLower);
 
         return match (true) {
             // 1. Adex Wallet Exhausted (Note: comma acts as an OR operator in match)
@@ -515,6 +519,9 @@ class Adex extends ProviderAbstract
             // 3. Adex Invalid Number
             str_contains($messageLower, 'invalid number') 
                 => 'The provided phone number is invalid for this network.',
+            // invalid cable plan id, some message else especially if user set wrong cable id
+            str_contains($messageLower, 'invalid cable plan') 
+                => 'The selected cable plan is invalid. Please verify the plan from provider and try again.',
 
             // Default Fallback
             default => 'Transaction failed at the provider network. Please contact support if this persists.',

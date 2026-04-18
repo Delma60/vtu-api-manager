@@ -19,7 +19,6 @@ interface Props {
 
 export default function ProvidersPage({ providers, routingConfig }: Props) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-    console.log(providers);
 
     // Fallback data if props are missing during UI dev
     const activeProviders = (providers || []).map((provider) => ({
@@ -131,20 +130,18 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-3">
-                                <span
-                                    className={`rounded border px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${getStatusColor(provider.status)}`}
-                                >
-                                    {provider.status}
-                                </span>
+                                    <span
+                                        className={`rounded border px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${getStatusColor(provider.status)}`}
+                                    >
+                                        {provider.status}
+                                    </span>
 
-                                {/* connection badge */}
-                                <div className="flex items-center gap-2">
-                                    <span className={`h-2 w-2 rounded-full ${provider.connection ? 'bg-emerald-400' : 'bg-slate-500'}`}></span>
-                                    <span className="text-xs text-slate-400">{provider.connection ? 'Connected' : 'Disconnected'}</span>
+                                    {/* connection badge */}
+                                    <div className="flex items-center gap-2">
+                                        <span className={`h-2 w-2 rounded-full ${provider.connection ? 'bg-emerald-400' : 'bg-slate-500'}`}></span>
+                                        <span className="text-xs text-slate-400">{provider.connection ? 'Connected' : 'Disconnected'}</span>
+                                    </div>
                                 </div>
-
-                                </div>
-
                             </div>
 
                             {/* Card Body - Metrics */}
@@ -153,7 +150,7 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                                     <p className="mb-1 text-xs font-medium text-slate-500">Upstream Balance</p>
                                     {/* Visual warning if balance is low */}
                                     <p
-                                        className={`font-mono text-lg font-bold ${parseFloat(provider.balance) < 20000 ? 'text-rose-400' : 'text-white'}`}
+                                        className={`font-mono text-lg font-bold ${parseFloat(provider.balance) <= 2000 ? 'text-rose-400' : parseFloat(provider.balance) <= 10000 ? 'text-amber-400' : 'text-white'}`}
                                     >
                                         ₦{parseFloat(provider.balance)?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </p>
@@ -346,9 +343,13 @@ const IsActiveSwitch = (provider?: Provider) => {
 
     return (
         <div className="flex items-center justify-center gap-3 rounded-lg border border-slate-800/50 bg-slate-900/50 px-3 py-1">
-            <Label className='text-sm'> Active </Label>
+            <Label className="text-sm"> Active </Label>
             {/* small switch */}
-            <Switch checked={!!provider?.is_active} onCheckedChange={handleChecked} className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-red-500 border" />
+            <Switch
+                checked={!!provider?.is_active}
+                onCheckedChange={handleChecked}
+                className="border data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-red-500"
+            />
         </div>
     );
 };

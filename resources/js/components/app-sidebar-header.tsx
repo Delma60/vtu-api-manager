@@ -9,6 +9,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Separator } from './ui/separator';
 import { UserInfo } from './user-info';
+import { NotificationDropdown } from './notification-dropdown';
 
 interface SearchResult {
     type: string;
@@ -234,13 +235,7 @@ export function AppSidebarHeader() {
                 </Button>
 
                 {/* Notification Bell */}
-                <div className="relative">
-                    <Button variant="ghost" size="icon" className="hover:bg-muted relative transition-colors">
-                        <Bell className="h-5 w-5" />
-                        {/* Notification Badge Dot */}
-                        <span className="border-background absolute top-2 right-2 h-2 w-2 rounded-full border-2 bg-red-500" />
-                    </Button>
-                </div>
+                <NotificationDropdown />
 
                 <div className="hidden items-center gap-4 sm:flex">
                     <AppearanceToggleDropdown />

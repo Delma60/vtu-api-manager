@@ -50,7 +50,10 @@ class HandleInertiaRequests extends Middleware
                 if(!$provider->connection) return $provider;
             })->filter()->count(),
             'mode' => auth()->check() ? auth()->user()->business->mode : null,
-
+            'notifications' => $request->user() ? $request->user()->unreadNotifications()->take(5)->get() : [],
+            'unreadNotificationsCount' => $request->user() ? $request->user()->unreadNotifications()->count() : 0,
+            'is_super_admin' => $request->user() ? $request->user()->isSuperAdmin() : false,
+            'is_business_admin' => $request->user() ? $request->user()->isBusinessAdmin() : false,
             'flash' => function () {
                 return [
                     'success' => session('success'),

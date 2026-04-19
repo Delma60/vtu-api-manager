@@ -47,13 +47,7 @@ export default function PricingManager({ networks, network_types, airtime_discou
                         <p className="text-muted-foreground mt-0.5 text-xs">Manage global discounts and specific service margins.</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
-                            Discard Changes
-                        </Button>
-                        <Button className="shadow-primary/20 gap-2 shadow-lg">
-                            <Save className="h-4 w-4" />
-                            Save Configuration
-                        </Button>
+                       
                     </div>
                 </header>
 

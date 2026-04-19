@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataPlanController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use App\Http\Controllers\MetricsController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\PricingController;
@@ -17,9 +18,11 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\NetworkTypeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentLinkController;
 use App\Http\Controllers\ServiceControlController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Middleware\SuperAdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -69,23 +72,26 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('api-logs', ApiLogController::class);
         Route::resource('webhooks', WebhookController::class);
         Route::prefix('bots')->name("bots.")->group(function(){
-            Route::prefix("telegram-bot")->name("telegram.")->group(function(){
-                Route::get('/', [TelegramController::class, 'settings'])->name('index');
-                Route::post('/sync', [TelegramController::class, 'syncWebhook'])->name('sync');
-                Route::put('/update-merchant', [TelegramController::class, 'updateMerchant'])->name('update-merchant');
+            Route::prefix("telegram-bot")->controller(TelegramController::class)->name("telegram.")->group(function(){
+                Route::get('/', 'settings')->name('index');
+                Route::post('/sync', 'syncWebhook')->name('sync');
+                Route::put('/update-merchant', 'updateMerchant')->name('update-merchant');
             });
         })->name('bots');
+    });
+    Route::prefix("notifications")->controller(NotificationController::class)->name("notifications.")->group(function(){
+        Route::post('mark-all-as-read', "markAllAsRead")->name('mark-all-as-read');
+        Route::post('/{id}/mark-as-read', "markAsRead")->name('mark-as-read');
 
     });
-
-    Route::prefix('metrics')->group(function() {
-        Route::get('/dashboard', [MetricsController::class, 'dashboard'])->name('metrics.dashboard');
-        Route::get('/service-types/success-rate', [MetricsController::class, 'serviceTypeSuccessRate'])->name('metrics.service-type.success-rate');
-        Route::get('/services/{service}/success-rate', [MetricsController::class, 'serviceSuccessRate'])->name('metrics.service.success-rate');
-        Route::get('/networks/success-rate', [MetricsController::class, 'networkSuccessRate'])->name('metrics.network.success-rate');
-        Route::get('/service-types/compare', [MetricsController::class, 'compareServiceTypes'])->name('metrics.service-types.compare');
-        Route::get('/service-types/rankings', [MetricsController::class, 'serviceTypeRankings'])->name('metrics.service-types.rankings');
-        Route::post('/regenerate', [MetricsController::class, 'regenerate'])->name('metrics.regenerate');
+    Route::prefix('metrics')->controller(MetricsController::class)->name("metrics.")->group(function() {
+        Route::get('/dashboard', 'dashboard')->name('dashboard');
+        Route::get('/service-types/success-rate', 'serviceTypeSuccessRate')->name('service-type.success-rate');
+        Route::get('/services/{service}/success-rate', 'serviceSuccessRate')->name('service.success-rate');
+        Route::get('/networks/success-rate', 'networkSuccessRate')->name('network.success-rate');
+        Route::get('/service-types/compare', 'compareServiceTypes')->name('service-types.compare');
+        Route::get('/service-types/rankings', 'serviceTypeRankings')->name('service-types.rankings');
+        Route::post('/regenerate', 'regenerate')->name('regenerate');
     });
 
 });
@@ -123,6 +129,18 @@ Route::prefix('docs')->group(function () {
     })->name('docs.data-plans');
     //
 
+});
+
+Route::middleware(['auth', SuperAdminMiddleware::class])
+    ->prefix('admin')
+    ->name('super-admin.')
+    ->group(function () {
+        
+        Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
+        
+        // Future routes go here:
+        // Route::resource('businesses', BusinessController::class);
+        // Route::resource('global-providers', GlobalProviderController::class);
 });
 
 require __DIR__.'/settings.php';

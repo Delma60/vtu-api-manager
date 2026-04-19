@@ -1,5 +1,6 @@
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import { Provider } from '@/types';
 import { router, useForm, usePage } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Props {
@@ -32,44 +34,42 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
 
     const config = routingConfig || { auto_failover: true, timeout_ms: 5000 };
 
-    // Helper for status colors
+    // Helper for status colors using semantic/tailwind dynamic colors
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'operational':
-                return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+                return 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
             case 'degraded':
-                return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+                return 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20';
             case 'disabled':
-                return 'text-slate-400 bg-slate-500/10 border-slate-500/20';
+                return 'text-muted-foreground bg-muted/50 border-border';
             default:
-                return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+                return 'text-destructive bg-destructive/10 border-destructive/20';
         }
     };
 
     return (
         <AppLayout>
-            <div className="min-h-screen flex-1 bg-slate-950 p-8 font-sans text-slate-200">
+            <div className="min-h-screen flex-1 bg-background p-8 font-sans text-foreground">
                 {/* 1. Header & Actions */}
                 <header className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-white">API Providers</h1>
-                        <p className="text-sm text-slate-400">Manage upstream connections, balances, and failover routing.</p>
+                        <h1 className="text-2xl font-bold tracking-tight">API Providers</h1>
+                        <p className="text-sm text-muted-foreground">Manage upstream connections, balances, and failover routing.</p>
                     </div>
                     <div className="flex items-center gap-3">
                         <Button onClick={() => setIsAddDialogOpen(true)}>
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
+                            <Plus className="mr-2 h-4 w-4" />
                             Add New Provider
                         </Button>
                     </div>
                 </header>
 
                 {/* 2. Global Routing Settings */}
-                <div className="mb-8 flex flex-col justify-between gap-6 rounded-xl border border-slate-800 bg-[#0f172a] p-5 shadow-sm md:flex-row md:items-center">
+                <div className="mb-8 flex flex-col justify-between gap-6 rounded-xl border border-border bg-card p-5 shadow-sm text-card-foreground md:flex-row md:items-center">
                     <div className="flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-indigo-500/20 bg-indigo-500/10">
-                            <svg className="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
+                            <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -79,32 +79,32 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                             </svg>
                         </div>
                         <div>
-                            <h4 className="text-base font-semibold text-white">Smart Auto-Failover</h4>
-                            <p className="mt-0.5 text-xs text-slate-400">
+                            <h4 className="text-base font-semibold">Smart Auto-Failover</h4>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
                                 Automatically route transactions to the next priority provider if the primary fails.
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6 border-t border-slate-800 pt-4 md:border-t-0 md:border-l md:pt-0 md:pl-6">
+                    <div className="flex items-center gap-6 border-t border-border pt-4 md:border-t-0 md:border-l md:pt-0 md:pl-6">
                         <div className="flex flex-col">
-                            <label className="mb-1 text-xs font-medium text-slate-500">Global Timeout</label>
+                            <label className="mb-1 text-xs font-medium text-muted-foreground">Global Timeout</label>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
                                     defaultValue={config.timeout_ms}
-                                    className="w-20 rounded border border-slate-700 bg-slate-900 px-2 py-1 text-sm text-white outline-none focus:border-indigo-500"
+                                    className="w-20 rounded border border-input bg-background px-2 py-1 text-sm text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-all"
                                 />
-                                <span className="text-xs text-slate-500">ms</span>
+                                <span className="text-xs text-muted-foreground">ms</span>
                             </div>
                         </div>
                         <div className="flex flex-col items-center">
-                            <label className="mb-2 text-xs font-medium text-slate-500">Enable Feature</label>
+                            <label className="mb-2 text-xs font-medium text-muted-foreground">Enable Feature</label>
                             <div
-                                className={`flex h-6 w-11 cursor-pointer items-center rounded-full px-1 transition-colors ${config.auto_failover ? 'bg-indigo-500' : 'bg-slate-700'}`}
+                                className={`flex h-6 w-11 cursor-pointer items-center rounded-full px-1 transition-colors ${config.auto_failover ? 'bg-primary' : 'bg-muted'}`}
                             >
                                 <div
-                                    className={`h-4 w-4 transform rounded-full bg-white transition-transform ${config.auto_failover ? 'translate-x-5' : ''}`}
+                                    className={`h-4 w-4 transform rounded-full bg-background transition-transform ${config.auto_failover ? 'translate-x-5' : ''}`}
                                 ></div>
                             </div>
                         </div>
@@ -116,17 +116,17 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                     {activeProviders.map((provider) => (
                         <div
                             key={provider.id}
-                            className="group flex flex-col overflow-hidden rounded-xl border border-slate-800 bg-[#0f172a] shadow-sm transition-colors hover:border-slate-700"
+                            className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-colors hover:border-ring/50"
                         >
                             {/* Card Header */}
-                            <div className="flex items-start justify-between border-b border-slate-800/60 p-5">
+                            <div className="flex items-start justify-between border-b border-border p-5">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-sm font-bold text-slate-300">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-input bg-muted text-sm font-bold text-muted-foreground">
                                         {provider.name.substring(0, 2).toUpperCase()}
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-bold text-white">{provider.name}</h3>
-                                        <p className="text-xs text-slate-500">Priority: {provider.priority}</p>
+                                        <h3 className="text-base font-bold">{provider.name}</h3>
+                                        <p className="text-xs text-muted-foreground">Priority: {provider.priority}</p>
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-3">
@@ -138,54 +138,43 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
 
                                     {/* connection badge */}
                                     <div className="flex items-center gap-2">
-                                        <span className={`h-2 w-2 rounded-full ${provider.connection ? 'bg-emerald-400' : 'bg-slate-500'}`}></span>
-                                        <span className="text-xs text-slate-400">{provider.connection ? 'Connected' : 'Disconnected'}</span>
+                                        <span className={`h-2 w-2 rounded-full ${provider.connection ? 'bg-emerald-500' : 'bg-muted-foreground'}`}></span>
+                                        <span className="text-xs text-muted-foreground">{provider.connection ? 'Connected' : 'Disconnected'}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Card Body - Metrics */}
                             <div className="grid flex-1 grid-cols-2 gap-4 p-5">
-                                <div className="col-span-2 rounded-lg border border-slate-800/50 bg-slate-900/50 p-3">
-                                    <p className="mb-1 text-xs font-medium text-slate-500">Upstream Balance</p>
+                                <div className="col-span-2 rounded-lg border border-border bg-muted/30 p-3">
+                                    <p className="mb-1 text-xs font-medium text-muted-foreground">Upstream Balance</p>
                                     {/* Visual warning if balance is low */}
                                     <p
-                                        className={`font-mono text-lg font-bold ${parseFloat(provider.balance) <= 2000 ? 'text-rose-400' : parseFloat(provider.balance) <= 10000 ? 'text-amber-400' : 'text-white'}`}
+                                        className={`font-mono text-lg font-bold ${parseFloat(provider.balance) <= 2000 ? 'text-destructive' : parseFloat(provider.balance) <= 10000 ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'}`}
                                     >
                                         ₦{parseFloat(provider.balance)?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </p>
                                 </div>
 
                                 <div>
-                                    <p className="mb-1 text-xs font-medium text-slate-500">Success Rate</p>
-                                    <p className="text-sm text-slate-300">{provider.success_rate}%</p>
+                                    <p className="mb-1 text-xs font-medium text-muted-foreground">Success Rate</p>
+                                    <p className="text-sm font-medium">{provider.success_rate}%</p>
                                 </div>
                                 <div>
-                                    <p className="mb-1 text-xs font-medium text-slate-500">Avg Latency</p>
-                                    <p className="text-sm text-slate-300">{provider.latency}</p>
+                                    <p className="mb-1 text-xs font-medium text-muted-foreground">Avg Latency</p>
+                                    <p className="text-sm font-medium">{provider.latency}</p>
                                 </div>
                             </div>
 
                             {/* Card Footer - Actions */}
-                            <div className="flex items-center justify-between border-t border-slate-800/60 bg-slate-900/30 p-4">
+                            <div className="flex items-center justify-between border-t border-border bg-muted/10 p-4">
                                 <div className="flex items-center gap-2">
-                                    {/* <div
-                                        className={`flex h-4 w-8 cursor-pointer items-center rounded-full px-0.5 transition-colors ${provider.status !== 'disabled' ? 'bg-emerald-500' : 'bg-slate-700'}`}
-                                    >
-                                        <div
-                                            className={`h-3 w-3 transform rounded-full bg-white transition-transform ${provider.status !== 'disabled' ? 'translate-x-4' : ''}`}
-                                        ></div>
-                                    </div>
-                                    <span className="text-xs font-medium text-slate-400">
-                                        {provider.status !== 'disabled' ? 'Active' : 'Offline'}
-                                    </span> */}
-
                                     <IsActiveSwitch {...provider} />
                                 </div>
 
                                 <button
                                     onClick={() => router.get(route('providers.edit', provider.id))}
-                                    className="flex items-center gap-1 text-sm font-medium text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-indigo-300"
+                                    className="flex items-center gap-1 text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary/80"
                                 >
                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path
@@ -238,7 +227,7 @@ const CreateProvider = ({
     };
 
     useEffect(() => {
-        //   code from name
+        // code from name
         if (data.name) {
             const generatedCode = data.name
                 .toLowerCase()
@@ -247,6 +236,7 @@ const CreateProvider = ({
             setData('code', generatedCode);
         }
     }, [data.name]);
+
     return (
         <Dialog
             open={isAddDialogOpen}
@@ -269,7 +259,7 @@ const CreateProvider = ({
                     <div className="grid gap-5 py-6">
                         <div className="space-y-2">
                             <Label htmlFor="name">
-                                Provider Name <span className="text-red-500">*</span>
+                                Provider Name <span className="text-destructive">*</span>
                             </Label>
                             <Input
                                 id="name"
@@ -284,7 +274,7 @@ const CreateProvider = ({
 
                         <div className="space-y-2">
                             <Label htmlFor="base_url">
-                                Base API URL <span className="text-red-500">*</span>
+                                Base API URL <span className="text-destructive">*</span>
                             </Label>
                             <Input
                                 id="base_url"
@@ -298,7 +288,7 @@ const CreateProvider = ({
 
                         <div className="space-y-2">
                             <Label htmlFor="api_key">
-                                Api key / Username <span className="text-red-500">*</span>
+                                Api key / Username <span className="text-destructive">*</span>
                             </Label>
                             <Input
                                 id="api_key"
@@ -326,7 +316,7 @@ const CreateProvider = ({
                         <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={processing} className="bg-indigo-600 text-white hover:bg-indigo-700">
+                        <Button type="submit" disabled={processing}>
                             {processing ? 'Creating...' : 'Create Provider'}
                         </Button>
                     </DialogFooter>
@@ -342,13 +332,13 @@ const IsActiveSwitch = (provider?: Provider) => {
     };
 
     return (
-        <div className="flex items-center justify-center gap-3 rounded-lg border border-slate-800/50 bg-slate-900/50 px-3 py-1">
+        <div className="flex items-center justify-center gap-3 rounded-lg border border-border bg-background px-3 py-1">
             <Label className="text-sm"> Active </Label>
             {/* small switch */}
             <Switch
                 checked={!!provider?.is_active}
                 onCheckedChange={handleChecked}
-                className="border data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-red-500"
+                className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-destructive"
             />
         </div>
     );

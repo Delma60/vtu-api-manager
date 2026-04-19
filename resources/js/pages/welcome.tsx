@@ -1,35 +1,41 @@
 export default function WelcomePage() {
     return (
-        <div className="min-h-screen bg-slate-950 font-sans text-slate-200 selection:bg-indigo-500 selection:text-white">
+        <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-indigo-500 selection:text-white dark:bg-slate-950 dark:text-slate-200">
             {/* 1. Navigation Bar */}
             <nav className="mx-auto flex max-w-7xl items-center justify-between px-8 py-6">
                 <div className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30"></div>
-                    <span className="text-xl font-bold tracking-tight text-white">NexusVTU</span>
+                    <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">NexusVTU</span>
                 </div>
 
                 <div className="hidden items-center gap-8 text-sm font-medium text-slate-400 md:flex">
-                    <a href="#features" className="transition-colors hover:text-white">
+                    <a href="#features" className="text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                         Features
                     </a>
-                    <a href="#performance" className="transition-colors hover:text-white">
+                    <a
+                        href="#performance"
+                        className="text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                    >
                         Uptime
                     </a>
-                    <a href="#pricing" className="transition-colors hover:text-white">
+                    <a href="#pricing" className="text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                         Pricing
                     </a>
-                    <a href="#docs" className="transition-colors hover:text-white">
+                    <a href="#docs" className="text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                         Documentation
                     </a>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <a href="/login" className="text-sm font-medium text-slate-300 transition-colors hover:text-white">
+                    <a
+                        href="/login"
+                        className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                    >
                         Sign in
                     </a>
                     <a
                         href="/register"
-                        className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-900 transition-all hover:bg-slate-200"
+                        className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-900 transition-all hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
                     >
                         Get API Keys
                     </a>
@@ -44,12 +50,12 @@ export default function WelcomePage() {
                         v2.0 API is now live
                     </div>
 
-                    <h1 className="text-5xl leading-[1.1] font-extrabold tracking-tight text-white lg:text-7xl">
+                    <h1 className="text-5xl leading-[1.1] font-extrabold tracking-tight text-slate-900 lg:text-7xl dark:text-white">
                         One Unified API for <br className="hidden lg:block" />
                         <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Telecom Billing.</span>
                     </h1>
 
-                    <p className="max-w-xl text-lg leading-relaxed text-slate-400">
+                    <p className="max-w-xl text-lg leading-relaxed text-slate-700 dark:text-slate-400">
                         Stop wrestling with multiple vendor integrations and downtimes. Route your airtime, data, and utility payments through a
                         single, highly available REST API with built-in auto-failover.
                     </p>
@@ -58,7 +64,7 @@ export default function WelcomePage() {
                         <button className="rounded-lg bg-indigo-600 px-8 py-3.5 font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500">
                             Start Integrating
                         </button>
-                        <button className="rounded-lg border border-slate-700 bg-slate-800/50 px-8 py-3.5 font-semibold text-white transition-all hover:bg-slate-800">
+                        <button className="rounded-lg border border-slate-200 bg-slate-100/70 px-8 py-3.5 font-semibold text-slate-900 transition-all hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-800">
                             Read the Docs
                         </button>
                     </div>
@@ -66,8 +72,8 @@ export default function WelcomePage() {
 
                 <div className="relative z-10 w-full max-w-lg flex-1 lg:max-w-none">
                     <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 opacity-20 blur-2xl"></div>
-                    <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0f172a] shadow-2xl">
-                        <div className="flex items-center border-b border-slate-800 bg-slate-900 px-4 py-3">
+                    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-2xl dark:border-slate-800 dark:bg-[#0f172a]">
+                        <div className="flex items-center border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
                             <div className="flex gap-2">
                                 <div className="h-3 w-3 rounded-full bg-rose-500/80"></div>
                                 <div className="h-3 w-3 rounded-full bg-amber-500/80"></div>
@@ -112,7 +118,7 @@ export default function WelcomePage() {
             </header>
 
             {/* 3. Partner / Networks Strip */}
-            <section className="border-y border-slate-800 bg-slate-900/30 py-8">
+            <section className="border-y border-slate-200 bg-slate-100/60 py-8 dark:border-slate-800 dark:bg-slate-900/30">
                 <div className="mx-auto max-w-7xl px-8">
                     <p className="mb-6 text-center text-xs font-semibold tracking-widest text-slate-500 uppercase">Supported Infrastructure</p>
                     <div className="flex flex-wrap justify-center gap-12 opacity-60 lg:gap-24">
@@ -128,7 +134,7 @@ export default function WelcomePage() {
             {/* 4. Core Features Grid */}
             <section id="features" className="mx-auto max-w-7xl px-8 py-24">
                 <div className="mb-16 text-center">
-                    <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">Middleware built for reliability.</h2>
+                    <h2 className="mb-4 text-3xl font-bold text-slate-900 md:text-4xl dark:text-white">Middleware built for reliability.</h2>
                     <p className="mx-auto max-w-2xl text-lg text-slate-400">
                         We handle the upstream complexity so you can focus on building your frontend application.
                     </p>
@@ -136,7 +142,7 @@ export default function WelcomePage() {
 
                 <div className="grid gap-8 md:grid-cols-3">
                     {/* Feature 1 */}
-                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8 transition-colors hover:border-indigo-500/50">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-8 transition-colors hover:border-indigo-500/50 dark:border-slate-800 dark:bg-slate-900">
                         <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-lg border border-indigo-500/20 bg-indigo-500/10">
                             <svg className="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path
@@ -147,7 +153,7 @@ export default function WelcomePage() {
                                 />
                             </svg>
                         </div>
-                        <h3 className="mb-3 text-xl font-semibold text-white">Smart Auto-Routing</h3>
+                        <h3 className="mb-3 text-xl font-semibold text-slate-900 dark:text-white">Smart Auto-Routing</h3>
                         <p className="leading-relaxed text-slate-400">
                             If your primary provider fails or times out, our system instantly re-routes the request to a backup vendor. Zero dropped
                             transactions.
@@ -155,13 +161,13 @@ export default function WelcomePage() {
                     </div>
 
                     {/* Feature 2 */}
-                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8 transition-colors hover:border-purple-500/50">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-8 transition-colors hover:border-purple-500/50 dark:border-slate-800 dark:bg-slate-900">
                         <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-lg border border-purple-500/20 bg-purple-500/10">
                             <svg className="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
-                        <h3 className="mb-3 text-xl font-semibold text-white">Real-Time Webhooks</h3>
+                        <h3 className="mb-3 text-xl font-semibold text-slate-900 dark:text-white">Real-Time Webhooks</h3>
                         <p className="leading-relaxed text-slate-400">
                             Stop polling our servers. We push transaction statuses directly to your application endpoint the millisecond the network
                             resolves them.
@@ -169,7 +175,7 @@ export default function WelcomePage() {
                     </div>
 
                     {/* Feature 3 */}
-                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8 transition-colors hover:border-emerald-500/50">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-8 transition-colors hover:border-emerald-500/50 dark:border-slate-800 dark:bg-slate-900">
                         <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10">
                             <svg className="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path
@@ -180,7 +186,7 @@ export default function WelcomePage() {
                                 />
                             </svg>
                         </div>
-                        <h3 className="mb-3 text-xl font-semibold text-white">Unified Responses</h3>
+                        <h3 className="mb-3 text-xl font-semibold text-slate-900 dark:text-white">Unified Responses</h3>
                         <p className="leading-relaxed text-slate-400">
                             We standardize all chaotic vendor responses into one clean JSON structure. Map it once, and it works for every network
                             provider.
@@ -190,16 +196,16 @@ export default function WelcomePage() {
             </section>
 
             {/* 5. Performance / Dashboard Teaser */}
-            <section id="performance" className="border-y border-slate-800 bg-slate-900/50 py-24">
+            <section id="performance" className="border-y border-slate-200 bg-slate-100/50 py-24 dark:border-slate-800 dark:bg-slate-900/50">
                 <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 px-8 md:flex-row">
                     <div className="flex-1">
-                        <h2 className="mb-6 text-3xl font-bold text-white">Complete visibility into your margins.</h2>
-                        <p className="mb-8 text-lg leading-relaxed text-slate-400">
+                        <h2 className="mb-6 text-3xl font-bold text-slate-900 dark:text-white">Complete visibility into your margins.</h2>
+                        <p className="mb-8 text-lg leading-relaxed text-slate-700 dark:text-slate-400">
                             Our dashboard doesn't just manage API keys. It gives you real-time logs of every request, tracks your wallet balances
                             across all underlying vendors, and lets you set custom profit markups per network.
                         </p>
                         <ul className="space-y-4">
-                            <li className="flex items-center gap-3 text-slate-300">
+                            <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                                 <svg className="h-5 w-5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
                                     <path
                                         fillRule="evenodd"
@@ -209,7 +215,7 @@ export default function WelcomePage() {
                                 </svg>
                                 Dedicated Request Logs
                             </li>
-                            <li className="flex items-center gap-3 text-slate-300">
+                            <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                                 <svg className="h-5 w-5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
                                     <path
                                         fillRule="evenodd"
@@ -219,7 +225,7 @@ export default function WelcomePage() {
                                 </svg>
                                 Vendor Health Status Monitors
                             </li>
-                            <li className="flex items-center gap-3 text-slate-300">
+                            <li className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                                 <svg className="h-5 w-5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
                                     <path
                                         fillRule="evenodd"
@@ -234,9 +240,9 @@ export default function WelcomePage() {
                     <div className="relative w-full flex-1">
                         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-transparent blur-3xl"></div>
                         {/* Faux Dashboard UI Element */}
-                        <div className="relative rounded-xl border border-slate-700 bg-[#0f172a] p-6 shadow-2xl">
-                            <div className="mb-6 flex items-center justify-between border-b border-slate-800 pb-4">
-                                <div className="font-semibold text-white">Live Traffic</div>
+                        <div className="relative rounded-xl border border-slate-200 bg-slate-100 p-6 shadow-2xl dark:border-slate-700 dark:bg-[#0f172a]">
+                            <div className="mb-6 flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-800">
+                                <div className="font-semibold text-slate-900 dark:text-white">Live Traffic</div>
                                 <div className="flex gap-2">
                                     <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
                                 </div>
@@ -266,53 +272,55 @@ export default function WelcomePage() {
 
             {/* 6. Simple Pricing / CTA */}
             <section id="pricing" className="mx-auto max-w-4xl px-8 py-24 text-center">
-                <h2 className="mb-6 text-3xl font-bold text-white">Simple, transparent rates.</h2>
-                <p className="mb-10 text-slate-400">We aggregate the best vendor prices. You pay a tiny markup for the infrastructure reliability.</p>
+                <h2 className="mb-6 text-3xl font-bold text-slate-900 dark:text-white">Simple, transparent rates.</h2>
+                <p className="mb-10 text-slate-700 dark:text-slate-400">
+                    We aggregate the best vendor prices. You pay a tiny markup for the infrastructure reliability.
+                </p>
 
-                <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8 md:p-12">
-                    <div className="mb-10 grid gap-6 border-b border-slate-800 pb-10 text-left md:grid-cols-3">
+                <div className="rounded-2xl border border-slate-200 bg-white p-8 md:p-12 dark:border-slate-800 dark:bg-slate-900">
+                    <div className="mb-10 grid gap-6 border-b border-slate-200 pb-10 text-left md:grid-cols-3 dark:border-slate-700">
                         <div>
                             <div className="mb-1 text-sm text-slate-400">MTN Data (1GB)</div>
-                            <div className="text-2xl font-bold text-white">₦245</div>
+                            <div className="text-2xl font-bold text-slate-900 dark:text-white">₦245</div>
                         </div>
                         <div>
                             <div className="mb-1 text-sm text-slate-400">Airtime Discount</div>
-                            <div className="text-2xl font-bold text-white">Up to 3%</div>
+                            <div className="text-2xl font-bold text-slate-900 dark:text-white">Up to 3%</div>
                         </div>
                         <div>
                             <div className="mb-1 text-sm text-slate-400">Utility Fee</div>
-                            <div className="text-2xl font-bold text-white">₦35</div>
+                            <div className="text-2xl font-bold text-slate-900 dark:text-white">₦35</div>
                         </div>
                     </div>
 
-                    <button className="w-full rounded-xl bg-white px-10 py-4 text-lg font-bold text-slate-900 shadow-lg shadow-white/10 transition-all hover:bg-slate-200 md:w-auto">
+                    <button className="w-full rounded-xl bg-white px-10 py-4 text-lg font-bold text-slate-900 shadow-lg shadow-white/10 transition-all hover:bg-slate-200 md:w-auto dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/10 dark:hover:bg-slate-800">
                         Create Free Account
                     </button>
                 </div>
             </section>
 
             {/* 7. Footer */}
-            <footer className="border-t border-slate-800 bg-slate-950 py-12">
+            <footer className="border-t border-slate-200 bg-white py-12 dark:border-slate-800 dark:bg-slate-950">
                 <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-8 md:flex-row">
                     <div className="flex items-center gap-2">
                         <div className="h-6 w-6 flex-shrink-0 rounded bg-indigo-500"></div>
-                        <span className="font-semibold tracking-tight text-white">NexusVTU</span>
+                        <span className="font-semibold tracking-tight text-slate-900 dark:text-white">NexusVTU</span>
                     </div>
                     <div className="flex gap-6 text-sm text-slate-500">
-                        <a href="#" className="hover:text-slate-300">
+                        <a href="#" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                             API Reference
                         </a>
-                        <a href="#" className="hover:text-slate-300">
+                        <a href="#" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                             Status Page
                         </a>
-                        <a href="#" className="hover:text-slate-300">
+                        <a href="#" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                             Support
                         </a>
-                        <a href="#" className="hover:text-slate-300">
+                        <a href="#" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                             Terms
                         </a>
                     </div>
-                    <div className="text-sm text-slate-600">© 2026 Nexus Infrastructure.</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">© 2026 Nexus Infrastructure.</div>
                 </div>
             </footer>
         </div>

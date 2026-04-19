@@ -1,10 +1,22 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { Provider } from '@/types';
 import { router, useForm } from '@inertiajs/react';
-import { CheckCircle, Info } from 'lucide-react';
+import { 
+    Activity, 
+    AlertCircle, 
+    AlertTriangle, 
+    ArrowLeft, 
+    CheckCircle, 
+    Info, 
+    Key, 
+    Route, 
+    Server, 
+    ShieldCheck 
+} from 'lucide-react';
 import { useState } from 'react';
 
 export default function ProviderConfig({
@@ -19,7 +31,6 @@ export default function ProviderConfig({
     const [activeTab, setActiveTab] = useState('credentials');
 
     const { data: formData, setData, errors, patch, processing } = useForm<Provider>(currentProvider);
-    // Inertia useForm equivalent state
     const [changePassword, setChangePassword] = useState(true);
 
     const onSave = () => {
@@ -28,46 +39,55 @@ export default function ProviderConfig({
 
     return (
         <AppLayout>
-            <div className="min-h-screen flex-1 bg-slate-950 font-sans text-slate-200">
+            <div className="min-h-screen flex-1 bg-background font-sans text-foreground">
                 {/* Sticky Header */}
-                <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-slate-950/80 px-8 py-5 backdrop-blur-md">
+                <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/80 px-8 py-5 backdrop-blur-md">
                     <div className="flex items-center gap-4">
                         <a
                             href="/providers"
-                            className="rounded-lg border border-slate-800 bg-slate-900 p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+                            className="rounded-lg border border-input bg-background p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                         >
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
+                            <ArrowLeft className="h-5 w-5" />
                         </a>
                         <div>
-                            <h1 className="flex items-center gap-3 text-xl font-bold tracking-tight text-white">
+                            <h1 className="flex items-center gap-3 text-xl font-bold tracking-tight text-foreground">
                                 {currentProvider.name}
                                 <span
-                                    className={`rounded px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${currentProvider.is_active ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-400' : 'border border-slate-500/20 bg-slate-500/10 text-slate-400'}`}
+                                    className={`rounded px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${
+                                        currentProvider.is_active 
+                                            ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
+                                            : 'border border-muted-foreground/20 bg-muted/50 text-muted-foreground'
+                                    }`}
                                 >
                                     {currentProvider.is_active ? 'Active' : 'Disabled'}
                                 </span>
                                 <span
-                                    className={`rounded px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${currentProvider.connection ? 'border border-blue-500/20 bg-blue-500/10 text-blue-400' : 'border border-orange-500/20 bg-orange-500/10 text-orange-400'}`}
+                                    className={`rounded px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase ${
+                                        currentProvider.connection 
+                                            ? 'border border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400' 
+                                            : 'border border-orange-500/20 bg-orange-500/10 text-orange-600 dark:text-orange-400'
+                                    }`}
                                 >
                                     {currentProvider.connection ? 'Connected' : 'Disconnected'}
                                 </span>
                             </h1>
-                            <p className="mt-0.5 font-mono text-xs text-slate-400">Code: {currentProvider.code}</p>
-                            <p className="mt-1 text-xs text-slate-400">
+                            <p className="mt-0.5 font-mono text-xs text-muted-foreground">Code: {currentProvider.code}</p>
+                            <p className="mt-1 text-xs font-medium text-muted-foreground">
                                 Balance: ₦{Number(currentProvider.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button className="px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:text-white">Cancel</button>
-                        <button
+                        <button className="px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                            Cancel
+                        </button>
+                        <Button
                             onClick={onSave}
-                            className="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500"
+                            disabled={processing}
+                            className="px-6 py-2.5 shadow-md"
                         >
                             {processing ? 'Saving...' : 'Save Configuration'}
-                        </button>
+                        </Button>
                     </div>
                 </header>
 
@@ -76,48 +96,39 @@ export default function ProviderConfig({
                     <nav className="w-full shrink-0 space-y-1 md:w-64">
                         <button
                             onClick={() => setActiveTab('credentials')}
-                            className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'credentials' ? 'bg-indigo-500/10 text-indigo-400' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}`}
+                            className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors ${
+                                activeTab === 'credentials' 
+                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    : 'text-muted-foreground font-medium hover:bg-muted hover:text-foreground'
+                            }`}
                         >
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-                                />
-                            </svg>
+                            <Key className="h-5 w-5" />
                             API Credentials
                         </button>
                         <button
                             onClick={() => setActiveTab('routing')}
-                            className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'routing' ? 'bg-indigo-500/10 text-indigo-400' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}`}
+                            className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors ${
+                                activeTab === 'routing' 
+                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    : 'text-muted-foreground font-medium hover:bg-muted hover:text-foreground'
+                            }`}
                         >
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                                />
-                            </svg>
+                            <Route className="h-5 w-5" />
                             Routing & Failover
                         </button>
                         <button
                             onClick={() => setActiveTab('diagnostics')}
-                            className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'diagnostics' ? 'bg-indigo-500/10 text-indigo-400' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}`}
+                            className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm transition-colors ${
+                                activeTab === 'diagnostics' 
+                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    : 'text-muted-foreground font-medium hover:bg-muted hover:text-foreground'
+                            }`}
                         >
                             <div className="flex items-center gap-3">
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                                    />
-                                </svg>
+                                <Activity className="h-5 w-5" />
                                 Diagnostics
                             </div>
-                            {recentErrors && recentErrors.length > 0 && <span className="h-2 w-2 rounded-full bg-rose-500"></span>}
+                            {recentErrors && recentErrors.length > 0 && <span className="h-2 w-2 rounded-full bg-destructive"></span>}
                         </button>
                     </nav>
 
@@ -125,57 +136,50 @@ export default function ProviderConfig({
                     <div className="max-w-3xl flex-1">
                         {/* TAB 1: API Credentials */}
                         {activeTab === 'credentials' && (
-                            <div className="overflow-hidden rounded-xl border border-slate-800 bg-[#0f172a] shadow-sm">
-                                <div className="border-b border-slate-800 p-6">
-                                    <h2 className="text-lg font-semibold text-white">Connection Details</h2>
-                                    <p className="mt-1 text-sm text-slate-400">
+                            <div className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm">
+                                <div className="border-b border-border p-6">
+                                    <h2 className="text-lg font-semibold">Connection Details</h2>
+                                    <p className="mt-1 text-sm text-muted-foreground">
                                         These keys securely authenticate your server with the upstream provider.
                                     </p>
                                 </div>
                                 <div className="space-y-6 p-6">
                                     <div>
-                                        <Label className="mb-2 block text-sm font-medium text-slate-300">Base URL</Label>
+                                        <Label className="mb-2 block text-sm font-medium text-foreground">Base URL</Label>
                                         <Input
                                             type="url"
                                             value={formData.base_url}
                                             onChange={(e) => setData('base_url', e.target.value)}
-                                            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 font-mono text-sm text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                            className="w-full font-mono text-sm"
                                         />
                                     </div>
                                     <div>
-                                        <Label className="mb-2 block text-sm font-medium text-slate-300">Public Key / Username</Label>
+                                        <Label className="mb-2 block text-sm font-medium text-foreground">Public Key / Username</Label>
                                         <Input
                                             type="text"
                                             value={formData.api_key}
                                             onChange={(e) => setData('api_key', e.target.value)}
-                                            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 font-mono text-sm text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                            className="w-full font-mono text-sm"
                                         />
                                     </div>
                                     <div>
-                                        <Label className="mb-2 block text-sm font-medium text-slate-300">Secret Key / Password</Label>
+                                        <Label className="mb-2 block text-sm font-medium text-foreground">Secret Key / Password</Label>
                                         <div className="relative">
                                             <Input
                                                 type={changePassword ? 'password' : 'text'}
                                                 value={formData.api_secret}
                                                 onChange={(e) => setData('api_secret', e.target.value)}
-                                                className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 font-mono text-sm text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                                className="w-full font-mono text-sm pr-20"
                                             />
                                             <button
                                                 onClick={() => setChangePassword(!changePassword)}
-                                                className="absolute top-3 right-3 text-sm font-medium text-indigo-400 hover:text-indigo-300"
+                                                className="absolute top-2.5 right-3 text-sm font-medium text-primary hover:text-primary/80"
                                             >
                                                 Reveal
                                             </button>
                                         </div>
-                                        <p className="mt-2 flex items-center gap-1 text-xs text-slate-500">
-                                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                                />
-                                            </svg>
+                                        <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                            <ShieldCheck className="h-3.5 w-3.5" />
                                             Stored securely using AES-256 encryption.
                                         </p>
                                     </div>
@@ -185,75 +189,67 @@ export default function ProviderConfig({
 
                         {/* TAB 2: Routing & Failover */}
                         {activeTab === 'routing' && (
-                            <div className="overflow-hidden rounded-xl border border-slate-800 bg-[#0f172a] shadow-sm">
-                                <div className="border-b border-slate-800 p-6">
-                                    <h2 className="text-lg font-semibold text-white">Routing Intelligence</h2>
-                                    <p className="mt-1 text-sm text-slate-400">Determine how and when your dispatcher utilizes this provider.</p>
+                            <div className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm">
+                                <div className="border-b border-border p-6">
+                                    <h2 className="text-lg font-semibold">Routing Intelligence</h2>
+                                    <p className="mt-1 text-sm text-muted-foreground">Determine how and when your dispatcher utilizes this provider.</p>
                                 </div>
                                 <div className="space-y-8 p-6">
-                                    <div className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+                                    <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
-                                            <h3 className="text-sm font-medium text-white">Routing Priority</h3>
-                                            <p className="mt-1 max-w-sm text-xs text-slate-400">
+                                            <h3 className="text-sm font-medium text-foreground">Routing Priority</h3>
+                                            <p className="mt-1 max-w-sm text-xs text-muted-foreground">
                                                 Lower numbers execute first. If Priority 1 fails, the dispatcher automatically attempts Priority 2.
                                             </p>
                                         </div>
-                                        <input
+                                        <Input
                                             type="number"
                                             value={formData.priority}
-                                            className="w-20 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-center font-mono text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                            className="w-20 text-center font-mono"
                                         />
                                     </div>
 
-                                    <div className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+                                    <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
-                                            <h3 className="text-sm font-medium text-white">Connection Timeout</h3>
-                                            <p className="mt-1 max-w-sm text-xs text-slate-400">
+                                            <h3 className="text-sm font-medium text-foreground">Connection Timeout</h3>
+                                            <p className="mt-1 max-w-sm text-xs text-muted-foreground">
                                                 How long to wait for a response before dropping the connection and failing over to the backup
                                                 provider.
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <input
+                                            <Input
                                                 type="number"
                                                 value={formData.timeout_ms}
-                                                className="w-24 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-center font-mono text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                                className="w-24 text-center font-mono"
                                             />
-                                            <span className="text-xs font-semibold text-slate-500">ms</span>
+                                            <span className="text-xs font-semibold text-muted-foreground">ms</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* TAB 4: Diagnostics */}
+                        {/* TAB 3: Diagnostics */}
                         {activeTab === 'diagnostics' && (
-                            <div className="overflow-hidden rounded-xl border border-slate-800 bg-[#0f172a] shadow-sm">
-                                <div className="flex items-center justify-between border-b border-slate-800 p-6">
+                            <div className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm">
+                                <div className="flex items-center justify-between border-b border-border p-6">
                                     <div>
-                                        <h2 className="text-lg font-semibold text-white">Provider Diagnostics</h2>
-                                        <p className="mt-1 text-sm text-slate-400">Recent connection errors and health checks.</p>
+                                        <h2 className="text-lg font-semibold">Provider Diagnostics</h2>
+                                        <p className="mt-1 text-sm text-muted-foreground">Recent connection errors and health checks.</p>
                                     </div>
                                     <button
                                         onClick={() => router.get(route('provders.diagnose', currentProvider.id))}
-                                        className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800"
+                                        className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                                     >
-                                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                            />
-                                        </svg>
+                                        <Server className="h-3.5 w-3.5" />
                                         Ping Provider
                                     </button>
                                 </div>
 
                                 <div className="space-y-4 p-6">
-                                    {
-                                        // JSON.stringify(recentErrors)
-                                        recentErrors.map(function (error, idx) {
+                                    {recentErrors && recentErrors.length > 0 ? (
+                                        recentErrors.map(function (error: any, idx: number) {
                                             return (
                                                 <div
                                                     key={idx}
@@ -262,65 +258,52 @@ export default function ProviderConfig({
                                                         error?.type === 'warning'
                                                             ? 'border-amber-500/20 bg-amber-500/10'
                                                             : error?.type === 'error'
-                                                              ? 'border-rose-500/20 bg-rose-500/10'
+                                                              ? 'border-destructive/20 bg-destructive/10'
                                                               : error?.type === 'success'
-                                                                ? 'border-green-500/20 bg-green-500/10'
-                                                                : 'border-blue-700/20 bg-blue-700/10',
+                                                                ? 'border-emerald-500/20 bg-emerald-500/10'
+                                                                : 'border-blue-500/20 bg-blue-500/10',
                                                     )}
                                                 >
                                                     {error?.type === 'warning' ? (
-                                                        <svg
-                                                            className="mt-0.5 h-5 w-5 shrink-0 text-amber-400"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                            stroke="currentColor"
-                                                        >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                                            />
-                                                        </svg>
-                                                    ) : error?.type === "error"?(
-                                                        <svg
-                                                            className="mt-0.5 h-5 w-5 shrink-0 text-rose-400"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                            stroke="currentColor"
-                                                        >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                            />
-                                                        </svg>
-                                                    ): error?.type === "success"?<CheckCircle className="text-green-500" />: <Info className="text-blue-500" />}
+                                                        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                                                    ) : error?.type === "error" ? (
+                                                        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+                                                    ) : error?.type === "success" ? (
+                                                        <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                                    ) : (
+                                                        <Info className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
+                                                    )}
+                                                    
                                                     <div>
                                                         <h4
                                                             className={cn(
-                                                                'text-sm font-semibold text-amber-400',
+                                                                'text-sm font-semibold',
                                                                 error?.type === 'success'
-                                                                    ? 'text-green-400'
+                                                                    ? 'text-emerald-700 dark:text-emerald-400'
                                                                     : error.type === 'warning'
-                                                                      ? 'text-amber-400'
+                                                                      ? 'text-amber-700 dark:text-amber-400'
                                                                       : error?.type === 'error'
-                                                                        ? 'text-rose-400'
-                                                                        : 'text-blue-400',
+                                                                        ? 'text-destructive'
+                                                                        : 'text-blue-700 dark:text-blue-400',
                                                             )}
                                                         >
                                                             {error?.title}
                                                         </h4>
-                                                        <p className="mt-1 text-xs text-slate-400">{error?.body}</p>
-                                                        <p className="mt-2 font-mono text-[10px] text-slate-500">
+                                                        <p className="mt-1 text-xs text-muted-foreground">{error?.body}</p>
+                                                        <p className="mt-2 font-mono text-[10px] text-muted-foreground/80">
                                                             {error.time} • Endpoint: {error.endpoint}
                                                         </p>
                                                     </div>
                                                 </div>
                                             );
                                         })
-                                    }
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+                                            <Activity className="h-10 w-10 opacity-20 mb-3" />
+                                            <p className="text-sm font-medium text-foreground">No recent issues</p>
+                                            <p className="text-xs">This provider is operating smoothly with zero recorded failures.</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

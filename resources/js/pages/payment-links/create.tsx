@@ -35,7 +35,7 @@ export default function CreatePaymentLink() {
     const networkTypes = useMemo(function(){
         // for airtime only
         if(data.service_type === 'airtime') {
-            console.log(networks, data.meta);
+            // console.log(networks, data.meta);
             return networks.find((n: any) => n.name === data.meta.network)
             ?.network_types.filter((nt: any) => {
                 return nt.type === data.service_type
@@ -84,7 +84,7 @@ export default function CreatePaymentLink() {
                                                 onChange={(e) => setData('amount', e.target.value)}
                                                 className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pr-4 pl-10 text-slate-900 transition-colors focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:bg-slate-900"
                                                 placeholder="0.00"
-                                                required
+                                                
                                             />
                                         </div>
                                         <InputError message={errors.amount} className="mt-1" />

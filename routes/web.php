@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\ApiLogController;
+use App\Http\Controllers\Bot\TelegramController;
 use App\Http\Controllers\CablePlanController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
@@ -28,6 +29,7 @@ Route::get('/', function () {
 
 // Payment link pay.show
 Route::get('pay/{paymentLink}', [PaymentLinkController::class, 'show'])->name('pay.show');
+Route::post('/webhook/telegram/sk_super_secret_string', [TelegramController::class, 'handleWebhook']);
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -66,6 +68,14 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('api-keys', ApiKeyController::class);
         Route::resource('api-logs', ApiLogController::class);
         Route::resource('webhooks', WebhookController::class);
+        Route::prefix('bots')->name("bots.")->group(function(){
+            Route::prefix("telegram-bot")->name("telegram.")->group(function(){
+                Route::get('/', [TelegramController::class, 'settings'])->name('index');
+                Route::post('/sync', [TelegramController::class, 'syncWebhook'])->name('sync');
+                Route::put('/update-merchant', [TelegramController::class, 'updateMerchant'])->name('update-merchant');
+            });
+        })->name('bots');
+
     });
 
     Route::prefix('metrics')->group(function() {
@@ -77,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/service-types/rankings', [MetricsController::class, 'serviceTypeRankings'])->name('metrics.service-types.rankings');
         Route::post('/regenerate', [MetricsController::class, 'regenerate'])->name('metrics.regenerate');
     });
+
 });
 
 // routes/web.php

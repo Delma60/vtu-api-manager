@@ -16,7 +16,7 @@ return new class extends Migration
                 $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->string('customer_name')->nullable();
             $table->string('customer_email')->nullable();
-            $table->decimal('amount', 12, 2);
+            $table->decimal('amount', 12, 2)->nullable();
             $table->string('description');
             $table->string('currency')->default('NGN');
             $table->enum('status', ['pending', 'successful', 'cancelled'])->default('pending');

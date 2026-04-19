@@ -3,19 +3,21 @@ import React, { useState } from 'react';
 
 interface PaymentLink {
     id: string;
-    amount: string;
+    amount: string | null;
     description: string;
     customer_name: string | null;
     customer_email: string | null;
     status: string;
 }
 
-export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLink, merchant: string }) {
+export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLink; merchant: string }) {
     const [isProcessing, setIsProcessing] = useState(false);
+    const isVariableAmount = paymentLink.amount === null;
 
-    const { data, setData, post } = useForm({
+    const { data, setData } = useForm({
         name: paymentLink.customer_name || '',
         email: paymentLink.customer_email || '',
+        amount: paymentLink.amount || '',
     });
 
     const handlePayment = (e: React.FormEvent) => {
@@ -36,105 +38,146 @@ export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLin
 
     if (paymentLink.status === 'successful') {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-100 to-indigo-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-                {/* Background decorative blobs */}
-                <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-300/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-300/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
+            <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background p-4 text-foreground">
+                {/* Background decorative blobs - Tied to theme colors instead of hardcoded indigo/emerald */}
+                <div className="absolute top-[-10%] left-[-10%] h-96 w-96 rounded-full bg-primary/20 blur-3xl filter dark:mix-blend-screen mix-blend-multiply opacity-70"></div>
+                <div className="absolute right-[-10%] bottom-[-10%] h-96 w-96 rounded-full bg-chart-2/20 blur-3xl filter dark:mix-blend-screen mix-blend-multiply opacity-70"></div>
 
-                <div className="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white/50 p-10 text-center relative z-10">
-                    <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                        <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
+                <div className="relative z-10 w-full max-w-md rounded-3xl border border-border bg-card/80 p-10 text-center shadow-xl backdrop-blur-xl text-card-foreground">
+                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 shadow-inner">
+                        <svg className="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path>
+                        </svg>
                     </div>
-                    <h2 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">Payment Successful!</h2>
-                    <p className="text-slate-600 text-lg">Thank you. Your payment to <span className="font-semibold text-slate-800">{merchant}</span> has been received.</p>
+                    <h2 className="mb-3 text-3xl font-bold tracking-tight">Payment Successful!</h2>
+                    <p className="text-lg text-muted-foreground">
+                        Thank you. Your payment to <span className="font-semibold text-foreground">{merchant}</span> has been
+                        received.
+                    </p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-indigo-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background p-4 text-foreground">
             <Head title={`Pay ${merchant}`} />
 
             {/* Glassy Background Blobs */}
-            <div className="absolute top-0 left-1/4 w-72 h-72 bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
-            <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
+            <div className="absolute top-0 left-1/4 h-72 w-72 rounded-full bg-primary/10 blur-3xl filter dark:mix-blend-screen mix-blend-multiply opacity-70"></div>
+            <div className="absolute right-1/4 bottom-0 h-72 w-72 rounded-full bg-chart-4/10 blur-3xl filter dark:mix-blend-screen mix-blend-multiply opacity-70"></div>
 
-            <div className="w-full max-w-md bg-white/70 backdrop-blur-2xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white/60 overflow-hidden relative z-10">
+            {/* Main Card */}
+            <div className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card/80 shadow-xl backdrop-blur-2xl text-card-foreground">
                 <div className="px-8 pt-10 pb-6 text-center">
-                    <div className="h-20 w-20 bg-gradient-to-tr from-indigo-600 to-purple-500 rounded-2xl flex items-center justify-center text-3xl font-extrabold text-white mx-auto mb-5 shadow-lg shadow-indigo-500/30 uppercase transform rotate-3">
+                    <div className="mx-auto mb-5 flex h-20 w-20 rotate-3 transform items-center justify-center rounded-2xl bg-gradient-to-tr from-primary to-chart-4 text-3xl font-extrabold text-primary-foreground uppercase shadow-lg shadow-primary/20">
                         {merchant.charAt(0)}
                     </div>
-                    <p className="text-slate-500 text-sm font-medium tracking-wide uppercase mb-1">Paying Merchant</p>
-                    <h2 className="text-2xl font-bold text-slate-800">{merchant}</h2>
+                    <p className="mb-1 text-sm font-medium tracking-wide text-muted-foreground uppercase">Paying Merchant</p>
+                    <h2 className="text-2xl font-bold">{merchant}</h2>
                 </div>
 
                 <div className="px-8 pb-10">
                     {/* Amount Card Container */}
-                    <div className="bg-white/50 rounded-2xl p-6 text-center mb-8 border border-white/60 shadow-sm">
-                        <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Amount</p>
-                        <h1 className="text-5xl font-extrabold text-slate-900 tracking-tight flex items-start justify-center">
-                            <span className="text-2xl mt-1 mr-1 text-slate-600">₦</span>
-                            {parseFloat(paymentLink.amount).toLocaleString()}
-                        </h1>
+                    <div className="mb-8 rounded-2xl border border-border bg-muted/50 p-6 text-center shadow-sm">
+                        <p className="mb-2 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                            {isVariableAmount ? 'Enter Amount to Pay' : 'Total Amount'}
+                        </p>
+
+                        {isVariableAmount ? (
+                            <div className="relative mx-auto mt-2 max-w-[200px]">
+                                <span className="absolute top-1/2 left-4 -translate-y-1/2 text-2xl font-bold text-muted-foreground">₦</span>
+                                <input
+                                    type="number"
+                                    min="100"
+                                    step="0.01"
+                                    required
+                                    value={data.amount}
+                                    onChange={(e) => setData('amount', e.target.value)}
+                                    className="w-full rounded-xl border-2 border-input bg-background py-3 pr-4 pl-12 text-center text-3xl font-extrabold text-foreground transition-all outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-0"
+                                    placeholder="0.00"
+                                />
+                            </div>
+                        ) : (
+                            <h1 className="flex items-start justify-center text-5xl font-extrabold tracking-tight">
+                                <span className="mt-1 mr-1 text-2xl text-muted-foreground">₦</span>
+                                {parseFloat(paymentLink.amount as string).toLocaleString()}
+                            </h1>
+                        )}
+
                         {paymentLink.description && (
-                            <p className="text-slate-600 mt-4 text-sm font-medium">
-                                {paymentLink.description}
-                            </p>
+                            <p className="mt-4 text-sm font-medium text-muted-foreground">{paymentLink.description}</p>
                         )}
                     </div>
 
                     <form onSubmit={handlePayment} className="space-y-5">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Full Name</label>
+                            <label className="mb-1.5 ml-1 block text-sm font-semibold text-foreground">Full Name</label>
                             <input
                                 type="text"
                                 value={data.name}
-                                onChange={e => setData('name', e.target.value)}
+                                onChange={(e) => setData('name', e.target.value)}
                                 required
                                 readOnly={!!paymentLink.customer_name}
-                                className="w-full rounded-xl border border-slate-200/60 bg-white/60 px-4 py-3.5 text-slate-900 shadow-sm focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all read-only:bg-slate-100/50 read-only:text-slate-500"
+                                className="w-full rounded-xl border border-input bg-background px-4 py-3.5 text-foreground shadow-sm transition-all outline-none read-only:bg-muted read-only:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 placeholder:text-muted-foreground"
                                 placeholder="John Doe"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Email Address</label>
+                            <label className="mb-1.5 ml-1 block text-sm font-semibold text-foreground">Email Address</label>
                             <input
                                 type="email"
                                 value={data.email}
-                                onChange={e => setData('email', e.target.value)}
+                                onChange={(e) => setData('email', e.target.value)}
                                 required
                                 readOnly={!!paymentLink.customer_email}
-                                className="w-full rounded-xl border border-slate-200/60 bg-white/60 px-4 py-3.5 text-slate-900 shadow-sm focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all read-only:bg-slate-100/50 read-only:text-slate-500"
+                                className="w-full rounded-xl border border-input bg-background px-4 py-3.5 text-foreground shadow-sm transition-all outline-none read-only:bg-muted read-only:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 placeholder:text-muted-foreground"
                                 placeholder="john@example.com"
                             />
                         </div>
 
+                        {/* Submit Button uses theme primary colors */}
                         <button
                             type="submit"
                             disabled={isProcessing}
-                            className="w-full mt-2 py-4 px-4 rounded-xl shadow-lg shadow-indigo-500/30 text-base font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 focus:ring-4 focus:ring-indigo-500/20 transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                            className="mt-2 w-full transform rounded-xl bg-primary px-4 py-4 text-base font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:opacity-90 focus:ring-4 focus:ring-ring/20 active:scale-[0.98] disabled:transform-none disabled:cursor-not-allowed disabled:opacity-70"
                         >
                             {isProcessing ? (
                                 <span className="flex items-center justify-center">
-                                    {/* SVG Spinner */}
-                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <svg
+                                        className="mr-3 -ml-1 h-5 w-5 animate-spin text-primary-foreground"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        ></path>
                                     </svg>
                                     Processing...
                                 </span>
                             ) : (
-                                `Pay ₦${parseFloat(paymentLink.amount).toLocaleString()}`
+                                // Added `|| '0'` fallback to prevent "NaN" if the input is completely empty
+                                `Pay ₦${parseFloat(data?.amount || '0').toLocaleString()}`
                             )}
                         </button>
                     </form>
                 </div>
             </div>
-            
+
             {/* Trust Badge */}
-            <div className="mt-8 text-center text-slate-500 text-sm font-medium flex items-center justify-center gap-2 relative z-10">
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            <div className="relative z-10 mt-8 flex items-center justify-center gap-2 text-center text-sm font-medium text-muted-foreground">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                </svg>
                 Secured Payments
             </div>
         </div>

@@ -1,6 +1,10 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { Transaction } from '@/types';
 import { Link, router } from '@inertiajs/react';
+import { Download, Filter } from 'lucide-react';
 import { useState } from 'react';
 
 interface PaginationData {
@@ -25,13 +29,14 @@ interface Props {
 }
 
 const statusColors: Record<string, { border: string; bg: string; text: string }> = {
-    successful: { border: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
-    failed: { border: 'border-rose-500/20', bg: 'bg-rose-500/10', text: 'text-rose-400' },
-    processing: { border: 'border-blue-500/20', bg: 'bg-blue-500/10', text: 'text-blue-400' },
-    pending: { border: 'border-yellow-500/20', bg: 'bg-yellow-500/10', text: 'text-yellow-400' },
-    refunded: { border: 'border-slate-500/20', bg: 'bg-slate-500/10', text: 'text-slate-400' },
+    successful: { border: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400' },
+    failed: { border: 'border-destructive/20', bg: 'bg-destructive/10', text: 'text-destructive' },
+    processing: { border: 'border-blue-500/20', bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400' },
+    pending: { border: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' },
+    refunded: { border: 'border-border', bg: 'bg-muted/50', text: 'text-muted-foreground' },
 };
 
+// Network dots typically represent brand colors, so keeping them static is fine
 const networkColors: Record<string, string> = {
     mtn: 'bg-yellow-500',
     airtel: 'bg-red-500',
@@ -87,40 +92,41 @@ export default function TransactionsPage({ transactions, filters }: Props) {
 
     return (
         <AppLayout>
-            <div className="min-h-screen flex-1 bg-slate-950 p-8 font-sans text-slate-200">
+            <div className="bg-background text-foreground min-h-screen flex-1 p-8 font-sans">
                 {/* Header & Actions */}
                 <header className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-white">Transactions</h1>
-                        <p className="text-sm text-slate-400">View and debug all API requests and financial ledgers.</p>
+                        <h1 className="text-2xl font-bold tracking-tight">Transactions</h1>
+                        <p className="text-muted-foreground text-sm">View and debug all API requests and financial ledgers.</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium shadow-sm transition-all hover:bg-slate-800">
-                            <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <Button variant="outline" className="flex items-center gap-2 px-4 py-2 text-sm font-medium">
+                            {/* <svg className="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth={2}
                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                                 />
-                            </svg>
+                            </svg> */}
+                            <Download className="h-4 w-4 opacity-70" />
                             Export CSV
-                        </button>
+                        </Button>
                     </div>
                 </header>
 
                 {/* Filter Bar */}
-                <div className="flex flex-col items-center justify-between gap-4 rounded-t-xl border border-b-0 border-slate-800 bg-[#0f172a] p-4 shadow-sm md:flex-row">
+                <div className="border-border bg-card flex flex-col items-center justify-between gap-4 rounded-t-xl border border-b-0 p-4 shadow-sm md:flex-row">
                     {/* Search */}
                     <div className="relative w-full md:w-96">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="text-muted-foreground h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
-                        <input
+                        <Input
                             type="text"
-                            className="block w-full rounded-lg border border-slate-700 bg-slate-900 py-2 pr-3 pl-10 leading-5 text-slate-300 placeholder-slate-500 transition-all focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none sm:text-sm"
+                            className="py-2 pr-3 pl-10 ring-1 focus-visible:ring-0 focus-visible:ring-offset-0"
                             placeholder="Search Reference, Phone, or Vendor ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -130,59 +136,57 @@ export default function TransactionsPage({ transactions, filters }: Props) {
 
                     {/* Dropdown Filters */}
                     <div className="flex w-full items-center gap-3 overflow-x-auto pb-1 md:w-auto md:pb-0">
-                        <select
-                            className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-300 outline-none focus:ring-1 focus:ring-indigo-500"
+                        <Select
                             value={statusFilter}
-                            onChange={(e) => {
-                                setStatusFilter(e.target.value);
-                                handleFilter('status', e.target.value);
+                            onValueChange={(e) => {
+                                setStatusFilter(e);
+                                handleFilter('status', e);
                             }}
                         >
-                            <option value="all">All Statuses</option>
-                            <option value="successful">Successful</option>
-                            <option value="failed">Failed</option>
-                            <option value="processing">Processing</option>
-                            <option value="pending">Pending</option>
-                            <option value="refunded">Refunded</option>
-                        </select>
+                            <SelectTrigger>
+                                <SelectValue placeholder="All Statuses" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="successful">Successful</SelectItem>
+                                <SelectItem value="failed">Failed</SelectItem>
+                                <SelectItem value="processing">Processing</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="refunded">Refunded</SelectItem>
+                            </SelectContent>
+                        </Select>
 
-                        <select
-                            className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-300 outline-none focus:ring-1 focus:ring-indigo-500"
+                        <Select
                             value={networkFilter}
-                            onChange={(e) => {
-                                setNetworkFilter(e.target.value);
-                                handleFilter('network', e.target.value);
+                            onValueChange={(e) => {
+                                setNetworkFilter(e);
+                                handleFilter('network', e);
                             }}
                         >
-                            <option value="all">All Networks</option>
-                            <option value="mtn">MTN</option>
-                            <option value="airtel">Airtel</option>
-                            <option value="glo">Glo</option>
-                            <option value="9mobile">9mobile</option>
-                            <option value="utilities">Utilities</option>
-                        </select>
+                            <SelectTrigger>
+                                <SelectValue placeholder="All Networks" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Networks</SelectItem>
+                                <SelectItem value="mtn">MTN</SelectItem>
+                                <SelectItem value="airtel">Airtel</SelectItem>
+                                <SelectItem value="glo">Glo</SelectItem>
+                                <SelectItem value="9mobile">9mobile</SelectItem>
+                                <SelectItem value="utilities">Utilities</SelectItem>
+                            </SelectContent>
+                        </Select>
 
-                        <button
-                            className="rounded-lg border border-slate-700 bg-slate-900 p-2 text-slate-400 transition-all hover:bg-slate-800"
-                            title="More Filters (Date Range)"
-                        >
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                                />
-                            </svg>
-                        </button>
+                        <Button variant="outline" title="More Filters (Date Range)">
+                            <Filter />
+                        </Button>
                     </div>
                 </div>
 
                 {/* Main Data Table */}
-                <div className="overflow-hidden rounded-b-xl border border-slate-800 bg-[#0f172a] shadow-sm">
+                <div className="border-border bg-card text-card-foreground overflow-hidden rounded-b-xl border shadow-sm">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm whitespace-nowrap text-slate-400">
-                            <thead className="border-b border-slate-800 bg-slate-900/80 text-xs font-semibold text-slate-500 uppercase">
+                        <table className="w-full text-left text-sm whitespace-nowrap">
+                            <thead className="border-border bg-muted/50 text-muted-foreground border-b text-xs font-semibold uppercase">
                                 <tr>
                                     <th className="px-6 py-4">Reference</th>
                                     <th className="px-6 py-4">Service</th>
@@ -194,7 +198,7 @@ export default function TransactionsPage({ transactions, filters }: Props) {
                                     <th className="px-6 py-4 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-800/60">
+                            <tbody className="divide-border divide-y">
                                 {transactions?.data && transactions.data.length > 0 ? (
                                     transactions.data.map((transaction) => {
                                         const statusStyle = statusColors[transaction.status] || statusColors.pending;
@@ -202,28 +206,34 @@ export default function TransactionsPage({ transactions, filters }: Props) {
                                         const isRefunded = transaction.status === 'refunded';
 
                                         return (
-                                            <tr key={transaction.reference} className="group transition-colors hover:bg-slate-800/30">
+                                            <tr key={transaction.reference} className="group hover:bg-muted/50 transition-colors">
                                                 <td className="px-6 py-4">
-                                                    <div className={`font-mono text-slate-300 ${isRefunded ? 'line-through opacity-70' : ''}`}>
+                                                    <div className={`font-mono font-medium ${isRefunded ? 'line-through opacity-50' : ''}`}>
                                                         {transaction.reference}
                                                     </div>
-                                                    <div className={`mt-0.5 font-mono text-[10px] text-slate-500 ${isRefunded ? 'opacity-70' : ''}`}>
+                                                    <div
+                                                        className={`text-muted-foreground mt-0.5 font-mono text-[10px] ${isRefunded ? 'opacity-50' : ''}`}
+                                                    >
                                                         {transaction.vendor_reference || '--'}
                                                     </div>
                                                 </td>
-                                                <td className={`px-6 py-4 ${isRefunded ? 'opacity-70' : ''}`}>
+                                                <td className={`px-6 py-4 ${isRefunded ? 'opacity-50' : ''}`}>
                                                     <div className="flex items-center gap-2">
                                                         <span className={`h-2 w-2 rounded-full ${networkColor}`}></span>
-                                                        <span className="font-medium text-slate-300">
+                                                        <span className="text-foreground font-medium">
                                                             {getServiceName(transaction.type, transaction.network)}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className={`px-6 py-4 font-mono ${isRefunded ? 'opacity-70' : ''}`}>{transaction.destination}</td>
-                                                <td className={`px-6 py-4 font-medium text-white ${isRefunded ? 'opacity-70' : ''}`}>
+                                                <td className={`text-muted-foreground px-6 py-4 font-mono ${isRefunded ? 'opacity-50' : ''}`}>
+                                                    {transaction.destination}
+                                                </td>
+                                                <td className={`text-foreground px-6 py-4 font-medium ${isRefunded ? 'opacity-50' : ''}`}>
                                                     {formatCurrency(transaction.amount)}
                                                 </td>
-                                                <td className={`px-6 py-4 ${transaction.profit > 0 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                                <td
+                                                    className={`px-6 py-4 font-medium ${transaction.profit > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'} ${isRefunded ? 'opacity-50' : ''}`}
+                                                >
                                                     {formatCurrency(transaction.profit)}
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -233,13 +243,13 @@ export default function TransactionsPage({ transactions, filters }: Props) {
                                                         {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
                                                     </span>
                                                 </td>
-                                                <td className={`px-6 py-4 text-xs ${isRefunded ? 'opacity-70' : ''}`}>
+                                                <td className={`text-muted-foreground px-6 py-4 text-xs ${isRefunded ? 'opacity-50' : ''}`}>
                                                     {formatDate(transaction.created_at)}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <Link
                                                         href={`/transactions/${transaction.reference.toLowerCase()}`}
-                                                        className="text-xs font-medium text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-indigo-300"
+                                                        className="text-primary text-xs font-medium opacity-0 transition-opacity group-hover:opacity-100 hover:underline"
                                                     >
                                                         View Details
                                                     </Link>
@@ -249,7 +259,7 @@ export default function TransactionsPage({ transactions, filters }: Props) {
                                     })
                                 ) : (
                                     <tr>
-                                        <td colSpan={8} className="px-6 py-8 text-center text-slate-500">
+                                        <td colSpan={8} className="text-muted-foreground px-6 py-8 text-center">
                                             No transactions found
                                         </td>
                                     </tr>
@@ -259,15 +269,15 @@ export default function TransactionsPage({ transactions, filters }: Props) {
                     </div>
 
                     {/* Pagination Footer */}
-                    <div className="flex items-center justify-between border-t border-slate-800 bg-slate-900/50 p-4 text-sm">
-                        <div className="text-slate-500">
-                            Showing <span className="font-medium text-slate-300">{transactions?.from || 0}</span> to{' '}
-                            <span className="font-medium text-slate-300">{transactions?.to || 0}</span> of{' '}
-                            <span className="font-medium text-slate-300">{transactions?.total || 0}</span> results
+                    <div className="border-border bg-muted/30 flex items-center justify-between border-t p-4 text-sm">
+                        <div className="text-muted-foreground">
+                            Showing <span className="text-foreground font-medium">{transactions?.from || 0}</span> to{' '}
+                            <span className="text-foreground font-medium">{transactions?.to || 0}</span> of{' '}
+                            <span className="text-foreground font-medium">{transactions?.total || 0}</span> results
                         </div>
                         <div className="flex gap-2">
-                            <button
-                                className="rounded-md border border-slate-700 bg-[#0f172a] px-3 py-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200 disabled:opacity-50"
+                            <Button
+                                variant="outline"
                                 disabled={transactions?.current_page === 1}
                                 onClick={() => {
                                     const newPage = transactions!.current_page - 1;
@@ -275,9 +285,9 @@ export default function TransactionsPage({ transactions, filters }: Props) {
                                 }}
                             >
                                 Previous
-                            </button>
-                            <button
-                                className="rounded-md border border-slate-700 bg-[#0f172a] px-3 py-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200 disabled:opacity-50"
+                            </Button>
+                            <Button
+                                variant="outline"
                                 disabled={transactions?.current_page === transactions?.last_page}
                                 onClick={() => {
                                     const newPage = transactions!.current_page + 1;
@@ -285,7 +295,7 @@ export default function TransactionsPage({ transactions, filters }: Props) {
                                 }}
                             >
                                 Next
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

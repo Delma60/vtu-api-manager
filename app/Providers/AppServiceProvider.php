@@ -6,6 +6,7 @@ use App\Models\PersonalAccessToken;
 use App\Models\Transaction;
 use App\Observers\TransactionObserver;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 use Laravel\Sanctum\Sanctum;
@@ -26,10 +27,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
-
+        if (str_contains(config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
         // Register model observers
         Transaction::observe(TransactionObserver::class);
-
         Sanctum::getAccessTokenFromRequestUsing(function ($request) {
             $token = $request->bearerToken();
 

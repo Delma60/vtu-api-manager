@@ -60,7 +60,7 @@ export default function PaymentLinksIndex() {
                                     paymentLinks.map((link) => (
                                         <TableRow key={link.id}>
                                             <TableCell className="font-medium pl-6">{link.description}</TableCell>
-                                            <TableCell>₦{parseFloat(link.amount).toLocaleString()}</TableCell>
+                                            <TableCell>{link.amount === null ? 'Variable' : "₦" + parseFloat(link.amount).toLocaleString()}</TableCell>
                                             <TableCell>
                                                 <Badge variant="outline">{link.is_reusable ? 'Reusable' : 'One-time'}</Badge>
                                             </TableCell>

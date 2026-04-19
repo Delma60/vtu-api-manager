@@ -5,12 +5,14 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { route as routeFn } from 'ziggy-js';
 import { initializeTheme } from './hooks/use-appearance';
+import axios from 'axios'
 
 declare global {
     const route: typeof routeFn;
 }
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+axios.defaults.headers.common['ngrok-skip-browser-warning'] = 'true';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

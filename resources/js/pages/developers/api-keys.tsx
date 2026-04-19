@@ -60,18 +60,18 @@ export default function ApiKeys({ keys }: { keys: ApiKey[] }) {
     return (
         <AppLayout>
             <Head title="API Keys" />
-            <div className="flex min-h-screen flex-1 flex-col space-y-6 p-6">
+            <div className="flex min-h-screen flex-1 flex-col space-y-6 p-6 bg-background font-sans text-foreground">
                 <header className="mb-4">
-                    <h1 className="text-2xl font-bold tracking-tight text-white">API Credentials</h1>
-                    <p className="mt-1 text-sm text-slate-400">
+                    <h1 className="text-2xl font-bold tracking-tight">API Credentials</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
                         Manage your API keys to authenticate requests to the VTU platform.
                     </p>
                 </header>
 
                 {/* Warning Alert */}
-                <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-amber-200">
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-amber-800 dark:text-amber-200">
                     <div className="flex items-center gap-3">
-                        <KeySquare className="h-5 w-5 text-amber-400" />
+                        <KeySquare className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                         <p className="text-sm">
                             <strong>Keep your keys secure.</strong> Do not share your live API keys in publicly accessible areas such as GitHub, client-side code, or public forums.
                         </p>
@@ -79,25 +79,25 @@ export default function ApiKeys({ keys }: { keys: ApiKey[] }) {
                 </div>
 
                 <div className="grid grid-cols-1 gap-6">
-                    <Card className="border-slate-800 bg-slate-900">
-                        <CardHeader className="flex flex-row items-center justify-between border-b border-slate-800 pb-4">
+                    <Card className="border-border bg-card shadow-sm">
+                        <CardHeader className="flex flex-row items-center justify-between border-b border-border pb-4">
                             <div>
                                 <CardTitle className="text-lg">Standard API Keys</CardTitle>
-                                <CardDescription className="text-slate-400">Keys used for server-to-server integrations.</CardDescription>
+                                <CardDescription className="text-muted-foreground">Keys used for server-to-server integrations.</CardDescription>
                             </div>
 
                             {/* Generate Key Dialog */}
                             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500 text-white">
-                                        <Plus className="mr-2 h-4 w-4" /> Generate New Key
+                                    <Button size="sm" className="gap-1.5 shadow-sm">
+                                        <Plus className="h-4 w-4" /> Generate New Key
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="border-slate-800 bg-slate-900 text-white sm:max-w-[425px]">
+                                <DialogContent className="sm:max-w-[425px]">
                                     <form onSubmit={handleGenerateKey}>
                                         <DialogHeader>
                                             <DialogTitle>Generate API Key</DialogTitle>
-                                            <DialogDescription className="text-slate-400">
+                                            <DialogDescription>
                                                 Provide a recognizable name for your new API key to help you track its usage.
                                             </DialogDescription>
                                         </DialogHeader>
@@ -109,16 +109,16 @@ export default function ApiKeys({ keys }: { keys: ApiKey[] }) {
                                                     placeholder="e.g. Production Web Server"
                                                     value={data.name}
                                                     onChange={(e) => setData('name', e.target.value)}
-                                                    className="border-slate-700 bg-slate-800"
+                                                    className="bg-background"
                                                 />
                                                 <InputError message={errors.name} />
                                             </div>
                                         </div>
                                         <DialogFooter>
-                                            <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="text-slate-300 hover:text-white">
+                                            <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)}>
                                                 Cancel
                                             </Button>
-                                            <Button type="submit" disabled={processing} className="bg-indigo-600 hover:bg-indigo-500">
+                                            <Button type="submit" disabled={processing}>
                                                 {processing ? 'Generating...' : 'Generate Key'}
                                             </Button>
                                         </DialogFooter>
@@ -129,38 +129,38 @@ export default function ApiKeys({ keys }: { keys: ApiKey[] }) {
 
                         <CardContent className="p-0">
                             {keys.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
+                                <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
                                     <KeySquare className="mb-3 h-10 w-10 opacity-20" />
-                                    <p>No API keys found.</p>
+                                    <p className="font-medium text-foreground">No API keys found.</p>
                                     <p className="text-xs">Generate one to start making API requests.</p>
                                 </div>
                             ) : (
-                                <div className="divide-y divide-slate-800">
+                                <div className="divide-y divide-border">
                                     {keys.map((key) => {
                                         const isVisible = visibleKeys.includes(key.id);
                                         const maskedToken = key.token.substring(0, 8) + '••••••••••••••••••••••••' + key.token.substring(key.token.length - 4);
                                         const displayToken = isVisible ? key.token : maskedToken;
 
                                         return (
-                                            <div key={key.id} className="flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center">
+                                            <div key={key.id} className="flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center hover:bg-muted/30 transition-colors">
                                                 <div className="space-y-1">
                                                     <div className="flex items-center gap-2">
-                                                        <p className="font-medium text-white">{key.name}</p>
+                                                        <p className="font-medium text-foreground">{key.name}</p>
                                                         {key.is_live ? (
-                                                            <Badge className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20">Live</Badge>
+                                                            <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20 shadow-none">Live</Badge>
                                                         ) : (
-                                                            <Badge className="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/20">Test</Badge>
+                                                            <Badge className="bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border-amber-500/20 shadow-none">Test</Badge>
                                                         )}
                                                     </div>
                                                     <div className="flex items-center gap-3">
-                                                        <code className="rounded bg-slate-950 px-2 py-1 font-mono text-sm text-slate-300">
+                                                        <code className="rounded border border-border bg-muted px-2 py-1 font-mono text-sm text-muted-foreground">
                                                             {displayToken}
                                                         </code>
                                                         <div className="flex items-center gap-1">
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="h-8 w-8 text-slate-400 hover:bg-slate-800 hover:text-white"
+                                                                className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                                                                 onClick={() => toggleVisibility(key.id)}
                                                             >
                                                                 {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -168,26 +168,25 @@ export default function ApiKeys({ keys }: { keys: ApiKey[] }) {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="h-8 w-8 text-slate-400 hover:bg-slate-800 hover:text-white"
+                                                                className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                                                                 onClick={() => copyToClipboard(key.id, key.token)}
                                                             >
-                                                                {copiedKey === key.id ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                                                                {copiedKey === key.id ? <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> : <Copy className="h-4 w-4" />}
                                                             </Button>
                                                         </div>
                                                     </div>
-                                                    <div className="text-xs text-slate-500">
+                                                    <div className="text-xs text-muted-foreground">
                                                         Created on {new Date(key.created_at).toLocaleDateString()} • Last used: {key.last_used_at ? new Date(key.last_used_at).toLocaleDateString() : 'Never'}
                                                     </div>
                                                 </div>
 
                                                 <div>
-
                                                     <DeleteButton
                                                         variant="ghost"
                                                         route={route('api-keys.destroy', key.id)}
                                                         resourceName='api key'
                                                         requirePassword
-                                                        className="text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
+                                                        className="text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
                                                     >
                                                         <Trash2 className="mr-2 h-4 w-4" /> Revoke Key
                                                     </DeleteButton>

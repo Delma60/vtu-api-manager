@@ -23,7 +23,7 @@ class StorePaymentLinkRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'amount' => 'required|numeric|min:100',
+            'amount' => 'nullable|numeric|min:100',
             'description' => 'required|string|max:255',
             'customer_name' => 'nullable|string|max:255',
             'customer_email' => 'nullable|email',

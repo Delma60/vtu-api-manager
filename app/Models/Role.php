@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Role extends Model
 {
     use BelongsToBusiness;
+    protected $connection = 'mysql';
+    
     protected $fillable = ['name', 'slug', 'service_cost_margins'];
 
     protected $casts = [

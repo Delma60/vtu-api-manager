@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
+use App\EnvironmentAware;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Customer extends User
 {
     /** @use HasFactory<\Database\Factories\CustomerFactory> */
-    use BelongsToBusiness;
+    use BelongsToBusiness, EnvironmentAware, HasFactory;
     
     protected $table = 'users';
 

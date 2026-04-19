@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
+use App\EnvironmentAware;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApiLog extends Model
 {
-    use HasFactory, HasUuids, Prunable, BelongsToBusiness;
+    use HasFactory, HasUuids, Prunable, BelongsToBusiness, EnvironmentAware;
 
     protected $fillable = [
         'user_id',

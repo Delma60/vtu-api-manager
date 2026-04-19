@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Models;
+namespace
+ App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -8,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Business extends Model
 {
     //
+    protected $connection = 'mysql';
     protected $fillable = [
         'name',
         'support_email',

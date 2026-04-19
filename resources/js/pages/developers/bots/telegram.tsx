@@ -44,7 +44,7 @@ export default function MerchantTelegramBot({ globalBotUsername, merchantCode, i
         <AppLayout breadcrumbs={[{ title: 'Telegram Sales Channel', href: route('bots.telegram.index') }]}>
             <Head title="Telegram Sales Channel" />
 
-            <div className="mx-auto max-w-4xl space-y-8 py-6">
+            <div className=" space-y-8 p-6 py-6">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Telegram Sales Channel</h2>
                     <p className="mt-1 text-slate-500 dark:text-slate-300">

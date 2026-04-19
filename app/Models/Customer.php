@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Customer extends User
 {
     /** @use HasFactory<\Database\Factories\CustomerFactory> */
-    use BelongsToBusiness, EnvironmentAware, HasFactory;
+    use BelongsToBusiness, HasFactory;
     
     protected $table = 'users';
 

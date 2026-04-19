@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApiLog extends Model
 {
-    use HasFactory, HasUuids, Prunable, BelongsToBusiness, EnvironmentAware;
+    use HasFactory, HasUuids, Prunable, BelongsToBusiness;
 
     protected $fillable = [
         'user_id',

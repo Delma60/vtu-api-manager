@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     /** @use HasFactory<\Database\Factories\TransactionFactory> */
-    use HasFactory,BelongsToBusiness,EnvironmentAware;
+    use HasFactory,BelongsToBusiness;
 
     protected $fillable = [
         'user_id', 'transaction_type', 'provider', 'account_or_phone', 'amount',

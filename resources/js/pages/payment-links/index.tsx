@@ -22,7 +22,7 @@ export default function PaymentLinksIndex() {
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
     const copyToClipboard = (id: string) => {
-        const url ="";// route('pay.show', id);
+        const url = route('pay.show', id);
         navigator.clipboard.writeText(url);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
@@ -30,7 +30,7 @@ export default function PaymentLinksIndex() {
 
     return (
         <AppLayout breadcrumbs={[{ title: 'Payment Links', href: route('payment-links.index') }]}>
-            <div className="flex flex-col gap-6 p-4 pt-0">
+            <div className="flex flex-col gap-6 p-4 ">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-semibold tracking-tight">Payment Links</h1>

@@ -27,7 +27,7 @@ Route::get('/', function () {
 })->name('home');
 
 // Payment link pay.show
-Route::get('pay/{id}', [PaymentLinkController::class, 'show'])->name('pay.show');
+Route::get('pay/{paymentLink}', [PaymentLinkController::class, 'show'])->name('pay.show');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

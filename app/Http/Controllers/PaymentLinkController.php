@@ -10,6 +10,7 @@ use App\Models\DataPlan;
 use App\Models\Network;
 use App\Models\NetworkType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -70,20 +71,20 @@ class PaymentLinkController extends Controller
      */
     public function show(PaymentLink $paymentLink)
     {
-        //
-        $paymentLink->load('business:id,name,business_name');
+        Log::info($paymentLink);
+        // 1. Eager load both the business AND the owner to save DB queries
+        $paymentLink->load('business.owner');
 
-        // If it's a one-time link and already paid, don't allow payment again
         if (!$paymentLink->is_reusable && $paymentLink->status === 'successful') {
             return abort(403, 'This payment link has already been paid.');
         }
 
-        return Inertia::render('pay/show', [
+        return Inertia::render('checkout/pay', [
             'paymentLink' => $paymentLink,
-            'merchant' => $paymentLink->user->business_name ?? $paymentLink->user->name
+            // 2. Use null-safe operator (?->) and fall back to the business name
+            'merchant' => $paymentLink->business?->owner?->name ?? $paymentLink->business?->name ?? 'Unknown Merchant'
         ]);
     }
-
     /**
      * Show the form for editing the specified resource.
      */

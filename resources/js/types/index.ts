@@ -89,3 +89,53 @@ export interface Transaction {
         name: string;
     } | null;
 }
+
+
+export interface Network {
+    id: string|number;
+    name: string;
+    code: string;
+    airtime_api_id: number|string;
+    airtime_pin_api_id: number|string;
+    data_api_id: number|string;
+    data_pin_api_id: number|string;
+    is_active: boolean;
+    network_types?: NetworkType[]
+}
+
+
+export interface NetworkType {
+    id: number|string;
+    name: string;
+    type: string;
+    typeable:Typeable;
+    is_active: boolean;
+    network_id:string;
+}
+
+export interface Typeable {
+    id: number|string;
+    name: string;
+}
+
+export interface DataPlan {
+    id: number;
+    name: string;
+    plan_type?:string;
+    plan_name?:string;
+    network: string;
+    min_amount: number;
+    max_amount: number;
+    is_active: boolean;
+}
+
+
+export interface   DiscountPlan {
+    id: number;
+    name: string;
+    plan_type: NetworkType
+    network: Network;
+    min_amount: number;
+    max_amount: number;
+    is_active: boolean;
+}

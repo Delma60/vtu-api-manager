@@ -158,7 +158,12 @@
     }
 }
 
-
+.tab-list{
+    @apply mb-8 flex w-full justify-start overflow-x-auto bg-muted/50 p-1 border border-border h-auto;
+}
+.tab-trigger {
+    @apply gap-2 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm;
+}
 .no-scrollbar::-webkit-scrollbar
 {
     display: none;

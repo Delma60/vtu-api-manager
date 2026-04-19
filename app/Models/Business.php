@@ -15,6 +15,9 @@ class Business extends Model
         'support_email',
         'is_active',
         'slug',
+        'bot_code',
+        'telegram_is_active',
+        'telegram_welcome_message',
     ];
 
     public function owner(): HasOne

@@ -79,20 +79,20 @@ export default function ServiceControl({ providers, services, networkTypes, netw
                 <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col p-8">
                     <Tabs defaultValue="airtime" className="w-full">
                         
-                        <TabsList className="mb-8 flex w-full justify-start overflow-x-auto bg-muted/50 p-1 border border-border h-auto">
-                            <TabsTrigger value="airtime" className="gap-2 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                        <TabsList className="tab-list">
+                            <TabsTrigger value="airtime" className="tab-trigger">
                                 <Smartphone className="h-4 w-4" /> Airtime
                             </TabsTrigger>
-                            <TabsTrigger value="data" className="gap-2 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                            <TabsTrigger value="data" className="tab-trigger">
                                 <Wifi className="h-4 w-4" /> Data
                             </TabsTrigger>
-                            <TabsTrigger value="cable" className="gap-2 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                            <TabsTrigger value="cable" className="tab-trigger">
                                 <Network className="h-4 w-4" /> Cable TV
                             </TabsTrigger>
-                            <TabsTrigger value="electricity" className="gap-2 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                            <TabsTrigger value="electricity" className="tab-trigger">
                                 <Lightbulb className="h-4 w-4" /> Electricity
                             </TabsTrigger>
-                            <TabsTrigger value="others" className="gap-2 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                            <TabsTrigger value="others" className="tab-trigger">
                                 <Layers className="h-4 w-4" /> Other Services
                             </TabsTrigger>
                         </TabsList>

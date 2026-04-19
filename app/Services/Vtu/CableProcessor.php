@@ -2,6 +2,7 @@
 
 namespace App\Services\Vtu;
 
+use App\Models\CablePlan;
 use App\Models\User;
 use App\Services\ProviderService;
 use App\Services\TransactionService;
@@ -13,19 +14,20 @@ class CableProcessor
 
     public function process(User $user, array $payload): array
     {
-        $provider = ProviderService::getProviderInstance($payload['provider']);
+        $provider = ProviderService::getProviderInstance('cable');
         $txRef = $payload['tx_ref'] ?? 'VTM_' . uniqid();
         $payload['tx_ref'] = $txRef;
+        $cablePlan = CablePlan::find($payload['cable_plan']);
 
         // 1. Initialize Transaction and deduct wallet
         try {
             $transaction = $this->transactionService->initialize($user, [
                 'transaction_reference' => $txRef,
-                'provider' => $payload['provider'],
+                'provider' => $payload['cable'],
                 'platform' => $payload['platform'] ?? 'api',
                 'transaction_type' => 'cable',
                 'account_or_phone' => $payload['iuc'],
-                'amount' => $payload['amount'],
+                'amount' => $cablePlan->amount,
                 'discount_amount' => $payload['discount_amount'] ?? 0.00,
                 'meta' => [
                     'cable_plan_id' => $payload['cable_plan'] ?? null,

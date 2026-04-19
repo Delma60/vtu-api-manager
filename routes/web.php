@@ -16,6 +16,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\NetworkTypeController;
+use App\Http\Controllers\PaymentLinkController;
 use App\Http\Controllers\ServiceControlController;
 use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
@@ -25,12 +26,16 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+// Payment link pay.show
+Route::get('pay/{id}', [PaymentLinkController::class, 'show'])->name('pay.show');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    // toogle mode
+    
     Route::get('toggle-mode', [DashboardController::class, 'toggleMode'])->name('toggle-mode');
 
     Route::resource('transactions', TransactionController::class);
+    Route::resource('payment-links', PaymentLinkController::class);
     Route::resource('wallets', WalletController::class);
     Route::resource('networks', NetworkController::class);
     Route::resource('providers', ProviderController::class);
@@ -46,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('customers/{customer}/activate', [CustomerController::class, 'activate'])->name('customers.activate');
 
     Route::get('search', [SearchController::class, 'index'])->name('search');
+    // Route::post('/payment-links', [PaymentLinkController::class, 'store'])->name('payment-links.store');
 
     Route::get('pricing/airtime-data', [PricingController::class, 'airtimeAndData'])->name('pricing.airtime-data');
     Route::get('pricing/airtime-plan/create', [PricingController::class, 'createAirtimePlan'])->name('pricing.airtime-plan.create');

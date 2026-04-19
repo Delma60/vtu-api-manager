@@ -99,6 +99,20 @@ export function SidebarComponent() {
                     label: 'Wallets & Balances',
                     routeName: 'wallets.index',
                 },
+                // payment link
+                {
+                    icon: (
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                        />
+                    ),
+                    label: 'Payment Links',
+                    routeName: 'payment-links.index',
+                }
+
             ],
         },
         {

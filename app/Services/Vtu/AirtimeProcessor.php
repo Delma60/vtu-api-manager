@@ -13,7 +13,7 @@ class AirtimeProcessor
 
     public function process(User $user, array $payload): array
     {
-        $provider = ProviderService::getProviderInstance($payload['provider']);
+        $provider = ProviderService::getProviderInstance('airtime');
         $txRef = $payload['tx_ref'] ?? 'VTM_' . uniqid();
         $payload['tx_ref'] = $txRef; 
 

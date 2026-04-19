@@ -43,8 +43,7 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
-        $providerHealth = Provider::with('transactions')
-            ->orderBy('name')
+        $providerHealth = Provider::orderBy('name')
             ->get()
             ->map(function (Provider $provider) {
                 return [

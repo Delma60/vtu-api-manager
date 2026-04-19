@@ -117,5 +117,6 @@ class User extends Authenticatable
     {
         return $this->type === 'customer';
     }
+
 }
 

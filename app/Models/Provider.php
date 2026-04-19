@@ -53,7 +53,7 @@ class Provider extends Model
     public function getConnectionAttribute()
     {
         $user = auth()->user();
-        $key = md5($this->base_url . $this->api_key . $this->api_secret .$user->id . $user->business->mode);
+        $key = md5($this->base_url . $this->api_key . $this->api_secret .$user?->id ?? "" . $user->business->mode);
         $provider = ProviderService::make($this);
         return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
             // Log::info(["key" => $provider]);
@@ -64,7 +64,7 @@ class Provider extends Model
     public function getBalanceAttribute()
     {
         $user = auth()->user();
-        $key = md5($this->base_url . $this->api_key . $this->api_secret . $user->email . $user->business->mode );
+        $key = md5($this->base_url . $this->api_key . $this->api_secret . $user?->id ?? '' . $user->business->mode );
         $provider = ProviderService::make($this);
         return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
             return $provider->checkBalance();

@@ -20,7 +20,7 @@ class CablePlan extends Model
         'is_active',
     ];
 
-    protected $appends = ['provider'];
+    protected $appends = ['provider', 'amount'];
 
     protected $casts = [
         'is_active' => 'boolean',
@@ -31,6 +31,24 @@ class CablePlan extends Model
         return $this->morphToMany(Provider::class, 'providerable', 'providerables', 'providerable_id', 'provider_id')
             ->withPivot(['cost_price', 'margin_value', 'margin_type', 'server_id'])
             ->withTimestamps();
+    }
+
+    // amount attribute
+    public function getAmountAttribute()
+    {
+        $provider = $this->providers()->first();
+        if ($provider) {
+            $costPrice = $provider->pivot->cost_price;
+            $marginValue = $provider->pivot->margin_value;
+            $marginType = $provider->pivot->margin_type;
+
+            if ($marginType === 'percentage') {
+                return round($costPrice + ($costPrice * ($marginValue / 100)), 2);
+            } else {
+                return round($costPrice + $marginValue, 2);
+            }
+        }
+        return null; // or some default value
     }
 
     public function networkType():BelongsTo

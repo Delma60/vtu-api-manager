@@ -89,7 +89,7 @@ class DataPurchaseRequest extends FormRequest
                     }
                 }],
             'bypass' => 'sometimes|boolean',
-            'tx_ref' => 'required|string|unique:transactions,reference',
+            'tx_ref' => 'required|string|unique:transactions,transaction_reference',
         ];
     }
 

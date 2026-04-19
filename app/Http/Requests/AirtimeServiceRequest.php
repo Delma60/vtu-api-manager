@@ -116,7 +116,7 @@ class AirtimeServiceRequest extends FormRequest
                 }],
             'amount'    => ['required', 'integer', 'min:1'], 
             'bypass'    => ['sometimes', 'boolean'],
-            'tx_ref'    => ['required', 'string', 'unique:transactions,reference'],
+            'tx_ref'    => ['required', 'string', 'unique:transactions,transaction_reference'],
         ];
     }
 

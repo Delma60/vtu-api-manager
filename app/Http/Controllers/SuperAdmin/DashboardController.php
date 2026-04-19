@@ -22,7 +22,7 @@ public function index()
             // Aggregate all successful transactions across ALL businesses today
             'totalPlatformVolume' => number_format(Transaction::where('status', 'successful')->whereDate('created_at', today())->sum('amount'), 2),
             'activeBusinesses' => Business::where('is_active', true)->count(),
-            'totalSimhosts' => Provider::count(),
+            'totalSimhosts' => Provider::where("meta->meta_author", "simhost")->count(),
             'activeBots' => BotSession::where('is_active', true)->count(), 
         ];
 

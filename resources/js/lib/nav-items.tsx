@@ -79,7 +79,7 @@ export const navItems = ({
                             </svg>
                         ),
                         label: 'Payment Providers',
-                        routeName: 'super-admin.dashboard', // Change to 'super-admin.payment-providers.index'
+                        routeName: 'super-admin.payment-gateways.index'
                     },
                     {
                         icon: (

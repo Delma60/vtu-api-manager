@@ -20,6 +20,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\NetworkTypeController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\PaymentLinkController;
 use App\Http\Controllers\ServiceControlController;
 use App\Http\Controllers\SuperAdmin\BusinessController;
@@ -149,6 +150,9 @@ Route::middleware(['auth', SuperAdminMiddleware::class])
         Route::resource('users', SuperAdminUserController::class);
         Route::post('users/{user}/toggle', [SuperAdminUserController::class, 'toggleStatus'])->name('users.toggle');
         // Route::resource('global-providers', GlobalProviderController::class);
+        Route::post('payment-gateways/{paymentGateway}/toggle', [PaymentGatewayController::class, 'toggleStatus'])
+        ->name('payment-gateways.toggle');
+    Route::resource('payment-gateways', PaymentGatewayController::class)->except(['show']);
 });
 
 require __DIR__.'/settings.php';

@@ -20,6 +20,11 @@ class ApiLogController extends Controller
             });
         }
 
+        if($request->filled("id")){
+            $businessId = $request->input("id");
+            $query->where("business_id", $businessId);
+        }
+
         // Paginate results
         $logs = $query->where("business_id", $request->user()->business_id)->paginate(20)
             ->withQueryString();

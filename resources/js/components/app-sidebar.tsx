@@ -1,3 +1,4 @@
+import { NavUser } from '@/components/nav-user';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
     Sidebar,
@@ -17,7 +18,6 @@ import { User } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 export function SidebarComponent() {
     const { props, url } = usePage<{
@@ -69,7 +69,7 @@ export function SidebarComponent() {
                     <div className="px-2 py-3">
                         <button
                             onClick={changeMode}
-                            className="flex w-full cursor-pointer items-center justify-between rounded-lg border border-border bg-background p-1 text-xs font-semibold transition-all hover:border-sidebar-accent"
+                            className="border-border bg-background hover:border-sidebar-accent flex w-full cursor-pointer items-center justify-between rounded-lg border p-1 text-xs font-semibold transition-all"
                             title={`Switch to ${isLiveMode ? 'Test' : 'Live'} Mode`}
                         >
                             <div
@@ -78,7 +78,7 @@ export function SidebarComponent() {
                                 {state === 'expanded' ? 'Test' : 'T'}
                             </div>
                             <div
-                                className={`flex-1 rounded-md py-1 text-center transition-all ${isLiveMode ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                className={`flex-1 rounded-md py-1 text-center transition-all ${isLiveMode ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 shadow-sm dark:text-emerald-400' : 'text-muted-foreground hover:text-foreground'}`}
                             >
                                 {state === 'expanded' ? 'Live' : 'L'}
                             </div>
@@ -191,33 +191,7 @@ export function SidebarComponent() {
 
             {/* User Profile Footer */}
             <SidebarFooter className="border-sidebar-border border-t">
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <button className="hover:bg-sidebar-accent group flex w-full items-center gap-3 rounded-lg px-2 py-2 transition-colors">
-                            <Avatar className="border-sidebar-border h-8 w-8 shrink-0 border">
-                                <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs font-medium">
-                                    {props?.auth?.user?.name
-                                        ?.split(' ')
-                                        .map((n: string) => n[0])
-                                        .join('')
-                                        .toUpperCase()}
-                                </AvatarFallback>
-                                <AvatarImage
-                                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(props?.auth?.user?.name || 'User')}&background=0f172a&color=ffffff&size=128`}
-                                    alt={props?.auth?.user?.name}
-                                />
-                            </Avatar>
-                            {state === 'expanded' && (
-                                <div className="min-w-0 flex-1 text-left">
-                                    <p className="text-sidebar-foreground group-hover:text-sidebar-accent-foreground truncate text-sm font-medium">
-                                        {props?.auth?.user?.name}
-                                    </p>
-                                    <p className="text-sidebar-foreground/60 truncate text-xs">{props?.auth?.user?.email}</p>
-                                </div>
-                            )}
-                        </button>
-                    </SidebarMenuItem>
-                </SidebarMenu>
+                <NavUser />
             </SidebarFooter>
 
             <SidebarRail />

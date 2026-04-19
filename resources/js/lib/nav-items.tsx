@@ -41,7 +41,7 @@ export const navItems = ({
                             </svg>
                         ),
                         label: 'Businesses',
-                        routeName: 'super-admin.dashboard', // Change to: 'super-admin.businesses.index'
+                        routeName: 'super-admin.businesses.index', // Change to: 'super-admin.businesses.index'
                     },
                     {
                         icon: (
@@ -50,7 +50,7 @@ export const navItems = ({
                             </svg>
                         ),
                         label: 'Users',
-                        routeName: 'super-admin.dashboard', // Change to: 'super-admin.users.index'
+                        routeName: 'super-admin.users.index', // Change to: 'super-admin.users.index'
                     },
                 ],
             },

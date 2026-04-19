@@ -10,6 +10,7 @@ use App\Http\Controllers\DataPlanController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
+use App\Http\Controllers\SuperAdmin\UserController as SuperAdminUserController;
 use App\Http\Controllers\MetricsController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\PricingController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\NetworkTypeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentLinkController;
 use App\Http\Controllers\ServiceControlController;
+use App\Http\Controllers\SuperAdmin\BusinessController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Middleware\SuperAdminMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -139,7 +141,13 @@ Route::middleware(['auth', SuperAdminMiddleware::class])
         Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
         
         // Future routes go here:
-        // Route::resource('businesses', BusinessController::class);
+        Route::post('businesses/{business}/toggle', [BusinessController::class, 'toggleStatus'])
+        ->name('businesses.toggle');
+
+    // 2. The standard resource route generates index, show, create, etc.
+        Route::resource('businesses', BusinessController::class);
+        Route::resource('users', SuperAdminUserController::class);
+        Route::post('users/{user}/toggle', [SuperAdminUserController::class, 'toggleStatus'])->name('users.toggle');
         // Route::resource('global-providers', GlobalProviderController::class);
 });
 

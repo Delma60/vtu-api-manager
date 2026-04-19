@@ -27,7 +27,7 @@ public function index()
         ];
 
         // 2. Simhost/Provider Health
-        $simhostHealth = Provider::orderBy('priority')
+        $simhostHealth = Provider::where("meta->meta_author", "simhost")->orderBy('priority')
             ->take(5)
             ->get()
             ->map(function ($host) {

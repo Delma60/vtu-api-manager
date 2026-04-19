@@ -21,7 +21,7 @@ class ProviderService
     static function make (Provider $provider):ProviderAbstract {
         $useSandbox = false;
 
-        if (auth()->check() && auth()->user()->user_type !== 'super_admin' && auth()->user()->business) {
+        if (auth()->check() && auth()->user()->user_type !== 'admin' && auth()->user()->business) {
             $useSandbox = auth()->user()->business->mode === 'test';
         }
 

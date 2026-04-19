@@ -14,6 +14,12 @@ trait BelongsToBusiness
             $user = static::getTenantUser();
             $tableName = (new static)->getTable();
             
+            // 1. BYPASS FOR SUPER ADMIN: Allow them to see everything
+            if ($user && $user->user_type === 'super_admin') {
+                return;
+            }
+            
+            // 2. STANDARD TENANT LOGIC
             if ($user && $user->business_id !== null) {
                 // User is authenticated and has a business_id - filter by it
                 $builder->where("{$tableName}.business_id", $user->business_id);
@@ -26,7 +32,10 @@ trait BelongsToBusiness
         // Automatically assign the business_id when creating new records
         static::creating(function ($model) {
             if (empty($model->business_id)) {
-                if ($user = static::getTenantUser()) {
+                $user = static::getTenantUser();
+                
+                // Ensure we don't apply super admin's null business_id
+                if ($user && $user->user_type !== 'super_admin' && $user->business_id) {
                     $model->business_id = $user->business_id;
                 }
             }

@@ -21,14 +21,12 @@ class ProviderService
     static function make (Provider $provider):ProviderAbstract {
         $useSandbox = false;
 
-        // Dynamically check if the current user/business is in test mode
-        // This assumes your API authentication (e.g., Sanctum or API Key Middleware) 
-        // logs in the user associated with the API request.
-        if (auth()->check() && auth()->user()->business) {
+        if (auth()->check() && auth()->user()->user_type !== 'super_admin' && auth()->user()->business) {
             $useSandbox = auth()->user()->business->mode === 'test';
         }
 
-        $match = $useSandbox ? "sandbox": $provider->meta['meta_author'];
+        // Add ?? 'sandbox' fallback to prevent array offset errors
+        $match = $useSandbox ? "sandbox" : ($provider->meta['meta_author'] ?? 'sandbox');
         // Log::info($provider);
         return match ($match) {
             "ADEX DEVELOPER"=> new Adex($provider),

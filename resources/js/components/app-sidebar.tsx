@@ -12,19 +12,21 @@ import {
     SidebarRail,
     useSidebar,
 } from '@/components/ui/sidebar';
+import { navItems } from '@/lib/nav-items';
+import { User } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { navItems } from '@/lib/nav-items';
 
 export function SidebarComponent() {
     const { props, url } = usePage<{
-        auth: { user: { name: string; email: string } };
+        auth: { user: User };
         provider_down_count?: number;
         mode?: 'live' | 'test';
     }>();
     const providerDownCount = (props as Record<string, unknown>)?.provider_down_count ?? 0;
+    const userType = props.auth.user.user_type;
     const [activeTab, setActiveTab] = useState(url);
     const [isLiveMode, setIsLiveMode] = useState(props.mode === 'live');
     const [expandedItems, setExpandedItems] = useState<string[]>(['pricing']);
@@ -39,8 +41,7 @@ export function SidebarComponent() {
         setExpandedItems((prev) => (prev.includes(itemName) ? prev.filter((name) => name !== itemName) : [...prev, itemName]));
     };
 
-
-    const _navItems = navItems({ providerDownCount })
+    const _navItems = navItems({ providerDownCount, user_type: props.auth.user.user_type });
 
     const isItemActive = (routeName: string): boolean => {
         if (!routeName) return false;
@@ -53,33 +54,37 @@ export function SidebarComponent() {
     };
 
     return (
-        <Sidebar collapsible="icon" variant="sidebar" className="border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
+        <Sidebar collapsible="icon" variant="sidebar" className="border-sidebar-border bg-sidebar text-sidebar-foreground border-r">
             {/* Logo Section */}
-            <SidebarGroup className="border-b border-sidebar-border">
+            <SidebarGroup className="border-sidebar-border border-b">
                 <div className="flex items-center justify-center gap-2 px-2 py-4">
-                    <div className="h-6 w-6 shrink-0 rounded bg-gradient-to-br from-primary to-chart-4 shadow-lg shadow-primary/30" />
-                    {state === 'expanded' && <span className="text-lg font-bold tracking-tight whitespace-nowrap text-sidebar-foreground">NexusVTU</span>}
+                    <div className="from-primary to-chart-4 shadow-primary/30 h-6 w-6 shrink-0 rounded bg-gradient-to-br shadow-lg" />
+                    {state === 'expanded' && (
+                        <span className="text-sidebar-foreground text-lg font-bold tracking-tight whitespace-nowrap">NexusVTU</span>
+                    )}
                 </div>
-
+                {/* <div className="rounded-lg bg-red-500 p-4 text-white shadow-md">{props.auth.user.user_type ?? 'none'}</div> */}
                 {/* Environment Toggle */}
-                <div className="px-2 py-3">
-                    <button
-                        onClick={changeMode}
-                        className="flex w-full cursor-pointer items-center justify-between rounded-lg border border-border bg-background p-1 text-xs font-semibold transition-all hover:border-sidebar-accent"
-                        title={`Switch to ${isLiveMode ? 'Test' : 'Live'} Mode`}
-                    >
-                        <div
-                            className={`flex-1 rounded-md py-1 text-center transition-all ${!isLiveMode ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                {userType !== 'admin' && (
+                    <div className="px-2 py-3">
+                        <button
+                            onClick={changeMode}
+                            className="flex w-full cursor-pointer items-center justify-between rounded-lg border border-border bg-background p-1 text-xs font-semibold transition-all hover:border-sidebar-accent"
+                            title={`Switch to ${isLiveMode ? 'Test' : 'Live'} Mode`}
                         >
-                            {state === 'expanded' ? 'Test' : 'T'}
-                        </div>
-                        <div
-                            className={`flex-1 rounded-md py-1 text-center transition-all ${isLiveMode ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-                        >
-                            {state === 'expanded' ? 'Live' : 'L'}
-                        </div>
-                    </button>
-                </div>
+                            <div
+                                className={`flex-1 rounded-md py-1 text-center transition-all ${!isLiveMode ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                            >
+                                {state === 'expanded' ? 'Test' : 'T'}
+                            </div>
+                            <div
+                                className={`flex-1 rounded-md py-1 text-center transition-all ${isLiveMode ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                            >
+                                {state === 'expanded' ? 'Live' : 'L'}
+                            </div>
+                        </button>
+                    </div>
+                )}
             </SidebarGroup>
 
             {/* Main Navigation */}
@@ -87,7 +92,7 @@ export function SidebarComponent() {
                 {_navItems.map((section) => (
                     <SidebarGroup key={section.section}>
                         {state === 'expanded' && (
-                            <SidebarGroupLabel className="px-2 text-xs font-semibold tracking-wider text-sidebar-foreground/60 uppercase">
+                            <SidebarGroupLabel className="text-sidebar-foreground/60 px-2 text-xs font-semibold tracking-wider uppercase">
                                 {section.section}
                             </SidebarGroupLabel>
                         )}
@@ -129,7 +134,7 @@ export function SidebarComponent() {
                                                 </CollapsibleTrigger>
                                                 {expandedItems.includes(item.label) && state === 'expanded' && (
                                                     <CollapsibleContent>
-                                                        <SidebarMenu className="ml-3 mt-1 space-y-1 border-l border-sidebar-border pl-3">
+                                                        <SidebarMenu className="border-sidebar-border mt-1 ml-3 space-y-1 border-l pl-3">
                                                             {item.children.map((child) => (
                                                                 <SidebarMenuItem key={child.routeName}>
                                                                     <SidebarMenuButton
@@ -168,7 +173,7 @@ export function SidebarComponent() {
                                                     <>
                                                         <span className="flex-1">{item.label}</span>
                                                         {'badge' in item && item.badge && (
-                                                            <span className="shrink-0 rounded-full border border-destructive/20 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold tracking-wide text-destructive">
+                                                            <span className="border-destructive/20 bg-destructive/10 text-destructive shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wide">
                                                                 {item.badge}
                                                             </span>
                                                         )}
@@ -185,12 +190,12 @@ export function SidebarComponent() {
             </SidebarContent>
 
             {/* User Profile Footer */}
-            <SidebarFooter className="border-t border-sidebar-border">
+            <SidebarFooter className="border-sidebar-border border-t">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <button className="flex w-full items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-sidebar-accent group">
-                            <Avatar className="h-8 w-8 shrink-0 border border-sidebar-border">
-                                <AvatarFallback className="text-xs font-medium bg-sidebar-primary text-sidebar-primary-foreground">
+                        <button className="hover:bg-sidebar-accent group flex w-full items-center gap-3 rounded-lg px-2 py-2 transition-colors">
+                            <Avatar className="border-sidebar-border h-8 w-8 shrink-0 border">
+                                <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs font-medium">
                                     {props?.auth?.user?.name
                                         ?.split(' ')
                                         .map((n: string) => n[0])
@@ -204,8 +209,10 @@ export function SidebarComponent() {
                             </Avatar>
                             {state === 'expanded' && (
                                 <div className="min-w-0 flex-1 text-left">
-                                    <p className="truncate text-sm font-medium text-sidebar-foreground group-hover:text-sidebar-accent-foreground">{props?.auth?.user?.name}</p>
-                                    <p className="truncate text-xs text-sidebar-foreground/60">{props?.auth?.user?.email}</p>
+                                    <p className="text-sidebar-foreground group-hover:text-sidebar-accent-foreground truncate text-sm font-medium">
+                                        {props?.auth?.user?.name}
+                                    </p>
+                                    <p className="text-sidebar-foreground/60 truncate text-xs">{props?.auth?.user?.email}</p>
                                 </div>
                             )}
                         </button>

@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-            $table->enum("user_type", ['admin', 'business_owner'])->default("business_owner")->after('password');
+        Schema::table('bot_sessions', function (Blueprint $table) {
+            // is_active
+            $table->boolean('is_active')->default(true)->after('payload');
         });
     }
 
@@ -22,8 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('user_type');
+        Schema::table('bot_sessions', function (Blueprint $table) {
+            //
+            $table->dropColumn(['is_active']);
         });
     }
 };

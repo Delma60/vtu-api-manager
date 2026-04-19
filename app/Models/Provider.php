@@ -53,10 +53,12 @@ class Provider extends Model
     public function getConnectionAttribute()
     {
         $user = auth()->user();
-        $key = md5($this->base_url . $this->api_key . $this->api_secret .$user?->id ?? "" . $user->business->mode);
+        // Safely check for mode. Super admins will default to 'live' cache keys
+        $mode = ($user && $user->user_type !== 'admin' && $user->business) ? $user->business->mode : 'live';
+        
+        $key = md5($this->base_url . $this->api_key . $this->api_secret . ($user?->id ?? "") . $mode);
         $provider = ProviderService::make($this);
         return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
-            // Log::info(["key" => $provider]);
             return $provider->isHealthy();
         });
     }
@@ -64,7 +66,9 @@ class Provider extends Model
     public function getBalanceAttribute()
     {
         $user = auth()->user();
-        $key = md5($this->base_url . $this->api_key . $this->api_secret . $user?->id ?? '' . $user->business->mode );
+        $mode = ($user && $user->user_type !== 'admin' && $user->business) ? $user->business->mode : 'live';
+        
+        $key = md5($this->base_url . $this->api_key . $this->api_secret . ($user?->id ?? "") . $mode);
         $provider = ProviderService::make($this);
         return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
             return $provider->checkBalance();

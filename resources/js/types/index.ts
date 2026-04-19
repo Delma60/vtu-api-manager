@@ -38,6 +38,7 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
     transactions?:Transaction[];
+    user_type: 'super_admin' | 'tenant';
     }
 
 

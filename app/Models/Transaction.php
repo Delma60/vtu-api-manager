@@ -17,7 +17,7 @@ class Transaction extends Model
         'quantity', 'status', 'transaction_reference', 'payment_reference',
         'funding_method', 'balance_before', 'balance_after', 'completed_at',
         'response_message', 'service_fee', 'platform', 'receiver', 'plan_type', 'token',
-        'promotion_id', 'discount_amount', 'mode',
+        'promotion_id', 'discount_amount', 'mode', 'business_id'
     ];
 
     protected $casts = [

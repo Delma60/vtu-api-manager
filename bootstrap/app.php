@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ApiKeyAuth;
 use App\Http\Middleware\ApiLoggerMiddleware;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SwitchEnvironmentDatabase;
@@ -25,11 +26,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            SwitchEnvironmentDatabase::class
         ]);
+        $middleware->append([
+            SwitchEnvironmentDatabase::class,
+            ]);
         $middleware->api(append: [
             ApiLoggerMiddleware::class,
-            SwitchEnvironmentDatabase::class,
+            ]);
+        $middleware->alias([
+            "api-auth" => ApiKeyAuth::class,
+
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -85,8 +91,9 @@ return Application::configure(basePath: dirname(__DIR__))
                     'has_token' => !!$request->bearerToken(),
                     'auth_header' => $request->header('Authorization') ? 'present' : 'missing',
                     'ip' => $request->ip(),
+                    'error' => $e->getMessage(),
                 ]);
-                
+
                 return response()->json([
                     'status'  => false,
                     'message' => 'Unauthenticated. Invalid or missing API Key.',

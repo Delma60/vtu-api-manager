@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('personal_access_tokens', function (Blueprint $table) {
-            $table->enum('mode', ['live', 'test'])->default('live')->after('abilities');
+            // plain_text_token
+            $table->string('plain_text_token')->nullable()->after('token');
         });
     }
 
@@ -22,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('personal_access_tokens', function (Blueprint $table) {
-            $table->dropColumn('mode');
+            //
+            $table->dropColumn('plain_text_token');
         });
     }
 };

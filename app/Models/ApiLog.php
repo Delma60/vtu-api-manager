@@ -16,9 +16,6 @@ class ApiLog extends Model
     // use ;
     use HasFactory, HasUuids, Prunable, EnvironmentAware, BelongsToBusiness;
 
-    // All API logs go to the live database (single audit trail)
-    // The EnvironmentAware trait filters by mode for display
-    protected $connection = 'mysql';
 
     protected $fillable = [
         'user_id',

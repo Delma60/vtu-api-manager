@@ -137,63 +137,71 @@ export default function ApiKeys({ keys }: { keys: ApiKey[] }) {
                             ) : (
                                 <div className="divide-y divide-border">
                                     {keys.map((key) => {
-                                        const isVisible = visibleKeys.includes(key.id);
-                                        const maskedToken = key.token.substring(0, 8) + '••••••••••••••••••••••••' + key.token.substring(key.token.length - 4);
-                                        const displayToken = isVisible ? key.token : maskedToken;
+    const isVisible = visibleKeys.includes(key.id);
 
-                                        return (
-                                            <div key={key.id} className="flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center hover:bg-muted/30 transition-colors">
-                                                <div className="space-y-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="font-medium text-foreground">{key.name}</p>
-                                                        {key.is_live ? (
-                                                            <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20 shadow-none">Live</Badge>
-                                                        ) : (
-                                                            <Badge className="bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border-amber-500/20 shadow-none">Test</Badge>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <code className="rounded border border-border bg-muted px-2 py-1 font-mono text-sm text-muted-foreground">
-                                                            {displayToken}
-                                                        </code>
-                                                        <div className="flex items-center gap-1">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                                                                onClick={() => toggleVisibility(key.id)}
-                                                            >
-                                                                {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                                                                onClick={() => copyToClipboard(key.id, key.token)}
-                                                            >
-                                                                {copiedKey === key.id ? <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> : <Copy className="h-4 w-4" />}
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-xs text-muted-foreground">
-                                                        Created on {new Date(key.created_at).toLocaleDateString()} • Last used: {key.last_used_at ? new Date(key.last_used_at).toLocaleDateString() : 'Never'}
-                                                    </div>
-                                                </div>
+    // Dynamically calculate the prefix and correctly grab the last 4 characters
+    const prefix = key.is_live ? 'VTUSECK-' : 'VTUSECK_TEST-';
 
-                                                <div>
-                                                    <DeleteButton
-                                                        variant="ghost"
-                                                        route={route('api-keys.destroy', key.id)}
-                                                        resourceName='api key'
-                                                        requirePassword
-                                                        className="text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
-                                                    >
-                                                        <Trash2 className="mr-2 h-4 w-4" /> Revoke Key
-                                                    </DeleteButton>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+    // Mask logic: shows prefix + dots + last 4 chars (e.g. VTUSECK_TEST-••••••••••••••••••••••••a8B3)
+    const maskedToken = key.token.length > 15
+        ? `${prefix}••••••••••••••••••••••••${key.token.slice(-4)}`
+        : `${prefix}••••••••••••••••••••••••`;
+
+    const displayToken = isVisible ? key.token : maskedToken;
+
+    return (
+        <div key={key.id} className="flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center hover:bg-muted/30 transition-colors">
+            <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                    <p className="font-medium text-foreground">{key.name}</p>
+                    {key.is_live ? (
+                        <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20 shadow-none">Live</Badge>
+                    ) : (
+                        <Badge className="bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border-amber-500/20 shadow-none">Test</Badge>
+                    )}
+                </div>
+                <div className="flex items-center gap-3">
+                    <code className="rounded border border-border bg-muted px-2 py-1 font-mono text-sm text-muted-foreground">
+                        {displayToken}
+                    </code>
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            onClick={() => toggleVisibility(key.id)}
+                        >
+                            {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            onClick={() => copyToClipboard(key.id, key.token)}
+                        >
+                            {copiedKey === key.id ? <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                        </Button>
+                    </div>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                    Created on {new Date(key.created_at).toLocaleDateString()} • Last used: {key.last_used_at ? new Date(key.last_used_at).toLocaleDateString() : 'Never'}
+                </div>
+            </div>
+
+            <div>
+                <DeleteButton
+                    variant="ghost"
+                    route={route('api-keys.destroy', key.id)}
+                    resourceName='api key'
+                    requirePassword
+                    className="text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
+                >
+                    <Trash2 className="mr-2 h-4 w-4" /> Revoke Key
+                </DeleteButton>
+            </div>
+        </div>
+    );
+})}
                                 </div>
                             )}
                         </CardContent>

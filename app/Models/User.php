@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\BelongsToBusiness;
+use App\Services\ApiKeyManager;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\NewAccessToken;
 
@@ -17,9 +19,7 @@ use Laravel\Sanctum\NewAccessToken;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens,HasFactory, Notifiable, HasRole, BelongsToBusiness;
-
-    protected $connection = 'mysql';
+    use HasFactory, Notifiable, HasRole, BelongsToBusiness;
 
     /**
      * The attributes that are mass assignable.
@@ -56,32 +56,8 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Create a new personal access token and keep the display value for later.
-     */
-    public function createToken(string $name, array $abilities = ['*'], ?DateTimeInterface $expiresAt = null)
-    {
-        $plainTextToken = $this->generateTokenString();
+ 
 
-        $token = $this->tokens()->create([
-            'name' => $name,
-            'token' => hash('sha256', $plainTextToken),
-            'abilities' => $abilities,
-            'expires_at' => $expiresAt,
-            'plain_text_token' => $this->buildPrefixedToken($plainTextToken),
-            'mode' => $this->business->mode ?? 'live',
-        ]);
-
-        return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
-    }
-
-    protected function buildPrefixedToken(string $token): string
-    {
-        // Default to 'live' if the user (like a Super Admin) doesn't belong to a specific business
-        $mode = $this->business?->mode ?? 'live';
-        
-        return ($mode === 'live' ? 'sk_live_' : 'sk_test_') . $token;
-    }
 
     public function wallet()
     {
@@ -114,6 +90,18 @@ class User extends Authenticatable
     {
         return $this->user_type === 'tentant_customer';
     }
+
+    function tokens():HasMany
+    {
+        return $this->hasMany(ApiCredential::class);
+    }
+
+    function createToken(string $name, array $abilities = ['*']): string
+    {
+        $key = ApiKeyManager::generateKey($this->id, $this->business?->mode, $name);
+        return $key;
+    }
+
 
     
 

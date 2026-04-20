@@ -24,9 +24,7 @@ export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLin
         e.preventDefault();
         setIsProcessing(true);
 
-        // IMPORTANT: Initialize your Flutterwave/Paystack modal here
-        // Example for Flutterwave:
-        // FlutterwaveCheckout({ ... });
+        
 
         // Temporary simulation:
         setTimeout(() => {

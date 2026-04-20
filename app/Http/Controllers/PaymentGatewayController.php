@@ -20,9 +20,15 @@ class PaymentGatewayController extends Controller
                 'name' => $gateway->name,
                 'code' => $gateway->code, // e.g., 'paystack', 'monnify'
                 'logo_url' => $gateway->logo_url,
+                'base_url' => $gateway->base_url,
+                'api_key' => $gateway->api_key,
+                'api_secret' => $gateway->api_secret,
+                'connected' => $gateway->connected,
                 'is_active' => (bool) $gateway->is_active,
+                'is_default' => (bool) $gateway->is_default,
                 'tenant_count' => $gateway?->businesses()?->count() ?? 0, // Optional: How many tenants use this
                 'created_at' => $gateway->created_at->format('M d, Y'),
+
             ];
         });
 
@@ -92,5 +98,11 @@ class PaymentGatewayController extends Controller
         $paymentGateway->update(['is_active' => !$paymentGateway->is_active]);
         
         return back()->with('success', "Gateway globally " . ($paymentGateway->is_active ? 'enabled' : 'disabled') . ".");
+    }
+
+    public function checkout(){
+
+        // external link
+        return redirect()->away('https://example.com/checkout');
     }
 }

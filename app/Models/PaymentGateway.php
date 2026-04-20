@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Class\Payment\PaymentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class PaymentGateway extends Model
 {
@@ -25,6 +27,10 @@ class PaymentGateway extends Model
         'api_key',
         'api_secret',
         'identifier',
+        'is_default',
+    ];
+    protected $appends = [
+        "connected"
     ];
 
     /**
@@ -38,11 +44,24 @@ class PaymentGateway extends Model
             'is_active' => 'boolean',
         ];
     }
+    // CONNECTED ATTRIBUTE
+    public function getConnectedAttribute(): bool
+    {
+        $user = auth()->user();
+        
+       $provider = PaymentFactory::make($this);
+       $provider->isHealthy();
+        $key = md5($this->base_url . $this->api_key . $this->api_secret . ($user?->id ?? "") );
+        return $provider->isHealthy();
+        // return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
+        // });
+    }
 
     /**
      * Optional: If you eventually create a pivot table or configuration table 
      * where tenants save their API keys for this gateway, you define the relationship here.
      */
+    //
     public function businesses()
     {
         // Assuming you create a 'business_payment_gateways' or 'gateway_configs' table later

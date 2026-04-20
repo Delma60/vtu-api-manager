@@ -11,7 +11,21 @@ class SwitchEnvironmentDatabase
 {
     public function handle(Request $request, Closure $next)
     {
-        if (auth()->check() && auth()->user()->business?->mode === 'test') {
+        // if (auth()->check() && auth()->user()->business?->mode === 'test') {
+        //     // Swap the default connection to the test connection
+        //     Config::set('database.default', env('DB_CONNECTION') . '_test');
+            
+        //     // Purge any existing connections to ensure a clean slate
+        //     DB::purge(env('DB_CONNECTION') . '_test');
+        // }
+
+        // {
+        // Add the condition: auth()->user()->user_type !== 'super_admin'
+        if (
+            auth()->check() && 
+            auth()->user()->user_type !== 'admin' && 
+            auth()->user()->business?->mode === 'test'
+        ) {
             // Swap the default connection to the test connection
             Config::set('database.default', env('DB_CONNECTION') . '_test');
             

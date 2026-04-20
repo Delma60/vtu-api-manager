@@ -123,4 +123,8 @@ class PaymentLinkController extends Controller
 
         return redirect()->back()->with('success', 'Payment completed successfully!');
     }
+
+    public function pay(){
+    
+    }
 }

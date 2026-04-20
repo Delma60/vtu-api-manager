@@ -24,6 +24,8 @@ use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\PaymentLinkController;
 use App\Http\Controllers\ServiceControlController;
 use App\Http\Controllers\SuperAdmin\BusinessController;
+use App\Http\Controllers\SystemBotController;
+use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Middleware\SuperAdminMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -35,7 +37,13 @@ Route::get('/', function () {
 
 // Payment link pay.show
 Route::get('pay/{paymentLink}', [PaymentLinkController::class, 'show'])->name('pay.show');
+Route::post('pay/{id}', [PaymentGatewayController::class, 'checkout'])->name('pay.submit');
+// failed/successful payment
+Route::get('pay/{paymentLink}/success', [PaymentLinkController::class, 'success'])->name('pay.success');
+Route::get('pay/{paymentLink}/failed', [PaymentLinkController::class, 'failed'])->name('pay.failed');
+
 Route::post('/webhook/telegram/sk_super_secret_string', [TelegramController::class, 'handleWebhook']);
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -95,6 +103,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/service-types/compare', 'compareServiceTypes')->name('service-types.compare');
         Route::get('/service-types/rankings', 'serviceTypeRankings')->name('service-types.rankings');
         Route::post('/regenerate', 'regenerate')->name('regenerate');
+
+        Route::resource('settings', SystemSettingController::class)->only(['index', 'store', 'destroy']);
     });
 
 });
@@ -152,7 +162,11 @@ Route::middleware(['auth', SuperAdminMiddleware::class])
         // Route::resource('global-providers', GlobalProviderController::class);
         Route::post('payment-gateways/{paymentGateway}/toggle', [PaymentGatewayController::class, 'toggleStatus'])
         ->name('payment-gateways.toggle');
-    Route::resource('payment-gateways', PaymentGatewayController::class)->except(['show']);
+        Route::resource('payment-gateways', PaymentGatewayController::class)->except(['show']);
+
+        Route::post('bots/{bot}/toggle', [SystemBotController::class, 'toggleStatus'])->name('bots.toggle');
+        Route::resource('bots', SystemBotController::class)->only(['index', 'store', 'destroy']);
+        Route::resource('settings', SystemSettingController::class)->only(['index', 'store', 'destroy']);
 });
 
 require __DIR__.'/settings.php';

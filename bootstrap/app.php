@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->api(append: [
             ApiLoggerMiddleware::class,
+            SwitchEnvironmentDatabase::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

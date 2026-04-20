@@ -20,6 +20,7 @@ class Business extends Model
         'bot_code',
         'telegram_is_active',
         'telegram_welcome_message',
+        'mode',
     ];
 
     public function owner(): HasOne

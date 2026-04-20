@@ -33,22 +33,23 @@ class TransactionService
      * Initialize a transaction and deduct the user's wallet securely.
      */
 
-    public function initialize(User $user, array $data): Transaction
+    public function initialize(User $user, array $data, ?string $platform = "api"): Transaction
     {
-        return DB::transaction(function () use ($user, $data) {
-            // Lock the wallet for update to prevent concurrent race conditions
-            $wallet = $user->wallet()->lockForUpdate()->first();
+        return DB::transaction(function () use ($user, $data, $platform) {
+            if($platform !== "api"){
+                $wallet = $user->wallet()->lockForUpdate()->first();
+    
+                // Calculate exact amount to deduct
+                $amountToDeduct = $data['amount'] - ($data['discount_amount'] ?? 0) + ($data['service_fee'] ?? 0);
+    
+                if (!$wallet || $wallet->balance < $amountToDeduct) {
+                    throw new Exception('Insufficient wallet balance to complete this transaction.');
+                }
+                // Deduct the wallet
+                $wallet->balance -= $amountToDeduct;
+                $wallet->save();
 
-            // Calculate exact amount to deduct
-            $amountToDeduct = $data['amount'] - ($data['discount_amount'] ?? 0) + ($data['service_fee'] ?? 0);
-
-            if (!$wallet || $wallet->balance < $amountToDeduct) {
-                throw new Exception('Insufficient wallet balance to complete this transaction.');
             }
-
-            // Deduct the wallet
-            $wallet->balance -= $amountToDeduct;
-            $wallet->save();
 
             // Create the pending transaction
             return Transaction::create([

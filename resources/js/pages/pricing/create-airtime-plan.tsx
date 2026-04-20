@@ -211,6 +211,8 @@ export default function CreateAirtimePlan({ networks: activeNetworks, providers 
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                                <InputError message={errors?.['providerable.provider_id']} />
+
                                     {data.providerable.provider_id && (
                                         <div className="mt-4 flex items-center gap-2">
                                             <div className="flex-1 space-y-2">

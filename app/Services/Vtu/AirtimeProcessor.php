@@ -15,15 +15,15 @@ class AirtimeProcessor
     {
         $provider = ProviderService::getProviderInstance('airtime');
         $txRef = $payload['tx_ref'] ?? 'VTM_' . uniqid();
-        $payload['tx_ref'] = $txRef; 
+        $payload['tx_ref'] = $txRef;
 
         // 1. Initialize Transaction and deduct wallet
         try {
             $transaction = $this->transactionService->initialize($user, [
                 'transaction_reference' => $txRef,
-                'provider' => $payload['provider'],
+                'provider' => $payload['network'],
                 'platform' => $payload['platform'] ?? 'api',
-                'transaction_type' => 'airtime',
+                'transaction_type' => 'airtime_recharge',
                 'account_or_phone' => $payload['phone'],
                 'amount' => $payload['amount'],
                 'discount_amount' => $payload['discount_amount'] ?? 0.00,

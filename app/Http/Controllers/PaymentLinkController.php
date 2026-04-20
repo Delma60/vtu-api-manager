@@ -9,6 +9,7 @@ use App\Models\CablePlan;
 use App\Models\DataPlan;
 use App\Models\Network;
 use App\Models\NetworkType;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -126,5 +127,27 @@ class PaymentLinkController extends Controller
 
     public function pay(){
     
+    }
+
+    public function paymentSuccess(Request $request, PaymentLink $paymentLink, $tx_ref = null)
+    {
+        // Handle successful payment callback
+        // The callback may provide tx_ref as a route segment or query parameter.
+        $tx_ref = $tx_ref ?? $request->query('tx_ref');
+
+        return Inertia::render('pay/success', [
+            'paymentLink' => $paymentLink,
+            'tx_ref' => $tx_ref,
+        ]);
+    }
+
+    public function paymentFailed(Request $request, PaymentLink $paymentLink, $tx_ref = null)
+    {
+        // Handle failed payment callback
+        
+        return Inertia::render('pay/failed', [
+            'paymentLink' => $paymentLink,
+            'tx_ref' => $tx_ref,
+        ]);
     }
 }

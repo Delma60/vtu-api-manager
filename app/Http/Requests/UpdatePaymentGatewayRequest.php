@@ -28,6 +28,7 @@ class UpdatePaymentGatewayRequest extends FormRequest
             'base_url' => ['nullable', 'url'],
             'logo_url' => ['nullable', 'url'],
             'is_active' => ['boolean'],
+            'is_default' => ['boolean'],
             'api_secret' => ['required', 'string', 'max:255'],
             'api_key' => ['required', 'string', 'max:255'],
         ];

@@ -9,9 +9,30 @@ use Exception;
 
 class TransactionService
 {
+    // initializing transaction for checkout
+    public function initializeCheckout(User $user, array $data):Transaction{
+
+    return Transaction::create(array_merge([
+                'business_id' => $user->business_id ?? null,
+                'user_id' => $user->id,
+                'provider' => $data['provider'] ?? 'unknown',
+                'status' => 'pending',
+                'transaction_reference' => $data['transaction_reference'],
+                'platform' => $data['platform'] ?? 'api',
+                'transaction_type' => $data['transaction_type'],
+                'account_or_phone' => $data['account_or_phone'],
+                'amount' => $data['amount'],
+                'discount_amount' => $data['discount_amount'] ?? 0.00,
+                'service_fee' => $data['service_fee'] ?? 0.00,
+                'quantity' => $data['quantity'] ?? 1,
+                'receiver' => $data['receiver'] ?? $data['account_or_phone'],
+                'meta' => $data['meta'] ?? $data,
+            ], $data));
+    }
     /**
      * Initialize a transaction and deduct the user's wallet securely.
      */
+
     public function initialize(User $user, array $data): Transaction
     {
         return DB::transaction(function () use ($user, $data) {

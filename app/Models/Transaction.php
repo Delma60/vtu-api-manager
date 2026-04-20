@@ -6,6 +6,7 @@ use App\BelongsToBusiness;
 use App\EnvironmentAware;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Transaction extends Model
 {
@@ -40,5 +41,10 @@ class Transaction extends Model
     public function service()
     {
         return $this->belongsTo(Service::class);
+    }
+
+    public static function generateTransactionId(): string
+    {
+        return strtoupper('TXN-' . now()->format('YmdHis') . '-' . Str::random(6));
     }
 }

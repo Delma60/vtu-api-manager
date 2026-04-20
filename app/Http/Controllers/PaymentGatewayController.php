@@ -2,9 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Class\Payment\PaymentFactory;
 use App\Models\PaymentGateway;
 use App\Http\Requests\StorePaymentGatewayRequest;
 use App\Http\Requests\UpdatePaymentGatewayRequest;
+use App\Models\PaymentLink;
+use App\Models\Transaction;
+use App\Services\TransactionService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class PaymentGatewayController extends Controller
 {
@@ -19,7 +26,7 @@ class PaymentGatewayController extends Controller
                 'id' => $gateway->id,
                 'name' => $gateway->name,
                 'code' => $gateway->code, // e.g., 'paystack', 'monnify'
-                'logo_url' => $gateway->logo_url,
+                'logo_url' => $gateway->logo_image,
                 'base_url' => $gateway->base_url,
                 'api_key' => $gateway->api_key,
                 'api_secret' => $gateway->api_secret,
@@ -100,9 +107,37 @@ class PaymentGatewayController extends Controller
         return back()->with('success', "Gateway globally " . ($paymentGateway->is_active ? 'enabled' : 'disabled') . ".");
     }
 
-    public function checkout(){
+    public function checkout(Request $request, PaymentLink $paymentLink, TransactionService $transactionService){
+        $data = $request->validate([
+            "amount" => ['required', 'numeric', 'min:0.01'],
+            "customer_name" => ['required', 'string'],
+            "customer_email" => ['required', 'email'],
+            "description" => ['nullable', 'string'],
+        ]);
+        
+        try {
+            # code...
+            $default_provider = PaymentGateway::default();
+            $paymentLink->load('business.owner');
 
-        // external link
-        return redirect()->away('https://example.com/checkout');
+            $transactionService->initializeCheckout($paymentLink->business->owner, [
+                'provider' => $default_provider->code,
+                'transaction_reference' => $paymentLink->tx_ref,
+                'platform' => 'web',
+                'transaction_type' => 'payment_link',
+                'account_or_phone' => $data['customer_email'],
+                'amount' => $data['amount'],
+                'description' => $data['description'] ?? null,
+            ]);
+
+            $data['paymentLink'] = $paymentLink->id;
+            $data['transaction_reference'] = Transaction::generateTransactionId();
+            $provider = PaymentFactory::make($default_provider)->checkout($data);
+            return Inertia::location($provider['checkout_url']);
+        } catch (\Throwable $e) {
+            # code...\
+            Log::error("Checkout error", ['error' => $e]);
+            return back()->with('error', 'An error occurred during checkout. Please try again.');
+        }
     }
 }

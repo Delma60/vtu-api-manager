@@ -27,6 +27,7 @@ class StorePaymentGatewayRequest extends FormRequest
             'code' => ['required', 'string', 'max:50', 'unique:payment_gateways,code'],
             'logo_url' => ['nullable', 'url'],
             'is_active' => ['boolean'],
+            'is_default' => ['boolean'],
         ];
     }
 }

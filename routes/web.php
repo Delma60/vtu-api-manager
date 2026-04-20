@@ -37,10 +37,10 @@ Route::get('/', function () {
 
 // Payment link pay.show
 Route::get('pay/{paymentLink}', [PaymentLinkController::class, 'show'])->name('pay.show');
-Route::post('pay/{id}', [PaymentGatewayController::class, 'checkout'])->name('pay.submit');
+Route::post('pay/{paymentLink}', [PaymentGatewayController::class, 'checkout'])->name('pay.submit');
 // failed/successful payment
-Route::get('pay/{paymentLink}/success', [PaymentLinkController::class, 'success'])->name('pay.success');
-Route::get('pay/{paymentLink}/failed', [PaymentLinkController::class, 'failed'])->name('pay.failed');
+Route::get('pay/{paymentLink}/success/{tx_ref?}', [PaymentLinkController::class, 'paymentSuccess'])->name('pay.success');
+Route::get('pay/{paymentLink}/failed/{tx_ref?}', [PaymentLinkController::class, 'paymentFailed'])->name('pay.failed');
 
 Route::post('/webhook/telegram/sk_super_secret_string', [TelegramController::class, 'handleWebhook']);
 
@@ -55,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('wallets', WalletController::class);
     Route::resource('networks', NetworkController::class);
     Route::resource('providers', ProviderController::class);
-    Route::get("/providers/{provider}/diagnose", [ProviderController::class, "diagnose"])->name("provders.diagnose");
+    Route::get("/providers/{provider}/diagnose", [ProviderController::class, "diagnose"])->name("providers.diagnose");
     Route::resource('service-controls', ServiceControlController::class);
     Route::put('/service-controls/bulk-update', [ServiceControlController::class, 'bulkUpdate'])
     ->name('service-controls.bulk-update');

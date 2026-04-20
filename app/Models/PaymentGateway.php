@@ -30,8 +30,20 @@ class PaymentGateway extends Model
         'is_default',
     ];
     protected $appends = [
-        "connected"
+        "connected",
+        "logo_image"
     ];
+
+    // when updating/creating and a new default is given, i want to make i have on default all times
+    protected static function booted()
+    {
+        static::saving(function ($gateway) {
+            if ($gateway->is_default) {
+                // Set all other gateways to not default
+                self::where('id', '!=', $gateway->id)->update(['is_default' => false]);
+            }
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -42,6 +54,7 @@ class PaymentGateway extends Model
     {
         return [
             'is_active' => 'boolean',
+            'is_default' => 'boolean',
         ];
     }
     // CONNECTED ATTRIBUTE
@@ -55,6 +68,15 @@ class PaymentGateway extends Model
         return $provider->isHealthy();
         // return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
         // });
+    }
+
+    function getLogoImageAttribute(): string
+    {
+        return  asset("images/".$this->code . ".png");
+    }
+
+    function scopeDefault(): ?PaymentGateway {
+        return $this->where('is_default', true)->first();
     }
 
     /**

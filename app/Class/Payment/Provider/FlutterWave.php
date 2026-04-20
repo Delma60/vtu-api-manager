@@ -172,14 +172,13 @@ class FlutterWave extends PaymentBase
 
     function checkout(array $data): array
     {
-        $txRef = Transaction::generateTransactionId();
         $response = Http::withHeaders($this->getHeaders())
             ->acceptJson()
             ->post($this->provider->base_url .'/payments', [
-                'tx_ref'       => $txRef,
+                'tx_ref'       => $data['transaction_reference'],
                  'amount'       => $data['amount'] ?? 0.00,
                 'currency'     => 'NGN',
-                'redirect_url' => route('pay.success', ['tx_ref' => $txRef]),
+                'redirect_url' => route('pay.success', ['paymentLink' => $data['paymentLink'], 'transaction' => $data['transaction_reference']]),
                 'customer'     => [
                     'email'       => $data['customer_email'],
                     'name'        => $data['customer_name'],
@@ -193,8 +192,9 @@ class FlutterWave extends PaymentBase
         if ($response->successful()) {
             $paymentLink = $response->json('data.link');
             return [
+                'status' => 'success',
                 'checkout_url' => $paymentLink,
-                 'transaction_reference' => $txRef,
+                 'transaction_reference' => $data['transaction_reference'],
                  'payment_reference' => $response->json('data.flw_ref') ?? null,
                 'amount' => $data['amount'] ?? 0.00,
                 'currency' => $data['currency'] ?? 'NGN',

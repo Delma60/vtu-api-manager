@@ -11,29 +11,21 @@ interface PaymentLink {
 }
 
 export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLink; merchant: string }) {
-    const [isProcessing, setIsProcessing] = useState(false);
+    // const [isProcessing, setIsProcessing] = useState(false);
     const isVariableAmount = paymentLink.amount === null;
 
-    const { data, setData } = useForm({
-        name: paymentLink.customer_name || '',
-        email: paymentLink.customer_email || '',
+    const { data, setData, post, processing:isProcessing, errors } = useForm({
+        customer_name: paymentLink.customer_name || '',
+        customer_email: paymentLink.customer_email || '',
         amount: paymentLink.amount || '',
     });
 
     const handlePayment = (e: React.FormEvent) => {
         e.preventDefault();
-        setIsProcessing(true);
-
-        
-
-        // Temporary simulation:
-        setTimeout(() => {
-            alert('Payment Gateway Modal would open here.');
-            setIsProcessing(false);
-            // Simulate success: post(route('pay.verify', paymentLink.id));
-        }, 1500);
+        post(route("pay.submit", paymentLink.id))
     };
 
+    console.log(errors)
     if (paymentLink.status === 'successful') {
         return (
             <div className="bg-background text-foreground relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
@@ -110,8 +102,8 @@ export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLin
                             <label className="text-foreground mb-1.5 ml-1 block text-sm font-semibold">Full Name</label>
                             <input
                                 type="text"
-                                value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
+                                value={data.customer_name}
+                                onChange={(e) => setData('customer_name', e.target.value)}
                                 required
                                 readOnly={!!paymentLink.customer_name}
                                 className="border-input bg-background text-foreground read-only:bg-muted read-only:text-muted-foreground focus:border-ring focus:ring-ring/20 placeholder:text-muted-foreground w-full rounded-xl border px-4 py-3.5 shadow-sm transition-all outline-none focus:ring-2"
@@ -122,8 +114,8 @@ export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLin
                             <label className="text-foreground mb-1.5 ml-1 block text-sm font-semibold">Email Address</label>
                             <input
                                 type="email"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
+                                value={data.customer_email}
+                                onChange={(e) => setData('customer_email', e.target.value)}
                                 required
                                 readOnly={!!paymentLink.customer_email}
                                 className="border-input bg-background text-foreground read-only:bg-muted read-only:text-muted-foreground focus:border-ring focus:ring-ring/20 placeholder:text-muted-foreground w-full rounded-xl border px-4 py-3.5 shadow-sm transition-all outline-none focus:ring-2"

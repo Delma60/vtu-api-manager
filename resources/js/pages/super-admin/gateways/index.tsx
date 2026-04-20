@@ -1,6 +1,6 @@
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -101,7 +101,7 @@ export default function PaymentGatewaysIndex({ gateways }: Props) {
                 </div>
 
                 {/* Gateway Cards Grid */}
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {gateways.length === 0 ? (
                         <div className="bg-card/50 col-span-full flex flex-col items-center justify-center rounded-lg border border-dashed p-12">
                             <CreditCard className="text-muted-foreground mb-4 h-10 w-10 opacity-50" />
@@ -114,107 +114,88 @@ export default function PaymentGatewaysIndex({ gateways }: Props) {
                         gateways.map((gateway) => (
                             <Card
                                 key={gateway.id}
-                                className={`group relative flex flex-col overflow-hidden transition-all duration-200 hover:shadow-md ${
-                                    !gateway.is_active ? 'bg-muted/20 opacity-80' : 'bg-card'
-                                } ${gateway.is_default ? 'border-primary shadow-primary/10 shadow-sm' : ''}`}
+                                className={`group flex flex-col transition-all duration-300 hover:shadow-md ${
+                                    gateway.is_active ? 'bg-card' : 'bg-muted/30 opacity-90'
+                                } ${gateway.is_default ? 'ring-primary border-primary shadow-primary/10 shadow-sm ring-1' : 'border-border'}`}
                             >
-                                {/* Subtle background glow for the default gateway */}
-                                {gateway.is_default && (
-                                    <div className="from-primary/5 pointer-events-none absolute inset-0 bg-gradient-to-br via-transparent to-transparent" />
-                                )}
-
-                                <CardHeader className="relative z-10 flex flex-row items-start justify-between pt-5 pb-4">
-                                    <div className="flex items-center gap-4">
-                                        {/* Logo Container with Status Dot */}
-                                        <div className="relative">
-                                            <div className="bg-background flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border shadow-sm">
+                                <CardContent className="flex flex-1 flex-col justify-between gap-4 p-5">
+                                    {/* Top Section: Logo, Titles & Status */}
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="bg-background flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border p-1 shadow-sm">
                                                 {gateway.logo_url ? (
-                                                    <img src={gateway.logo_url} alt={gateway.name} className="h-8 w-8 object-contain" />
+                                                    <img src={gateway.logo_url} alt={gateway.name} className="h-full w-full object-contain" />
                                                 ) : (
                                                     <CreditCard className="text-muted-foreground h-6 w-6" />
                                                 )}
                                             </div>
-                                            {/* Status Dot */}
-                                            <div
-                                                className={`border-background absolute -right-1 -bottom-1 h-3.5 w-3.5 rounded-full border-2 ${
-                                                    gateway.is_active ? 'bg-emerald-500' : 'bg-rose-500'
-                                                }`}
-                                            />
-                                        </div>
-
-                                        <div className="flex flex-col gap-0.5">
-                                            <div className="flex items-center gap-2">
-                                                <CardTitle className="text-lg tracking-tight">{gateway.name}</CardTitle>
-                                                {gateway.is_default && (
-                                                    <span className="bg-primary text-primary-foreground flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase shadow-sm">
-                                                        <Star className="h-2.5 w-2.5 fill-current" /> Default
-                                                    </span>
-                                                )}
+                                            <div className="flex flex-col">
+                                                <div className="flex items-center gap-2">
+                                                    <h3 className="text-base leading-none font-semibold tracking-tight">{gateway.name}</h3>
+                                                    {gateway.is_default && (
+                                                        <span className="bg-primary/10 text-primary flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wider uppercase">
+                                                            <Star className="mr-1 h-2.5 w-2.5 fill-current" /> Default
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <span className="text-muted-foreground mt-1.5 font-mono text-xs tracking-wider uppercase">
+                                                    {gateway.code}
+                                                </span>
                                             </div>
-                                            <p className="text-muted-foreground font-mono text-xs tracking-wider uppercase">{gateway.code}</p>
-                                        </div>
-                                    </div>
-                                </CardHeader>
-
-                                <CardContent className="relative z-10 flex-1 pb-5">
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {/* Metric 1: Usage */}
-                                        <div className="bg-muted/20 flex flex-col justify-center rounded-lg border p-3">
-                                            <div className="text-muted-foreground mb-1 flex items-center gap-1.5">
-                                                <Building2 className="h-3.5 w-3.5" />
-                                                <span className="text-[10px] font-bold tracking-wider uppercase">Usage</span>
-                                            </div>
-                                            <span className="text-sm font-semibold">{gateway.tenant_count} Tenants</span>
                                         </div>
 
-                                        {/* Metric 2: Connection Status */}
+                                        {/* Status Pill */}
                                         <div
-                                            className={`flex flex-col justify-center rounded-lg border p-3 ${
-                                                gateway.connected ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-rose-500/20 bg-rose-500/5'
+                                            className={`flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${
+                                                gateway.is_active
+                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
                                             }`}
                                         >
-                                            <div
-                                                className={`mb-1 flex items-center gap-1.5 ${
-                                                    gateway.connected ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-                                                }`}
-                                            >
-                                                {gateway.connected ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
-                                                <span className="text-[10px] font-bold tracking-wider uppercase">API Status</span>
-                                            </div>
-                                            <span
-                                                className={`text-sm font-semibold ${
-                                                    gateway.connected ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'
-                                                }`}
-                                            >
-                                                {gateway.connected ? 'Connected' : 'Disconnected'}
-                                            </span>
+                                            {gateway.is_active ? 'Active' : 'Disabled'}
+                                        </div>
+                                    </div>
+
+                                    {/* Middle Section: Inline Metrics */}
+                                    <div className="mt-2 flex items-center gap-4 text-sm">
+                                        <div className="text-muted-foreground flex items-center gap-1.5">
+                                            <Building2 className="h-4 w-4" />
+                                            <span className="font-medium">{gateway.tenant_count} Tenants</span>
+                                        </div>
+
+                                        {/* Separator Line */}
+                                        <div className="bg-border h-4 w-px" />
+
+                                        <div
+                                            className={`flex items-center gap-1.5 font-medium ${
+                                                gateway.connected ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                                            }`}
+                                        >
+                                            {gateway.connected ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
+                                            <span>{gateway.connected ? 'API Connected' : 'Disconnected'}</span>
                                         </div>
                                     </div>
                                 </CardContent>
 
-                                <CardFooter className="bg-muted/10 relative z-10 flex items-center justify-between border-t py-3">
-                                    {/* Action 1: Toggle */}
+                                {/* Bottom Section: Actions */}
+                                <div className="bg-muted/10 flex items-center justify-between border-t px-5 py-3">
                                     <div className="flex items-center gap-2">
                                         <Switch
                                             checked={gateway.is_active}
                                             onCheckedChange={() => toggleGlobalStatus(gateway.id)}
-                                            className="scale-90 data-[state=checked]:bg-emerald-500"
+                                            className="scale-75"
                                         />
-                                        <span className="text-muted-foreground text-xs font-medium">
-                                            {gateway.is_active ? 'Enabled' : 'Disabled'}
-                                        </span>
+                                        <span className="text-muted-foreground text-xs font-medium">Toggle Status</span>
                                     </div>
-
-                                    {/* Action 2: Configure */}
                                     <Button
-                                        variant="ghost"
+                                        variant="outline"
                                         size="sm"
                                         onClick={() => openEditDrawer(gateway)}
-                                        className="hover:border-border hover:bg-background h-8 border border-transparent shadow-sm"
+                                        className="bg-background h-8 shadow-sm"
                                     >
                                         <Edit2 className="text-muted-foreground mr-2 h-3.5 w-3.5" /> Configure
                                     </Button>
-                                </CardFooter>
+                                </div>
                             </Card>
                         ))
                     )}

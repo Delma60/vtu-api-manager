@@ -1,216 +1,264 @@
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
-import { Transaction } from '@/types';
+import { Link } from '@inertiajs/react';
+import {
+    ArrowLeft,
+    CheckCircle2,
+    Clock,
+    Copy,
+    CreditCard,
+    Terminal,
+    Smartphone,
+    Wallet,
+    XCircle,
+    Receipt
+} from 'lucide-react';
+import { useState } from 'react';
+
+interface Transaction {
+    id: number;
+    user_id: string;
+    transaction_type: string;
+    provider: string | null;
+    account_or_phone: string | null;
+    amount: number;
+    discount_amount: number;
+    quantity: number;
+    status: 'pending' | 'success' | 'fail';
+    transaction_reference: string;
+    payment_reference: string | null;
+    funding_method: string | null;
+    balance_before: number;
+    balance_after: number;
+    completed_at: string | null;
+    service_fee: number;
+    platform: string | null;
+    receiver: string | null;
+    plan_type: string | null;
+    token: string | null;
+    created_at: string;
+}
 
 interface Props {
-    transaction:Transaction;
-    metaData:{
-        request?: Record<string, any>;
-        response?: Record<string, any>;
-        payload?: Record<string, any>; // Fallback if 'request' is not available
-        result?: Record<string, any>; // Fallback if 'response' is not available
-        http_status?: string; // Optional HTTP status code for display
-    };
-    formattedDate:string;
+    transaction: Transaction;
+    metaData: any;
+    formattedDate: string;
 }
-export default function TransactionShow({ transaction, metaData, formattedDate }:Props) {
-    // Helper to color-code status badges dynamically
-    const getStatusBadge = (status) => {
-        switch (status.toLowerCase()) {
-            case 'successful':
-                return (
-                    <span className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-sm font-semibold text-emerald-400">
-                        Successful
-                    </span>
-                );
-            case 'failed':
-                return (
-                    <span className="rounded-md border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-sm font-semibold text-rose-400">Failed</span>
-                );
-            case 'refunded':
-                return (
-                    <span className="rounded-md border border-slate-500/20 bg-slate-500/10 px-3 py-1 text-sm font-semibold text-slate-400">
-                        Refunded
-                    </span>
-                );
-            default:
-                return (
-                    <span className="rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-sm font-semibold text-amber-400">
-                        Processing
-                    </span>
-                );
+
+export default function TransactionShow({ transaction, metaData, formattedDate }: Props) {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(JSON.stringify(metaData, null, 2));
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const formatCurrency = (value: number | string) => {
+        return `₦${Number(value).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    };
+
+    const formatName = (str: string | null) => {
+        if (!str) return 'N/A';
+        return str.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+
+    const StatusIcon = () => {
+        switch (transaction.status) {
+            case 'success': return <CheckCircle2 className="h-6 w-6 text-emerald-500" />;
+            case 'fail': return <XCircle className="h-6 w-6 text-destructive" />;
+            default: return <Clock className="h-6 w-6 text-amber-500" />;
         }
+    };
+
+    const statusColors = {
+        success: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400',
+        fail: 'bg-destructive/10 text-destructive border-destructive/20',
+        pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400',
     };
 
     return (
         <AppLayout>
-            <div className="min-h-screen flex-1 bg-slate-950 p-8 font-sans text-slate-200">
-                {/* 1. Header & Breadcrumbs */}
-                <div className="mb-8">
-                    <a
-                        href="/transactions"
-                        className="group mb-4 inline-flex items-center text-sm font-medium text-slate-400 transition-colors hover:text-indigo-400"
-                    >
-                        <svg
-                            className="mr-1 h-4 w-4 transition-transform group-hover:-translate-x-1"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Back to Transactions
-                    </a>
-                    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                        <div className="flex items-center gap-4">
-                            <h1 className="font-mono text-2xl font-bold tracking-tight text-white">{transaction.reference}</h1>
-                            {getStatusBadge(transaction.status)}
+            <div className="bg-background min-h-screen flex-1 p-6 md:p-8">
+                {/* Header Navigation */}
+                <div className="mb-6 flex items-center gap-4">
+                    <Button variant="outline" size="icon" asChild className="h-9 w-9 rounded-full">
+                        <Link href="/transactions">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Link>
+                    </Button>
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-2xl font-bold tracking-tight">Transaction Details</h1>
+                            <span className={`rounded-md border px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${statusColors[transaction.status]}`}>
+                                {transaction.status}
+                            </span>
                         </div>
-                        <div className="flex gap-3">
-                            {/* If failed, show a retry button */}
-                            {transaction.status === 'failed' && (
-                                <button className="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium shadow-sm transition-all hover:bg-slate-800">
-                                    Retry Transaction
-                                </button>
-                            )}
-                            <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500">
-                                Download Receipt
-                            </button>
-                        </div>
+                        <p className="text-muted-foreground text-sm mt-1">
+                            Ref: <span className="font-mono text-foreground">{transaction.transaction_reference}</span>
+                        </p>
                     </div>
-                    <p className="mt-2 text-sm text-slate-500">Initiated on {formattedDate}</p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    {/* LEFT COLUMN: Business Logic */}
-                    <div className="space-y-8 lg:col-span-1">
-                        {/* A. Core Details */}
-                        <div className="rounded-xl border border-slate-800 bg-[#0f172a] p-6 shadow-sm">
-                            <h3 className="mb-6 border-b border-slate-800 pb-3 text-base font-semibold text-white">Transaction Details</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <p className="mb-1 text-xs font-medium tracking-wider text-slate-500 uppercase">Network & Service</p>
-                                    <p className="text-sm font-medium text-slate-200">
-                                        {transaction.service?.name || String(transaction.network).toUpperCase()}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="mb-1 text-xs font-medium tracking-wider text-slate-500 uppercase">Destination (Phone/Meter)</p>
-                                    <p className="inline-block rounded border border-slate-800 bg-slate-900/50 px-2 py-1 font-mono text-base text-white">
-                                        {transaction.destination}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="mb-1 text-xs font-medium tracking-wider text-slate-500 uppercase">Upstream Provider</p>
-                                    <p className="text-sm font-medium text-slate-300">{transaction.provider?.name || 'Auto-Routed (Fallback)'}</p>
-                                </div>
-                                <div>
-                                    <p className="mb-1 text-xs font-medium tracking-wider text-slate-500 uppercase">Vendor Reference ID</p>
-                                    <p className="font-mono text-sm text-indigo-300">{transaction.vendor_reference || 'N/A'}</p>
-                                </div>
-                            </div>
-                        </div>
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    {/* Left Column: Human Readable Data */}
+                    <div className="flex flex-col gap-6 lg:col-span-2">
 
-                        {/* B. Financial Ledger */}
-                        <div className="relative overflow-hidden rounded-xl border border-slate-800 bg-[#0f172a] p-6 shadow-sm">
-                            {/* Background Icon */}
-                            <div className="pointer-events-none absolute -right-4 -bottom-4 opacity-5">
-                                <svg className="h-32 w-32 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={1}
-                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                            </div>
-
-                            <h3 className="mb-6 border-b border-slate-800 pb-3 text-base font-semibold text-white">Financial Ledger</h3>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-slate-400">Previous Balance</span>
-                                    <span className="font-medium text-slate-300">
-                                        ₦{Number(transaction.previous_balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                    </span>
+                        {/* Core Details Card */}
+                        <Card>
+                            <CardHeader className="bg-muted/30 border-b pb-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Receipt className="text-muted-foreground h-5 w-5" />
+                                        <CardTitle className="text-lg">Service Details</CardTitle>
+                                    </div>
+                                    <StatusIcon />
                                 </div>
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-slate-400">Amount Charged</span>
-                                    <span className="font-medium text-rose-400">
-                                        - ₦{Number(transaction.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                    </span>
+                            </CardHeader>
+                            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
+                                <div className="space-y-1">
+                                    <p className="text-muted-foreground text-xs uppercase tracking-wider">Service Type</p>
+                                    <p className="font-medium">{formatName(transaction.transaction_type)}</p>
                                 </div>
-                                {transaction.status === 'refunded' && (
-                                    <div className="flex items-center justify-between border-t border-dashed border-slate-700 pt-2 text-sm">
-                                        <span className="text-slate-400">Refund Applied</span>
-                                        <span className="font-medium text-emerald-400">
-                                            + ₦{Number(transaction.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                        </span>
+                                <div className="space-y-1">
+                                    <p className="text-muted-foreground text-xs uppercase tracking-wider">Upstream Provider</p>
+                                    <p className="font-medium">{formatName(transaction.provider)}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-muted-foreground text-xs uppercase tracking-wider">Target Account / Phone</p>
+                                    <p className="font-mono font-medium">{transaction.account_or_phone || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-muted-foreground text-xs uppercase tracking-wider">Plan / Package</p>
+                                    <p className="font-medium">{transaction.plan_type || 'N/A'}</p>
+                                </div>
+                                {transaction.token && (
+                                    <div className="space-y-1 sm:col-span-2 rounded-lg bg-primary/5 p-3 border border-primary/10">
+                                        <p className="text-primary text-xs font-bold uppercase tracking-wider">Generated Token / PIN</p>
+                                        <p className="font-mono text-lg font-bold tracking-widest text-foreground">{transaction.token}</p>
                                     </div>
                                 )}
-                                <div className="mt-3 flex items-center justify-between border-t border-slate-700 pt-3 text-base">
-                                    <span className="font-semibold text-white">New Balance</span>
-                                    <span className="font-bold text-white">
-                                        ₦{Number(transaction.new_balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                    </span>
-                                </div>
-                            </div>
+                            </CardContent>
+                        </Card>
 
-                            {/* Admin/Reseller Profit View (Optional based on user role) */}
-                            <div className="mt-6 flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900 p-3">
-                                <span className="text-xs font-medium text-slate-500">Your Profit Margin</span>
-                                <span className="text-sm font-bold text-emerald-400">
-                                    + ₦{Number(transaction.profit).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                </span>
-                            </div>
-                        </div>
+                        {/* Financial Ledger Card */}
+                        <Card>
+                            <CardHeader className="bg-muted/30 border-b pb-4">
+                                <div className="flex items-center gap-2">
+                                    <Wallet className="text-muted-foreground h-5 w-5" />
+                                    <CardTitle className="text-lg">Financial Ledger</CardTitle>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pt-6">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                                    <div className="space-y-1">
+                                        <p className="text-muted-foreground text-xs uppercase tracking-wider">Amount</p>
+                                        <p className="font-semibold text-lg">{formatCurrency(transaction.amount)}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-muted-foreground text-xs uppercase tracking-wider">Discount</p>
+                                        <p className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(transaction.discount_amount)}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-muted-foreground text-xs uppercase tracking-wider">Service Fee</p>
+                                        <p className="font-medium text-rose-600 dark:text-rose-400">{formatCurrency(transaction.service_fee)}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-muted-foreground text-xs uppercase tracking-wider">Quantity</p>
+                                        <p className="font-medium">{transaction.quantity}</p>
+                                    </div>
+                                </div>
+
+                                <Separator className="mb-6" />
+
+                                <div className="flex items-center justify-between rounded-lg border bg-muted/20 p-4">
+                                    <div className="space-y-1">
+                                        <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Balance Before</p>
+                                        <p className="font-mono font-medium">{formatCurrency(transaction.balance_before)}</p>
+                                    </div>
+                                    <ArrowLeft className="h-4 w-4 text-muted-foreground rotate-180 shrink-0" />
+                                    <div className="space-y-1 text-right">
+                                        <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Balance After</p>
+                                        <p className="font-mono font-medium">{formatCurrency(transaction.balance_after)}</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
 
-                    {/* RIGHT COLUMN: Developer / Machine Logic */}
-                    <div className="space-y-8 lg:col-span-2">
-                        {/* API Debugger Tool */}
-                        <div className="flex h-full max-h-[800px] flex-col overflow-hidden rounded-xl border border-slate-800 bg-[#0f172a] shadow-sm">
-                            <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/50 p-4">
-                                <div className="flex items-center gap-2">
-                                    <svg className="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                                        />
-                                    </svg>
-                                    <h3 className="text-sm font-semibold text-white">Developer Debug Logs</h3>
-                                </div>
-                                <div className="flex gap-2">
-                                    <span className="rounded border border-slate-700 bg-slate-800 px-2 py-1 font-mono text-xs text-slate-400">
-                                        POST /v1/topup
-                                    </span>
-                                </div>
-                            </div>
+                    {/* Right Column: Developer / Metadata */}
+                    <div className="flex flex-col gap-6 lg:col-span-1">
 
-                            <div className="custom-scrollbar flex-1 overflow-y-auto bg-[#0d1117] p-0">
-                                {/* Request Payload */}
-                                <div className="border-b border-slate-800/50">
-                                    <div className="flex items-center justify-between border-b border-slate-800/50 bg-slate-800/30 px-4 py-2 text-xs font-semibold tracking-wider text-slate-400 uppercase">
-                                        Vendor Request Payload
-                                        <span className="text-[10px] text-slate-500 normal-case">Sent to {transaction.provider?.name}</span>
+                        {/* Timeline & Meta Card */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Timeline & Meta</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex items-start gap-3">
+                                    <Clock className="h-4 w-4 text-muted-foreground mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-medium">Initiated</p>
+                                        <p className="text-xs text-muted-foreground">{formattedDate}</p>
                                     </div>
-                                    <pre className="overflow-x-auto p-4 font-mono text-xs text-emerald-300">
-                                        <code>{JSON.stringify(metaData.request || metaData.payload || {}, null, 2)}</code>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <CheckCircle2 className="h-4 w-4 text-muted-foreground mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-medium">Completed</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {transaction.completed_at ? new Date(transaction.completed_at).toLocaleString('en-NG') : 'Pending / Not Recorded'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <Separator />
+                                <div className="flex items-start gap-3">
+                                    <CreditCard className="h-4 w-4 text-muted-foreground mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-medium">Payment Reference</p>
+                                        <p className="text-xs font-mono text-muted-foreground break-all">
+                                            {transaction.payment_reference || 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <Smartphone className="h-4 w-4 text-muted-foreground mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-medium">Platform Source</p>
+                                        <p className="text-xs text-muted-foreground uppercase">{transaction.platform || 'API'}</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Raw API Payload Block */}
+                        <Card className="flex flex-col overflow-hidden">
+                            <CardHeader className="bg-slate-900 flex flex-row items-center justify-between py-3 border-b border-slate-800">
+                                <div className="flex items-center gap-2 text-slate-200">
+                                    <Terminal className="h-4 w-4" />
+                                    <CardTitle className="text-sm font-medium">Provider Response</CardTitle>
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleCopy}
+                                    className="h-8 text-slate-400 hover:text-white hover:bg-slate-800"
+                                >
+                                    <Copy className="h-3 w-3 mr-2" />
+                                    {copied ? 'Copied!' : 'Copy JSON'}
+                                </Button>
+                            </CardHeader>
+                            <CardContent className="p-0 bg-slate-950 text-slate-300">
+                                <div className="max-h-[400px] overflow-y-auto p-4 custom-scrollbar">
+                                    <pre className="text-xs font-mono whitespace-pre-wrap break-all">
+                                        <code>{JSON.stringify(metaData, null, 2)}</code>
                                     </pre>
                                 </div>
+                            </CardContent>
+                        </Card>
 
-                                {/* Response Payload */}
-                                <div>
-                                    <div className="flex items-center justify-between border-y border-slate-800/50 bg-slate-800/30 px-4 py-2 text-xs font-semibold tracking-wider text-slate-400 uppercase">
-                                        Vendor Response Payload
-                                        <span className="font-mono text-[10px] text-slate-500 normal-case">{metaData.http_status || '200 OK'}</span>
-                                    </div>
-                                    <pre className="overflow-x-auto p-4 font-mono text-xs text-indigo-300">
-                                        <code>{JSON.stringify(metaData.response || metaData.result || {}, null, 2)}</code>
-                                    </pre>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

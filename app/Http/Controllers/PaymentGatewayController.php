@@ -119,10 +119,11 @@ class PaymentGatewayController extends Controller
             # code...
             $default_provider = PaymentGateway::default();
             $paymentLink->load('business.owner');
+            $reference = $paymentLink->tx_ref ?? Transaction::generateTransactionId();
 
             $transactionService->initializeCheckout($paymentLink->business->owner, [
                 'provider' => $default_provider->code,
-                'transaction_reference' => $paymentLink->tx_ref,
+                'transaction_reference' => $reference,
                 'platform' => 'web',
                 'transaction_type' => 'payment_link',
                 'account_or_phone' => $data['customer_email'],
@@ -131,7 +132,8 @@ class PaymentGatewayController extends Controller
             ]);
 
             $data['paymentLink'] = $paymentLink->id;
-            $data['transaction_reference'] = Transaction::generateTransactionId();
+            $data['transaction_reference'] = $reference;
+            // ;
             $provider = PaymentFactory::make($default_provider)->checkout($data);
             return Inertia::location($provider['checkout_url']);
         } catch (\Throwable $e) {

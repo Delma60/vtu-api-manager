@@ -13,9 +13,9 @@ import { usePage, router } from '@inertiajs/react';
 import { SharedData } from '@/types'; // Adjust this import based on your types setup
 
 export function NotificationDropdown() {
-    const { auth } = usePage<any>().props;
-    const notifications = auth.notifications || [];
-    const unreadCount = auth.unreadNotificationsCount || 0;
+    const { auth, notifications = [], unreadNotificationsCount = 0 } = usePage<any>().props;
+    const notificationList = notifications || [];
+    const unreadCount = unreadNotificationsCount || 0;
 
     const markAsRead = (id: string) => {
         router.post(route('notifications.mark-as-read', id), {}, { preserveScroll: true });
@@ -50,13 +50,13 @@ export function NotificationDropdown() {
                 <DropdownMenuSeparator />
                 
                 <div className="max-h-[300px] overflow-y-auto">
-                    {notifications.length === 0 ? (
+                    {notificationList.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
                             <Bell className="mb-2 h-8 w-8 opacity-20" />
                             <p className="text-sm">No new notifications</p>
                         </div>
                     ) : (
-                        notifications.map((notification: any) => (
+                        notificationList.map((notification: any) => (
                             <DropdownMenuItem 
                                 key={notification.id} 
                                 className="flex cursor-pointer flex-col items-start gap-1 p-4"
@@ -78,7 +78,7 @@ export function NotificationDropdown() {
                     )}
                 </div>
 
-                {notifications.length > 0 && (
+                {notificationList.length > 0 && (
                     <>
                         <DropdownMenuSeparator />
                         <div className="p-2">

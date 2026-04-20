@@ -1,5 +1,7 @@
-import { Head, useForm } from '@inertiajs/react';
-import React, { useState } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import { AlertCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 interface PaymentLink {
     id: string;
@@ -11,10 +13,18 @@ interface PaymentLink {
 }
 
 export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLink; merchant: string }) {
-    // const [isProcessing, setIsProcessing] = useState(false);
+    // Cast usePage props to any to safely access flash messages without TS warnings
+    const { flash } = usePage<any>().props;
+    const [hasError, setHasError] = useState(!!flash?.error);
     const isVariableAmount = paymentLink.amount === null;
 
-    const { data, setData, post, processing:isProcessing, errors } = useForm({
+    const {
+        data,
+        setData,
+        post,
+        processing: isProcessing,
+        errors,
+    } = useForm({
         customer_name: paymentLink.customer_name || '',
         customer_email: paymentLink.customer_email || '',
         amount: paymentLink.amount || '',
@@ -22,31 +32,15 @@ export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLin
 
     const handlePayment = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route("pay.submit", paymentLink.id))
+        post(route('pay.submit', paymentLink.id));
     };
 
-    console.log(errors)
-    if (paymentLink.status === 'successful') {
-        return (
-            <div className="bg-background text-foreground relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
-                {/* Background decorative blobs - Tied to theme colors instead of hardcoded indigo/emerald */}
-                <div className="bg-primary/20 absolute top-[-10%] left-[-10%] h-96 w-96 rounded-full opacity-70 mix-blend-multiply blur-3xl filter dark:mix-blend-screen"></div>
-                <div className="bg-chart-2/20 absolute right-[-10%] bottom-[-10%] h-96 w-96 rounded-full opacity-70 mix-blend-multiply blur-3xl filter dark:mix-blend-screen"></div>
+    useEffect(() => {
+        if (flash?.error) {
+            setHasError(true);
+        }
+    }, [flash?.error, flash]);
 
-                <div className="border-border bg-card/80 text-card-foreground relative z-10 w-full max-w-md rounded-3xl border p-10 text-center shadow-xl backdrop-blur-xl">
-                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 shadow-inner">
-                        <svg className="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                    <h2 className="mb-3 text-3xl font-bold tracking-tight">Payment Successful!</h2>
-                    <p className="text-muted-foreground text-lg">
-                        Thank you. Your payment to <span className="text-foreground font-semibold">{merchant}</span> has been received.
-                    </p>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="bg-background text-foreground relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4">
@@ -55,6 +49,18 @@ export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLin
             {/* Glassy Background Blobs */}
             <div className="bg-primary/10 absolute top-0 left-1/4 h-72 w-72 rounded-full opacity-70 mix-blend-multiply blur-3xl filter dark:mix-blend-screen"></div>
             <div className="bg-chart-4/10 absolute right-1/4 bottom-0 h-72 w-72 rounded-full opacity-70 mix-blend-multiply blur-3xl filter dark:mix-blend-screen"></div>
+            
+            {/* Error Dialog */}
+            <Dialog open={hasError} onOpenChange={setHasError}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <div className="flex flex-col items-center justify-center pt-6 pb-2">
+                        <div className="text-destructive bg-destructive/10 mb-4 flex items-center justify-center rounded-full p-4">
+                            <AlertCircle className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-center text-lg font-semibold">{flash?.error}</h3>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Main Card */}
             <div className="border-border bg-card/80 text-card-foreground relative z-10 w-full max-w-md overflow-hidden rounded-3xl border shadow-xl backdrop-blur-2xl">
@@ -123,7 +129,7 @@ export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLin
                             />
                         </div>
 
-                        {/* Submit Button uses theme primary colors */}
+                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={isProcessing}
@@ -147,7 +153,6 @@ export default function Pay({ paymentLink, merchant }: { paymentLink: PaymentLin
                                     Processing...
                                 </span>
                             ) : (
-                                // Added `|| '0'` fallback to prevent "NaN" if the input is completely empty
                                 `Pay ₦${parseFloat(data?.amount || '0').toLocaleString()}`
                             )}
                         </button>

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('description');
             $table->string('currency')->default('NGN');
             $table->enum('status', ['pending', 'successful', 'cancelled'])->default('pending');
-            $table->string('tx_ref')->unique();
+            $table->string('tx_ref')->nullable()->unique();
             $table->boolean('is_reusable')->default(false); // Can it be paid multiple times?
             $table->timestamps();
         });

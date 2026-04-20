@@ -13,36 +13,35 @@ class TransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    // TransactionController.php
-
     public function index(Request $request)
     {
         $query = Transaction::query()
-            ->with('provider') // Eager load the upstream vendor
+            // Removed ->with('provider') because provider is now a string column, not a relationship
             ->orderBy('created_at', 'desc');
 
         // Apply Filters if they exist in the request
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function($q) use ($search) {
-                $q->where('reference', 'like', "%{$search}%")
-                ->orWhere('vendor_reference', 'like', "%{$search}%")
-                ->orWhere('destination', 'like', "%{$search}%");
+                $q->where('transaction_reference', 'like', "%{$search}%")
+                  ->orWhere('payment_reference', 'like', "%{$search}%")
+                  ->orWhere('account_or_phone', 'like', "%{$search}%");
             });
         }
 
         if ($request->filled('status')) {
+            // strictly 'pending', 'success', or 'fail'
             $query->where('status', $request->input('status'));
         }
 
-        if ($request->filled('network')) {
-            $query->where('network', $request->input('network'));
+        if ($request->filled('provider')) {
+            $query->where('provider', $request->input('provider'));
         }
 
         return Inertia::render('transactions/index', [
             // Using Laravel's built-in pagination
-            'transactions' => $query->paginate(20)->withQueryString(), 
-            'filters' => $request->only(['search', 'status', 'network', 'date_range'])
+            'transactions' => $query->paginate(20)->withQueryString(),
+            'filters' => $request->only(['search', 'status', 'provider', 'date_range'])
         ]);
     }
 
@@ -67,15 +66,19 @@ class TransactionController extends Controller
      */
     public function show($reference)
     {
-        // 1. Fetch the transaction by its public reference, not the DB ID
-        $transaction = Transaction::with(['user', 'provider', 'service'])
-            ->where('reference', $reference)
+        // 1. Fetch the transaction by its public reference
+        $transaction = Transaction::where('transaction_reference', $reference)
             ->firstOrFail();
 
-       
-        $metaData = is_string($transaction->meta_data) 
-            ? json_decode($transaction->meta_data, true) 
-            : $transaction->meta_data;
+        // Safely decode the response_message (if it's saved as a JSON string)
+        $metaData = is_string($transaction->response_message)
+            ? json_decode($transaction->response_message, true)
+            : $transaction->response_message;
+
+        // If json_decode fails (meaning it's just a raw text message), wrap it in an array
+        if (json_last_error() !== JSON_ERROR_NONE && is_string($transaction->response_message)) {
+            $metaData = ['response' => $transaction->response_message];
+        }
 
         return Inertia::render('transactions/show', [
             'transaction' => $transaction,

@@ -13,7 +13,7 @@ class PaymentLink extends Model
     use HasFactory, BelongsToBusiness, HasUuids;
 
     protected $fillable = [
-        'business_id', 'customer_name', 'customer_email', 'amount', 
+        'business_id', 'customer_name', 'customer_email', 'amount',
         'description', 'currency', 'status', 'tx_ref', 'is_reusable',
         'meta', 'service_type',
     ];
@@ -23,4 +23,11 @@ class PaymentLink extends Model
         'is_reusable' => 'boolean',
         'meta' => 'array',
     ];
+
+    // success, pending, failed
+    // updating status
+    function updateStatus($status){
+        $this->update(['status' => $status]);
+    }
+
 }

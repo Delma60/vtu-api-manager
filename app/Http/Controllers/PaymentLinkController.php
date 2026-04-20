@@ -10,6 +10,8 @@ use App\Models\DataPlan;
 use App\Models\Network;
 use App\Models\NetworkType;
 use App\Models\Transaction;
+use App\Notifications\PaymentSuccessful;
+use App\Services\TransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -61,7 +63,7 @@ class PaymentLinkController extends Controller
             'customer_name' => $validated['customer_name'] ?? null,
             'customer_email' => $validated['customer_email'] ?? null,
             'is_reusable' => $validated['is_reusable'] ?? false,
-            'tx_ref' => 'PL_' . strtoupper(Str::random(12)),
+            'tx_ref' => !$validated['is_reusable'] && Transaction::generateTransactionId(),
         ]);
 
         return back()->with('success', 'Payment link created successfully!');
@@ -72,17 +74,14 @@ class PaymentLinkController extends Controller
      */
     public function show(PaymentLink $paymentLink)
     {
-        Log::info($paymentLink);
-        // 1. Eager load both the business AND the owner to save DB queries
         $paymentLink->load('business.owner');
-
-        if (!$paymentLink->is_reusable && $paymentLink->status === 'successful') {
+      
+        if ($paymentLink->is_reusable == 0 && $paymentLink->status === 'successful') {
             return abort(403, 'This payment link has already been paid.');
         }
 
         return Inertia::render('checkout/pay', [
             'paymentLink' => $paymentLink,
-            // 2. Use null-safe operator (?->) and fall back to the business name
             'merchant' => $paymentLink->business?->owner?->name ?? $paymentLink->business?->name ?? 'Unknown Merchant'
         ]);
     }
@@ -114,8 +113,6 @@ class PaymentLinkController extends Controller
     {
         $paymentLink = PaymentLink::findOrFail($id);
 
-        // Example: Verify transaction ref from Flutterwave/Paystack here
-        // If successful:
 
         $paymentLink->update(['status' => 'successful']);
 
@@ -129,11 +126,30 @@ class PaymentLinkController extends Controller
     
     }
 
-    public function paymentSuccess(Request $request, PaymentLink $paymentLink, $tx_ref = null)
+    public function paymentSuccess(Request $request, PaymentLink $paymentLink, TransactionService $transactionService)
     {
+        $data = $request->validate([
+            "tx_ref" => ['nullable', 'string'],
+        ]);
         // Handle successful payment callback
+        $paymentLink->load("business.owner");
         // The callback may provide tx_ref as a route segment or query parameter.
-        $tx_ref = $tx_ref ?? $request->query('tx_ref');
+        $tx_ref = $data['tx_ref'] ?? $request->query('tx_ref');
+        $transaction  = Transaction::where('transaction_reference', $tx_ref)->first();
+
+        if (!$transaction) {
+            Log::warning("Transaction not found for tx_ref: {$tx_ref}");
+            return abort(404, 'Transaction not found');
+        }
+
+        $transactionService->markAsSuccessful($transaction, [
+            'message' => 'Payment completed successfully via callback.',
+        ]);
+
+        $paymentLink->updateStatus("successful");
+
+        // notify owner
+        $paymentLink->business->owner->notify(new PaymentSuccessful($paymentLink));
 
         return Inertia::render('pay/success', [
             'paymentLink' => $paymentLink,

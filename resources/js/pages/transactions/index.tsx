@@ -1,11 +1,38 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Transaction } from '@/types';
 import { Link, router } from '@inertiajs/react';
-import { Download, Filter } from 'lucide-react';
+import { Download, Filter, Search } from 'lucide-react';
 import { useState } from 'react';
+
+// 1. Fully mapped to your DB schema
+export interface Transaction {
+    id: number;
+    user_id: string;
+    transaction_type: string;
+    provider: string | null;
+    account_or_phone: string | null;
+    amount: number;
+    discount_amount: number;
+    quantity: number;
+    status: 'pending' | 'success' | 'fail';
+    transaction_reference: string;
+    payment_reference: string | null;
+    funding_method: string | null;
+    balance_before: number;
+    balance_after: number;
+    completed_at: string | null;
+    response_message: string | null;
+    service_fee: number;
+    platform: string | null;
+    receiver: string | null;
+    plan_type: string | null;
+    token: string | null;
+    created_at: string;
+    updated_at: string;
+}
 
 interface PaginationData {
     current_page: number;
@@ -24,20 +51,19 @@ interface Props {
     filters: {
         search?: string;
         status?: string;
-        network?: string;
+        provider?: string;
     };
 }
 
+// 2. Updated to strictly match DB enums ('pending', 'success', 'fail')
 const statusColors: Record<string, { border: string; bg: string; text: string }> = {
-    successful: { border: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400' },
-    failed: { border: 'border-destructive/20', bg: 'bg-destructive/10', text: 'text-destructive' },
-    processing: { border: 'border-blue-500/20', bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400' },
+    success: { border: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400' },
+    fail: { border: 'border-destructive/20', bg: 'bg-destructive/10', text: 'text-destructive' },
     pending: { border: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' },
-    refunded: { border: 'border-border', bg: 'bg-muted/50', text: 'text-muted-foreground' },
 };
 
-// Network dots typically represent brand colors, so keeping them static is fine
-const networkColors: Record<string, string> = {
+// Mapped for generic providers based on your DB
+const providerColors: Record<string, string> = {
     mtn: 'bg-yellow-500',
     airtel: 'bg-red-500',
     glo: 'bg-green-500',
@@ -48,7 +74,7 @@ const networkColors: Record<string, string> = {
 export default function TransactionsPage({ transactions, filters }: Props) {
     const [searchTerm, setSearchTerm] = useState(filters?.search || '');
     const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
-    const [networkFilter, setNetworkFilter] = useState(filters?.network || 'all');
+    const [providerFilter, setProviderFilter] = useState(filters?.provider || 'all');
 
     // Handle filter changes with debouncing for search
     const handleFilter = (key: string, value: string) => {
@@ -61,21 +87,16 @@ export default function TransactionsPage({ transactions, filters }: Props) {
         router.get('/transactions', newFilters, { preserveState: true });
     };
 
-    // Format the network display name
-    const getNetworkName = (network: string) => {
-        return network.charAt(0).toUpperCase() + network.slice(1).toLowerCase();
-    };
-
-    // Format the service/type display
-    const getServiceName = (type: string, network: string) => {
-        const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
-        return `${getNetworkName(network)} ${typeCapitalized}`;
+    // Format the display names cleanly
+    const formatName = (str: string | null) => {
+        if (!str) return 'N/A';
+        return str.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
     // Format currency
     const formatCurrency = (value: number | null) => {
         if (value === null) return '--';
-        return `₦${value.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        return `₦${Number(value).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
 
     // Format date
@@ -101,14 +122,6 @@ export default function TransactionsPage({ transactions, filters }: Props) {
                     </div>
                     <div className="flex items-center gap-3">
                         <Button variant="outline" className="flex items-center gap-2 px-4 py-2 text-sm font-medium">
-                            {/* <svg className="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                />
-                            </svg> */}
                             <Download className="h-4 w-4 opacity-70" />
                             Export CSV
                         </Button>
@@ -120,14 +133,12 @@ export default function TransactionsPage({ transactions, filters }: Props) {
                     {/* Search */}
                     <div className="relative w-full md:w-96">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <svg className="text-muted-foreground h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                            <Search className="text-muted-foreground h-4 w-4" />
                         </div>
                         <Input
                             type="text"
                             className="py-2 pr-3 pl-10 ring-1 focus-visible:ring-0 focus-visible:ring-offset-0"
-                            placeholder="Search Reference, Phone, or Vendor ID..."
+                            placeholder="Search Tx Reference or Payment Ref..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleFilter('search', searchTerm)}
@@ -148,26 +159,24 @@ export default function TransactionsPage({ transactions, filters }: Props) {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="successful">Successful</SelectItem>
-                                <SelectItem value="failed">Failed</SelectItem>
-                                <SelectItem value="processing">Processing</SelectItem>
+                                <SelectItem value="success">Success</SelectItem>
+                                <SelectItem value="fail">Fail</SelectItem>
                                 <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="refunded">Refunded</SelectItem>
                             </SelectContent>
                         </Select>
 
                         <Select
-                            value={networkFilter}
+                            value={providerFilter}
                             onValueChange={(e) => {
-                                setNetworkFilter(e);
-                                handleFilter('network', e);
+                                setProviderFilter(e);
+                                handleFilter('provider', e);
                             }}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="All Networks" />
+                                <SelectValue placeholder="All Providers" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All Networks</SelectItem>
+                                <SelectItem value="all">All Providers</SelectItem>
                                 <SelectItem value="mtn">MTN</SelectItem>
                                 <SelectItem value="airtel">Airtel</SelectItem>
                                 <SelectItem value="glo">Glo</SelectItem>
@@ -177,96 +186,92 @@ export default function TransactionsPage({ transactions, filters }: Props) {
                         </Select>
 
                         <Button variant="outline" title="More Filters (Date Range)">
-                            <Filter />
+                            <Filter className="h-4 w-4" />
                         </Button>
                     </div>
                 </div>
 
-                {/* Main Data Table */}
+                {/* Main Data Table using shadcn/ui */}
                 <div className="border-border bg-card text-card-foreground overflow-hidden rounded-b-xl border shadow-sm">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm whitespace-nowrap">
-                            <thead className="border-border bg-muted/50 text-muted-foreground border-b text-xs font-semibold uppercase">
-                                <tr>
-                                    <th className="px-6 py-4">Reference</th>
-                                    <th className="px-6 py-4">Service</th>
-                                    <th className="px-6 py-4">Destination</th>
-                                    <th className="px-6 py-4">Amount</th>
-                                    <th className="px-6 py-4">Profit</th>
-                                    <th className="px-6 py-4">Status</th>
-                                    <th className="px-6 py-4">Date</th>
-                                    <th className="px-6 py-4 text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-border divide-y">
-                                {transactions?.data && transactions.data.length > 0 ? (
-                                    transactions.data.map((transaction) => {
-                                        const statusStyle = statusColors[transaction.status] || statusColors.pending;
-                                        const networkColor = networkColors[transaction.network] || 'bg-slate-500';
-                                        const isRefunded = transaction.status === 'refunded';
+                    <Table>
+                        <TableHeader className="bg-muted/50">
+                            <TableRow>
+                                <TableHead className="px-6 py-4 font-semibold uppercase text-xs">Reference</TableHead>
+                                <TableHead className="px-6 py-4 font-semibold uppercase text-xs">Type & Provider</TableHead>
+                                <TableHead className="px-6 py-4 font-semibold uppercase text-xs">Account / Phone</TableHead>
+                                <TableHead className="px-6 py-4 font-semibold uppercase text-xs">Amount</TableHead>
+                                <TableHead className="px-6 py-4 font-semibold uppercase text-xs">Discount</TableHead>
+                                <TableHead className="px-6 py-4 font-semibold uppercase text-xs">Status</TableHead>
+                                <TableHead className="px-6 py-4 font-semibold uppercase text-xs">Date</TableHead>
+                                <TableHead className="px-6 py-4 font-semibold uppercase text-xs text-right">Action</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {transactions?.data && transactions.data.length > 0 ? (
+                                transactions.data.map((transaction) => {
+                                    const statusStyle = statusColors[transaction.status] || statusColors.pending;
+                                    const providerColor = transaction.provider ? (providerColors[transaction.provider.toLowerCase()] || 'bg-slate-500') : 'bg-slate-500';
 
-                                        return (
-                                            <tr key={transaction.reference} className="group hover:bg-muted/50 transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <div className={`font-mono font-medium ${isRefunded ? 'line-through opacity-50' : ''}`}>
-                                                        {transaction.reference}
-                                                    </div>
-                                                    <div
-                                                        className={`text-muted-foreground mt-0.5 font-mono text-[10px] ${isRefunded ? 'opacity-50' : ''}`}
-                                                    >
-                                                        {transaction.vendor_reference || '--'}
-                                                    </div>
-                                                </td>
-                                                <td className={`px-6 py-4 ${isRefunded ? 'opacity-50' : ''}`}>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={`h-2 w-2 rounded-full ${networkColor}`}></span>
+                                    return (
+                                        <TableRow key={transaction.transaction_reference} className="group hover:bg-muted/50 transition-colors">
+                                            <TableCell className="px-6 py-4">
+                                                <div className="font-mono font-medium">
+                                                    {transaction.transaction_reference}
+                                                </div>
+                                                <div className="text-muted-foreground mt-0.5 font-mono text-[10px]">
+                                                    {transaction.payment_reference || 'No Payment Ref'}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`h-2 w-2 rounded-full ${providerColor}`}></span>
+                                                    <div className="flex flex-col">
                                                         <span className="text-foreground font-medium">
-                                                            {getServiceName(transaction.type, transaction.network)}
+                                                            {formatName(transaction.transaction_type)}
+                                                        </span>
+                                                        <span className="text-muted-foreground text-[10px]">
+                                                            {formatName(transaction.provider)}
                                                         </span>
                                                     </div>
-                                                </td>
-                                                <td className={`text-muted-foreground px-6 py-4 font-mono ${isRefunded ? 'opacity-50' : ''}`}>
-                                                    {transaction.destination}
-                                                </td>
-                                                <td className={`text-foreground px-6 py-4 font-medium ${isRefunded ? 'opacity-50' : ''}`}>
-                                                    {formatCurrency(transaction.amount)}
-                                                </td>
-                                                <td
-                                                    className={`px-6 py-4 font-medium ${transaction.profit > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'} ${isRefunded ? 'opacity-50' : ''}`}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground px-6 py-4 font-mono">
+                                                {transaction.account_or_phone || '--'}
+                                            </TableCell>
+                                            <TableCell className="text-foreground px-6 py-4 font-medium">
+                                                {formatCurrency(transaction.amount)}
+                                            </TableCell>
+                                            <TableCell className={`px-6 py-4 font-medium ${transaction.discount_amount > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}>
+                                                {formatCurrency(transaction.discount_amount)}
+                                            </TableCell>
+                                            <TableCell className="px-6 py-4">
+                                                <span className={`rounded-md border ${statusStyle.border} ${statusStyle.bg} px-2.5 py-1 text-xs font-semibold ${statusStyle.text}`}>
+                                                    {formatName(transaction.status)}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-muted-foreground px-6 py-4 text-xs whitespace-nowrap">
+                                                {formatDate(transaction.created_at)}
+                                            </TableCell>
+                                            <TableCell className="px-6 py-4 text-right">
+                                                <Link
+                                                    href={`/transactions/${transaction.transaction_reference.toLowerCase()}`}
+                                                    className="text-primary text-xs font-medium opacity-0 transition-opacity group-hover:opacity-100 hover:underline"
                                                 >
-                                                    {formatCurrency(transaction.profit)}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span
-                                                        className={`rounded-md border ${statusStyle.border} ${statusStyle.bg} px-2.5 py-1 text-xs font-semibold ${statusStyle.text}`}
-                                                    >
-                                                        {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
-                                                    </span>
-                                                </td>
-                                                <td className={`text-muted-foreground px-6 py-4 text-xs ${isRefunded ? 'opacity-50' : ''}`}>
-                                                    {formatDate(transaction.created_at)}
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <Link
-                                                        href={`/transactions/${transaction.reference.toLowerCase()}`}
-                                                        className="text-primary text-xs font-medium opacity-0 transition-opacity group-hover:opacity-100 hover:underline"
-                                                    >
-                                                        View Details
-                                                    </Link>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })
-                                ) : (
-                                    <tr>
-                                        <td colSpan={8} className="text-muted-foreground px-6 py-8 text-center">
-                                            No transactions found
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                                    View Details
+                                                </Link>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={8} className="text-muted-foreground px-6 py-8 text-center">
+                                        No transactions found
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
 
                     {/* Pagination Footer */}
                     <div className="border-border bg-muted/30 flex items-center justify-between border-t p-4 text-sm">

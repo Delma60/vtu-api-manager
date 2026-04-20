@@ -25,8 +25,6 @@ export default function RegisterTenant() {
         });
     };
 
-    console.log(errors)
-
     return (
         <AppLayout>
             <Head title="Register New Tenant" />

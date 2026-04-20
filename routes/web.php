@@ -39,8 +39,8 @@ Route::get('/', function () {
 Route::get('pay/{paymentLink}', [PaymentLinkController::class, 'show'])->name('pay.show');
 Route::post('pay/{paymentLink}', [PaymentGatewayController::class, 'checkout'])->name('pay.submit');
 // failed/successful payment
-Route::get('pay/{paymentLink}/success/{tx_ref?}', [PaymentLinkController::class, 'paymentSuccess'])->name('pay.success');
-Route::get('pay/{paymentLink}/failed/{tx_ref?}', [PaymentLinkController::class, 'paymentFailed'])->name('pay.failed');
+Route::get('pay/{paymentLink}/success', [PaymentLinkController::class, 'paymentSuccess'])->name('pay.success');
+Route::get('pay/{paymentLink}/failed', [PaymentLinkController::class, 'paymentFailed'])->name('pay.failed');
 
 Route::post('/webhook/telegram/sk_super_secret_string', [TelegramController::class, 'handleWebhook']);
 

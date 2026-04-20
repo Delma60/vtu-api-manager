@@ -4,10 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\Provider;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class ProviderSeeder extends Seeder
 {
@@ -16,11 +15,11 @@ class ProviderSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::first();
+        $user = User::on('mysql')->first();
 
         // 3. If the database is completely empty (e.g., fresh migration), create a system admin dummy user
         if (!$user) {
-            $user = User::create([
+            $user = User::on('mysql')->create([
                 'name' => 'System Admin',
                 'email' => 'admin@vtu-manager.local',
                 'password' => Hash::make('password'),
@@ -30,7 +29,8 @@ class ProviderSeeder extends Seeder
             // $user->assignRole('super_admin');
         }
 
-        $userId = Auth::id() ?? 1; //\App\Models\User::first()->id ?? 1;
+        $userId = $user->id;
+        Log::info('Seeding Providers with user_id: ' . $userId);
 
         Provider::insert([
             [

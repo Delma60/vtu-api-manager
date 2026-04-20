@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('webhooks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('business_id')->constrained('vtu_api_manager.businesses')->cascadeOnDelete();
             $table->string('url');
             $table->string('secret')->unique(); // Used for payload signature verification
             $table->boolean('is_active')->default(true);

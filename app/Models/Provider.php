@@ -4,16 +4,16 @@ namespace App\Models;
 
 use App\BelongsToBusiness;
 use App\Services\ProviderService;
+use App\Traits\EnvironmentAwareConnection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class Provider extends Model
 {
     /** @use HasFactory<\Database\Factories\ProviderFactory> */
-    use HasFactory;
-    use BelongsToBusiness;
+    use HasFactory, BelongsToBusiness, EnvironmentAwareConnection;
 
     protected $fillable = [
         'user_id',
@@ -52,7 +52,7 @@ class Provider extends Model
 
     public function getConnectionAttribute()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         // Safely check for mode. Super admins will default to 'live' cache keys
         $mode = ($user && $user->user_type !== 'admin' && $user->business) ? $user->business->mode : 'live';
         
@@ -65,7 +65,7 @@ class Provider extends Model
 
     public function getBalanceAttribute()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $mode = ($user && $user->user_type !== 'admin' && $user->business) ? $user->business->mode : 'live';
         
         $key = md5($this->base_url . $this->api_key . $this->api_secret . ($user?->id ?? "") . $mode);

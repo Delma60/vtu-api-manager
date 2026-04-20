@@ -53,6 +53,6 @@ trait BelongsToBusiness
 
     public function business()
     {
-        return $this->belongsTo(Business::class);
+        return $this->setConnection("mysql")->belongsTo(Business::class);
     }
 }

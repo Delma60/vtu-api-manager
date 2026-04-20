@@ -20,13 +20,11 @@ class SwitchEnvironmentDatabase
                 $testConnection = env('DB_CONNECTION') . '_test';
                 Config::set('database.default', $testConnection);
                 DB::setDefaultConnection($testConnection);
-                DB::purge(env('DB_CONNECTION'));
             } elseif (str_starts_with($bearerToken, 'sk_live_')) {
                 // Ensure we're using the live connection
                 $liveConnection = env('DB_CONNECTION');
                 Config::set('database.default', $liveConnection);
                 DB::setDefaultConnection($liveConnection);
-                DB::purge($liveConnection . '_test');
             }
         } else {
             // For web requests, use the existing logic
@@ -39,7 +37,6 @@ class SwitchEnvironmentDatabase
                 $testConnection = $originalConnection . '_test'; 
                 Config::set('database.default', $testConnection);
                 DB::setDefaultConnection($testConnection);
-                DB::purge($originalConnection);
             }
         }
 

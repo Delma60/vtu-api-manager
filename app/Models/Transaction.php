@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
-use App\EnvironmentAware;
+use App\Traits\EnvironmentAwareConnection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 class Transaction extends Model
 {
     /** @use HasFactory<\Database\Factories\TransactionFactory> */
-    use HasFactory,BelongsToBusiness;
+    use HasFactory, BelongsToBusiness, EnvironmentAwareConnection;
 
     protected $fillable = [
         'user_id', 'transaction_type', 'provider', 'account_or_phone', 'amount',

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
+use App\Traits\EnvironmentAwareConnection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class DataPlan extends Model
 {
     /** @use HasFactory<\Database\Factories\DataPlanFactory> */
-    use HasFactory, BelongsToBusiness;
+    use HasFactory, BelongsToBusiness, EnvironmentAwareConnection;
 
     protected $fillable = [
         'network',

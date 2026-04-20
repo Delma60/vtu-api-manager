@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('business_id')
                   ->nullable()
                   ->after('id')
-                  ->constrained('businesses')
+                  ->constrained('vtu_api_manager.businesses')
                   ->cascadeOnDelete();
         });
 
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->foreignId('business_id')
                   ->nullable()
                   ->after('id')
-                  ->constrained('businesses')
+                  ->constrained('vtu_api_manager.businesses')
                   ->cascadeOnDelete();
         });
         // to provider 
@@ -33,7 +33,7 @@ return new class extends Migration
             $table->foreignId('business_id')
                   ->nullable()
                   ->after('id')
-                  ->constrained('businesses')
+                  ->constrained('vtu_api_manager.businesses')
                   ->cascadeOnDelete();
         });
 
@@ -41,7 +41,7 @@ return new class extends Migration
             $table->foreignId('business_id')
                   ->nullable()
                   ->after('id')
-                  ->constrained('businesses')
+                  ->constrained('vtu_api_manager.businesses')
                   ->cascadeOnDelete();
         });
         

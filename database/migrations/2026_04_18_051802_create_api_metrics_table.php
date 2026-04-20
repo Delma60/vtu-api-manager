@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('api_metrics', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('business_id')->constrained('vtu_api_manager.businesses')->cascadeOnDelete();
             $table->foreignId('provider_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('service_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('network')->nullable();

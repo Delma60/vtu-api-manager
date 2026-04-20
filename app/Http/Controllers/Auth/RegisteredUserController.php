@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
@@ -40,7 +41,9 @@ class RegisteredUserController extends Controller
             'password' => ['required', Rules\Password::defaults()],
         ]);
 
-        $user = DB::transaction(function () use ($request) {
+        try{
+            DB::beginTransaction();
+        
             
             // 1. Create the Business Tenant
             $business = Business::create([
@@ -48,6 +51,13 @@ class RegisteredUserController extends Controller
                 'slug' => Str::slug($request->company_name) . '-' . Str::random(4), 
                 'support_email' => $request->email,
                 'is_active' => true,
+            ]);
+
+            // 2. Create basic roles for the business
+            $ownerRole = \App\Models\Role::create([
+                'name' => 'Business Owner',
+                'slug' => 'owner',
+                'business_id' => $business->id,
             ]);
 
             $newUser = $business->owner()->create([
@@ -62,12 +72,19 @@ class RegisteredUserController extends Controller
             
 
             return $newUser;
-        });
+       DB::commit();
 
-        event(new Registered($user));
+        event(new Registered($newUser));
 
-        Auth::login($user);
+        Auth::login($newUser);
 
         return to_route('dashboard');
+    
+
+        }catch(\Exception $e){
+            DB::rollback();
+            Log::info($e);
+            return back()->withErrors(['error' => 'Registration failed. Please try again.']);
+        }
     }
 }

@@ -37,7 +37,7 @@ trait HasRole
     public function assignRole(string|Role $role): void
     {
         if (is_string($role)) {
-            $role = Role::where('slug', $role)->firstOrFail();
+            $role = Role::withoutGlobalScope('business_tenant')->where('slug', $role)->where('business_id', $this->business_id)->firstOrFail();
         }
 
         $this->role_id = $role->id;

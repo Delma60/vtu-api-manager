@@ -69,6 +69,7 @@ class User extends Authenticatable
             'abilities' => $abilities,
             'expires_at' => $expiresAt,
             'plain_text_token' => $this->buildPrefixedToken($plainTextToken),
+            'mode' => $this->business->mode ?? 'live',
         ]);
 
         return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);

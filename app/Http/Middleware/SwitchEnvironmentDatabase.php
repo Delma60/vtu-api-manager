@@ -4,39 +4,30 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
 
 class SwitchEnvironmentDatabase
 {
     public function handle(Request $request, Closure $next)
     {
-        // Check if this is an API request with a bearer token
         $bearerToken = $request->bearerToken();
         
+        // 1. API requests: Route based on token prefix (independent of user mode)
         if ($bearerToken) {
-            // Determine connection based on token prefix
             if (str_starts_with($bearerToken, 'sk_test_')) {
-                $testConnection = env('DB_CONNECTION') . '_test';
-                Config::set('database.default', $testConnection);
-                DB::setDefaultConnection($testConnection);
+                Config::set('database.default', env('DB_CONNECTION') . '_test');
             } elseif (str_starts_with($bearerToken, 'sk_live_')) {
-                // Ensure we're using the live connection
-                $liveConnection = env('DB_CONNECTION');
-                Config::set('database.default', $liveConnection);
-                DB::setDefaultConnection($liveConnection);
+                Config::set('database.default', env('DB_CONNECTION'));
             }
         } else {
-            // For web requests, use the existing logic
+            // 2. Web requests: Route based on authenticated user's business mode
             if (
-                auth()->check() && 
-                auth()->user()->user_type !== 'admin' && 
-                auth()->user()->business?->mode === 'test'
+                Auth::check() && 
+                Auth::user()->user_type !== 'admin' && 
+                Auth::user()->business?->mode === 'test'
             ) {
-                $originalConnection = env('DB_CONNECTION');
-                $testConnection = $originalConnection . '_test'; 
-                Config::set('database.default', $testConnection);
-                DB::setDefaultConnection($testConnection);
+                Config::set('database.default', env('DB_CONNECTION') . '_test');
             }
         }
 

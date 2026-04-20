@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use App\EnvironmentAware;
+use App\Traits\EnvironmentAwareConnection;
 use Laravel\Sanctum\PersonalAccessToken as SanctumPersonalAccessToken;
 
 class PersonalAccessToken extends SanctumPersonalAccessToken
 {
+    use EnvironmentAware, EnvironmentAwareConnection;
+
+
     /**
      * The attributes that are mass assignable.
      *
@@ -17,6 +22,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
         'abilities',
         'expires_at',
         'plain_text_token',
+        'mode',
     ];
 
     /**

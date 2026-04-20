@@ -6,6 +6,7 @@ use App\Models\ApiLog;
 use App\Services\MetricsService;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -53,6 +54,7 @@ class ApiLoggerMiddleware
             'duration_ms'      => $duration,
             'request_payload'  => $requestPayload,
             'response_payload' => $responsePayload,
+            'mode'             => Config::get('database.default') === (env('DB_CONNECTION') . '_test') ? 'test' : 'live',
         ]);
 
         try {

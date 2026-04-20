@@ -1,9 +1,12 @@
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { type User } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
+import { useState } from 'react';
 
 interface UserMenuContentProps {
     user: User;
@@ -11,6 +14,18 @@ interface UserMenuContentProps {
 
 export function UserMenuContent({ user }: UserMenuContentProps) {
     const cleanup = useMobileNavigation();
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+    const handleLogoutClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setShowLogoutConfirm(true);
+    };
+
+    const handleConfirmLogout = () => {
+        cleanup();
+        setShowLogoutConfirm(false);
+        router.post(route('logout'));
+    };
 
     return (
         <>
@@ -30,11 +45,28 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-                <Link className="block w-full" method="post" href={route('logout')} as="button" onClick={cleanup}>
-                    <LogOut className="mr-2" />
+                <button className="block w-full text-left" onClick={handleLogoutClick}>
+                    <LogOut className="mr-2 inline" />
                     Log out
-                </Link>
+                </button>
             </DropdownMenuItem>
+
+            <Dialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Log out?</DialogTitle>
+                        <DialogDescription>Are you sure you want to log out? You'll need to log in again to access your account.</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowLogoutConfirm(false)}>
+                            Cancel
+                        </Button>
+                        <Button variant="destructive" onClick={handleConfirmLogout}>
+                            Log out
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

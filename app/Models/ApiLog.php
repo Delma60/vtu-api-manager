@@ -13,7 +13,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApiLog extends Model
 {
+    use EnvironmentAware;
     use HasFactory, HasUuids, Prunable, BelongsToBusiness;
+
+    // All API logs go to the live database (single audit trail)
+    // The EnvironmentAware trait filters by mode for display
+    protected $connection = 'mysql';
 
     protected $fillable = [
         'user_id',
@@ -26,6 +31,7 @@ class ApiLog extends Model
         'duration_ms',
         'request_payload',
         'response_payload',
+        'mode',
     ];
 
     protected function casts(): array

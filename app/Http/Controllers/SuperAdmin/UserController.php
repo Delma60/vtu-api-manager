@@ -25,10 +25,10 @@ class UserController extends Controller
                 });
             })
             ->when($type !== 'all', function ($query) use ($type) {
-                if ($type === 'super_admin') {
-                    $query->where('user_type', 'super_admin');
+                if ($type ==='admin') {
+                    $query->where('user_type','admin');
                 } else {
-                    $query->where('user_type', '!=', 'super_admin');
+                    $query->where('user_type', '!=','admin');
                 }
             })
             ->latest()
@@ -43,7 +43,7 @@ class UserController extends Controller
                     'user_type' => $user->user_type,
                     // Handle nullable relationships safely
                     'business_name' => $user->business ? $user->business->name : 'System Platform',
-                    'role' => $user->role ? $user->role->name : ($user->user_type === 'super_admin' ? 'Super Admin' : 'Unassigned'),
+                    'role' => $user->role ? $user->role->name : ($user->user_type === admin ? 'Super Admin' : 'Unassigned'),
                     'created_at' => $user->created_at->format('M d, Y'),
                 ];
             });

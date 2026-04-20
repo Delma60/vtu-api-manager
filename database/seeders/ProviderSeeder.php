@@ -26,7 +26,7 @@ class ProviderSeeder extends Seeder
             ]);
 
             // If you are still using the HasRole trait from earlier:
-            // $user->assignRole('super_admin');
+            // $user->assignRole(admin);
         }
 
         $userId = $user->id;

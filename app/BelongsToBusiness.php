@@ -15,7 +15,7 @@ trait BelongsToBusiness
             $tableName = (new static)->getTable();
             
             // 1. BYPASS FOR SUPER ADMIN: Allow them to see everything
-            if ($user && $user->user_type === 'super_admin') {
+            if ($user && $user->user_type === 'admin') {
                 return;
             }
             
@@ -35,7 +35,7 @@ trait BelongsToBusiness
                 $user = static::getTenantUser();
                 
                 // Ensure we don't apply super admin's null business_id
-                if ($user && $user->user_type !== 'super_admin' && $user->business_id) {
+                if ($user && $user->user_type !== 'admin' && $user->business_id) {
                     $model->business_id = $user->business_id;
                 }
             }
@@ -53,6 +53,6 @@ trait BelongsToBusiness
 
     public function business()
     {
-        return $this->setConnection("mysql")->belongsTo(Business::class);
+        return $this->belongsTo(Business::class);
     }
 }

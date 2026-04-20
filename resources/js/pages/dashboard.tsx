@@ -1,7 +1,14 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { SelectValue } from '@radix-ui/react-select';
+import { useState } from 'react';
+import { Bar, BarChart, CartesianGrid, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,6 +21,7 @@ export default function Dashboard({
     metrics,
     providerHealth,
     recentTransactions,
+    volumeChartData,
 }: {
     metrics?: {
         totalBalance: number;
@@ -36,8 +44,26 @@ export default function Dashboard({
         status: 'success' | 'processing' | 'failed';
         time: string; // ISO timestamp
     }[];
+    volumeChartData?: { date: string; requests: number; success: number }[];
 }) {
     const stats = metrics;
+
+    // Inside your Dashboard component:
+    const [isBarHovered, setIsBarHovered] = useState(false);
+
+    const handleRangeChange = (range: string) => {
+        router.get(
+            route('dashboard'),
+            { range },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                only: ['volumeChartData', 'filters'], // Only refresh these props
+            },
+        );
+    };
+
+    // resources/js/pages/dashboard.tsx
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -52,12 +78,8 @@ export default function Dashboard({
                     </div>
                     <div className="flex items-center gap-3">
                         {/* Swapped borders and bg for theme variables */}
-                        <Button variant="outline">
-                            Download Report
-                        </Button>
-                        <Button>
-                            Top Up Wallet
-                        </Button>
+                        <Button variant="outline">Download Report</Button>
+                        <Button>Top Up Wallet</Button>
                     </div>
                 </header>
 
@@ -118,24 +140,70 @@ export default function Dashboard({
 
                 {/* Middle Section: Chart & Provider Health */}
                 <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    {/* Main Chart Area */}
                     <div className="bg-card text-card-foreground flex flex-col rounded-xl border p-6 shadow-sm lg:col-span-2">
                         <div className="mb-6 flex items-center justify-between">
                             <h3 className="text-base font-semibold">Transaction Volume</h3>
-                            <select className="border-input bg-background text-foreground rounded border px-2 py-1 text-xs outline-none">
-                                <option>Last 24 Hours</option>
-                                <option>Last 7 Days</option>
-                            </select>
+                            <div className="w-[200px]">
+                                <Select onValueChange={handleRangeChange} defaultValue="7days">
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="24hours">Last 24 Hours</SelectItem>
+                                        <SelectItem value="7days">Last 7 Days</SelectItem>
+                                        <SelectSeparator />
+                                        <SelectItem value="30days">Last 30 Days</SelectItem>
+                                        <SelectItem value="90days">Last 90 Days</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <div className="border-border bg-muted/30 flex flex-1 items-center justify-center rounded-lg border border-dashed">
-                            <p className="text-muted-foreground font-mono text-sm">[ Line Chart Component Mounts Here ]</p>
+                        <div className="h-[300px] w-full">
+                            {volumeChartData && volumeChartData.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={volumeChartData}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
+                                        <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                                        <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+
+                                        {/* Pass the custom component to the cursor prop */}
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: 'hsl(var(--card))',
+                                                border: '1px solid hsl(var(--border))',
+                                                borderRadius: '8px',
+                                            }}
+                                            cursor={<CustomHoverBackground />}
+                                            wrapperStyle={{
+                                                visibility: isBarHovered ? 'visible' : 'hidden',
+                                                transition: 'visibility 0.1s',
+                                            }}
+                                        />
+
+                                        <Bar
+                                            dataKey="requests"
+                                            fill="#6366f1"
+                                            maxBarSize={40}
+                                            activeBar={false}
+                                            onMouseEnter={() => setIsBarHovered(true)}
+                                            onMouseLeave={() => setIsBarHovered(false)}
+                                        />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className="flex h-full items-center justify-center">
+                                    <div className="text-center">
+                                        <div className="text-muted-foreground mb-2 text-sm">No data available</div>
+                                        <p className="text-muted-foreground text-xs">Chart data will appear here as transactions are processed</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
-
                     {/* Provider Health Sidebar */}
-                    <div className="bg-card text-card-foreground rounded-xl border p-6 shadow-sm">
+                    <div className="bg-card text-card-foreground flex flex-col rounded-xl border p-6 shadow-sm">
                         <h3 className="mb-6 text-base font-semibold">Provider Health</h3>
-                        <div className="space-y-4">
+                        <div className="flex-1 space-y-4">
                             {providerHealth?.map((provider) => (
                                 <div className="flex items-center justify-between" key={provider.name}>
                                     <div className="flex items-center gap-3">
@@ -161,15 +229,22 @@ export default function Dashboard({
                         </button>
                     </div>
                 </div>
-
                 {/* Bottom Section: Real-time Transaction Log */}
-                <div className="bg-card text-card-foreground overflow-hidden rounded-xl border shadow-sm">
-                    <div className="border-border flex items-center justify-between border-b p-6">
+                <Card className="overflow-hidden">
+                    <CardHeader className="border-border bg-card flex flex-row items-center justify-between space-y-0 border-b px-6 py-5">
                         <div className="flex items-center gap-3">
-                            <h3 className="text-base font-semibold">Live Transactions</h3>
-                            <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold tracking-wide text-emerald-600 uppercase dark:text-emerald-400">
-                                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"></span> Streaming
-                            </span>
+                            <CardTitle className="text-base font-semibold">Live Transactions</CardTitle>
+
+                            <Badge
+                                variant="outline"
+                                className="gap-1.5 border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold tracking-wide text-emerald-500 uppercase shadow-none"
+                            >
+                                <span className="relative flex h-2 w-2">
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                                </span>
+                                Live
+                            </Badge>
                         </div>
                         <Link
                             href={route('transactions.index')}
@@ -177,52 +252,188 @@ export default function Dashboard({
                         >
                             View All
                         </Link>
-                    </div>
+                    </CardHeader>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
-                            <thead className="border-border bg-muted/50 text-muted-foreground border-b text-xs font-semibold uppercase">
-                                <tr>
-                                    <th className="px-6 py-4">Reference</th>
-                                    <th className="px-6 py-4">Network/Service</th>
-                                    <th className="px-6 py-4">Destination</th>
-                                    <th className="px-6 py-4">Amount</th>
-                                    <th className="px-6 py-4">Status</th>
-                                    <th className="px-6 py-4 text-right">Time</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-border divide-y">
-                                {recentTransactions?.map((txn) => (
-                                    <tr key={txn.reference} className="hover:bg-muted/50 transition-colors">
-                                        <td className="text-muted-foreground px-6 py-4 font-mono">{txn.reference}</td>
-                                        <td className="px-6 py-4">
-                                            <span className="inline-flex items-center gap-2">
-                                                <span className="h-2 w-2 rounded-full bg-yellow-500"></span> {txn.network}
-                                            </span>
-                                        </td>
-                                        <td className="text-muted-foreground px-6 py-4 font-mono">{txn.destination}</td>
-                                        <td className="px-6 py-4 font-medium">₦{txn.amount.toLocaleString()}</td>
-                                        <td className="px-6 py-4">
-                                            <span className="rounded-md bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                                                {txn.status.charAt(0).toUpperCase() + txn.status.slice(1)}
-                                            </span>
-                                        </td>
-                                        <td className="text-muted-foreground px-6 py-4 text-right text-xs">Just now</td>
-                                    </tr>
-                                ))}
+                    <CardContent className="p-0">
+                        <Table>
+                            <TableHeader className="bg-muted/30">
+                                <TableRow className="hover:bg-transparent">
+                                    <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
+                                        Reference
+                                    </TableHead>
+                                    <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
+                                        Service
+                                    </TableHead>
+                                    <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
+                                        Destination
+                                    </TableHead>
+                                    <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
+                                        Amount
+                                    </TableHead>
+                                    <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
+                                        Status
+                                    </TableHead>
+                                    <TableHead className="text-muted-foreground px-6 py-4 text-right text-xs font-semibold tracking-wider uppercase">
+                                        Time
+                                    </TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {recentTransactions && recentTransactions.length > 0 ? (
+                                    recentTransactions.map((txn: any) => (
+                                        <TableRow key={txn.transaction_reference || txn.id} className="group hover:bg-muted/50 transition-colors">
+                                            {/* Reference */}
+                                            <TableCell className="px-6 py-4">
+                                                <span className="text-muted-foreground group-hover:text-foreground font-mono text-xs transition-colors">
+                                                    {txn.transaction_reference}
+                                                </span>
+                                            </TableCell>
 
-                                {(!recentTransactions || recentTransactions.length === 0) && (
-                                    <tr>
-                                        <td colSpan={6} className="text-muted-foreground px-6 py-8 text-center text-sm">
-                                            No recent transactions to display.
-                                        </td>
-                                    </tr>
+                                            {/* Provider & Transaction Type */}
+                                            <TableCell className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    {txn.provider && (
+                                                        <span
+                                                            className={`h-2.5 w-2.5 flex-shrink-0 rounded-full shadow-sm ${getProviderColor(txn.provider)}`}
+                                                        ></span>
+                                                    )}
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm leading-none font-medium">{txn.provider || 'System'}</span>
+                                                        <span className="text-muted-foreground mt-1 text-xs">
+                                                            {formatTransactionType(txn.transaction_type)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+
+                                            {/* Destination (Account or Phone) */}
+                                            <TableCell className="px-6 py-4 font-mono text-sm">
+                                                {txn.account_or_phone || txn.receiver || 'N/A'}
+                                            </TableCell>
+
+                                            {/* Amount */}
+                                            <TableCell className="px-6 py-4 font-semibold">₦{parseFloat(txn.amount).toLocaleString()}</TableCell>
+
+                                            {/* Status Badge */}
+                                            <TableCell className="px-6 py-4">
+                                                <Badge
+                                                    variant="outline"
+                                                    className={`gap-1 border-transparent capitalize shadow-sm ${getStatusBadge(txn.status)}`}
+                                                >
+                                                    {txn.status === 'success' ? (
+                                                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    ) : txn.status === 'fail' ? (
+                                                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={3}
+                                                                d="M6 18L18 6M6 6l12 12"
+                                                            />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                            />
+                                                        </svg>
+                                                    )}
+                                                    {txn.status}
+                                                </Badge>
+                                            </TableCell>
+
+                                            {/* Relative Time using created_at */}
+                                            <TableCell className="text-muted-foreground px-6 py-4 text-right text-xs font-medium">
+                                                {formatRelativeTime(txn.created_at)}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    /* Empty State */
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="h-32 text-center">
+                                            <div className="text-muted-foreground flex flex-col items-center justify-center space-y-3">
+                                                <svg className="h-8 w-8 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                    />
+                                                </svg>
+                                                <span className="text-sm">No recent transactions to display.</span>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
                                 )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
             </div>
         </AppLayout>
     );
 }
+
+// 1. Define the custom cursor above or inside your component
+const CustomHoverBackground = (props: any) => {
+    const { x, y, width, height } = props;
+    const bgWidth = 50; // Slightly wider than your maxBarSize of 40
+    const centeredX = x + (width - bgWidth) / 2; // Centers the gray box over the bar
+
+    return <Rectangle fill="#334155" opacity={0.2} x={centeredX} y={y} width={bgWidth} height={height} rx={4} />;
+};
+
+// Helper to format time relative to now
+const formatRelativeTime = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+
+    if (seconds < 60) return 'Just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return date.toLocaleDateString();
+};
+
+// Helper to get brand colors for providers
+const getProviderColor = (provider: string | null) => {
+    if (!provider) return 'bg-slate-500';
+    const p = provider.toLowerCase();
+    if (p.includes('mtn')) return 'bg-yellow-400';
+    if (p.includes('airtel')) return 'bg-red-500';
+    if (p.includes('glo')) return 'bg-green-500';
+    if (p.includes('9mobile')) return 'bg-emerald-800';
+    return 'bg-indigo-500';
+};
+
+// Clean up transaction_type (e.g., 'airtime_recharge' -> 'Airtime Recharge')
+const formatTransactionType = (type: string) => {
+    if (!type) return '';
+    return type
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
+
+// Helper for status badge styling based on DB enums: 'pending', 'success', 'fail'
+const getStatusBadge = (status: string) => {
+    const s = status?.toLowerCase();
+    if (s === 'success') {
+        return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+    }
+    if (s === 'fail' || s === 'failed') {
+        return 'bg-red-500/10 text-red-500 border-red-500/20';
+    }
+    if (s === 'pending') {
+        return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+    }
+    return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+};

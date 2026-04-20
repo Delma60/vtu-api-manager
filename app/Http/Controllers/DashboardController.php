@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\ApiLog;
-use App\Models\ApiMetric;
 use App\Models\Provider;
 use App\Models\Transaction;
 use App\Services\MetricsService;
 use App\Services\ProviderService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -25,6 +25,14 @@ class DashboardController extends Controller
     {
         $business = $request->user()->business;
         $today = now()->toDateString();
+        $range = $request->input('range', '7days');
+
+        $range = match($range) {
+            '24h' => '24hours',
+            '7days' => '7days',
+            '30days' => '30days',
+            default => '7days'
+        };
 
         $metrics = [
             'totalBalance' => (float) ProviderService::sumAllBalances(),
@@ -58,22 +66,17 @@ class DashboardController extends Controller
         $recentTransactions = Transaction::with('provider')
             ->latest()
             ->take(5)
-            ->get()
-            ->map(function (Transaction $transaction) {
-                return [
-                    'reference' => $transaction->reference,
-                    'network' => $transaction->network,
-                    'destination' => $transaction->destination,
-                    'amount' => (float) $transaction->amount,
-                    'status' => $transaction->status === 'successful' ? 'success' : $transaction->status,
-                    'time' => $transaction->created_at->toIso8601String(),
-                ];
-            });
+            ->get();
+            
+
+            // Build volume chart data with aggregation by interval
+            $volumeChartData = $this->getAggregatedVolumeData($business->id, $range);
 
         return Inertia::render('dashboard', [
             'metrics' => $metrics,
             'providerHealth' => $providerHealth,
             'recentTransactions' => $recentTransactions,
+            'volumeChartData' => $volumeChartData,
         ]);
     }
     // toggleMode
@@ -85,5 +88,65 @@ class DashboardController extends Controller
         $business->save();
 
         return back()->with('success', 'Mode toggled successfully.');
+    }
+
+    private function getAggregatedVolumeData(int $businessId, string $range): array
+    {
+        $data = [];
+        
+        if ($range === '24hours') {
+            // Group by hour for the past 24 hours from Transaction table
+            $transactions = Transaction::whereHas('business', fn($q) => $q->where('id', $businessId))
+                ->where('created_at', '>=', now()->subHours(24))
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->groupBy(fn($t) => $t->created_at->format('H:00'))
+                ->map(function ($group) {
+                    return [
+                        'date' => $group->first()->created_at->format('H:i'),
+                        'requests' => (int) $group->count(),
+                        'success' => (int) $group->where('status', 'successful')->count()
+                    ];
+                })
+                ->values()
+                ->all();
+            $data = $transactions;
+        } elseif ($range === '30days') {
+            // Group by day for the past 30 days from Transaction table
+            $transactions = Transaction::whereHas('business', fn($q) => $q->where('id', $businessId))
+                ->where('created_at', '>=', now()->subDays(30))
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->groupBy(fn($t) => $t->created_at->toDateString())
+                ->map(function ($group) {
+                    return [
+                        'date' => Carbon::parse($group->first()->created_at)->format('M d'),
+                        'requests' => (int) $group->count(),
+                        'success' => (int) $group->where('status', 'successful')->count()
+                    ];
+                })
+                ->values()
+                ->all();
+            $data = $transactions;
+        } else {
+            // Default to 7 days, group by day from Transaction table
+            $transactions = Transaction::whereHas('business', fn($q) => $q->where('id', $businessId))
+                ->where('created_at', '>=', now()->subDays(7))
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->groupBy(fn($t) => $t->created_at->toDateString())
+                ->map(function ($group) {
+                    return [
+                        'date' => Carbon::parse($group->first()->created_at)->format('M d'),
+                        'requests' => (int) $group->count(),
+                        'success' => (int) $group->where('status', 'successful')->count()
+                    ];
+                })
+                ->values()
+                ->all();
+            $data = $transactions;
+        }
+
+        return $data;
     }
 }

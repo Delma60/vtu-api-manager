@@ -25,6 +25,9 @@ class StorePaymentGatewayRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:50', 'unique:payment_gateways,code'],
+            'base_url' => ['required', 'url'],
+            'api_key' => ['required', 'string'],
+            'api_secret' => ['required', 'string'],
             'logo_url' => ['nullable', 'url'],
             'is_active' => ['boolean'],
             'is_default' => ['boolean'],

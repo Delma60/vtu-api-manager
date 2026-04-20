@@ -77,7 +77,10 @@ class User extends Authenticatable
 
     protected function buildPrefixedToken(string $token): string
     {
-        return ($this->business->mode === 'live' ? 'sk_live_' : 'sk_test_') . $token;
+        // Default to 'live' if the user (like a Super Admin) doesn't belong to a specific business
+        $mode = $this->business?->mode ?? 'live';
+        
+        return ($mode === 'live' ? 'sk_live_' : 'sk_test_') . $token;
     }
 
     public function wallet()
@@ -111,6 +114,8 @@ class User extends Authenticatable
     {
         return $this->user_type === 'tentant_customer';
     }
+
+    
 
 }
 

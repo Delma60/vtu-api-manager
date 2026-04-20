@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApiLog extends Model
 {
-    use EnvironmentAware;
-    use HasFactory, HasUuids, Prunable, BelongsToBusiness;
+    // use ;
+    use HasFactory, HasUuids, Prunable, EnvironmentAware, BelongsToBusiness;
 
     // All API logs go to the live database (single audit trail)
     // The EnvironmentAware trait filters by mode for display

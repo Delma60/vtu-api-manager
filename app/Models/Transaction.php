@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 class Transaction extends Model
 {
     /** @use HasFactory<\Database\Factories\TransactionFactory> */
-    use HasFactory, BelongsToBusiness, EnvironmentAwareConnection;
+    use HasFactory, EnvironmentAwareConnection, BelongsToBusiness;
 
     protected $fillable = [
         'user_id', 'transaction_type', 'provider', 'account_or_phone', 'amount',

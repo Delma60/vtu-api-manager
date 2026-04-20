@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Building2, CreditCard, Edit2, Plus, Star, Wifi, WifiOff } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface PaymentGateway {
     id: number;
@@ -82,6 +82,17 @@ export default function PaymentGatewaysIndex({ gateways }: Props) {
     const toggleGlobalStatus = (id: number) => {
         router.post(route('super-admin.payment-gateways.toggle', id), {}, { preserveScroll: true });
     };
+
+    useEffect(() => {
+        if (data.name) {
+            const generatedCode = data.name
+                .toLowerCase()
+                .trim()
+                .replace(/\s+/g, '_')
+                .replace(/[^a-z0-9_]/g, '');
+            setData('code', generatedCode);
+        }
+    }, [data.name]);
 
     return (
         <AppLayout>

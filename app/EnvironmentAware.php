@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait EnvironmentAware
 {
-    protected static function booted()
+    protected static function bootEnvironmentAware()
     {
         // 1. Automatically filter reads based on the active business mode
         static::addGlobalScope('environment', function (Builder $builder) {

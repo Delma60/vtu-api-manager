@@ -16,6 +16,7 @@ class TransactionController extends Controller
     public function index(Request $request)
     {
         $query = Transaction::query()
+        // ->where("business_id", auth()->user()->business_id)
             // Removed ->with('provider') because provider is now a string column, not a relationship
             ->orderBy('created_at', 'desc');
 

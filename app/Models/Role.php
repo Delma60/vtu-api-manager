@@ -12,7 +12,7 @@ class Role extends Model
     use BelongsToBusiness, EnvironmentAwareConnection;
     // protected $connection = 'mysql';
     
-    protected $fillable = ['name', 'slug', 'service_cost_margins'];
+    protected $fillable = ['name', 'slug', 'service_cost_margins', 'business_id'];
 
     protected $casts = [
         'service_cost_margins' => 'array', // Automatically casts the JSON column to a PHP array

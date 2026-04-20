@@ -68,17 +68,16 @@ class RegisteredUserController extends Controller
                 'type' => 'business_admin',     // Set them as an admin, not a customer
             ]);
 
-            $newUser->assignRole('owner');
+            $newUser->assignRole($ownerRole);
             
 
-            return $newUser;
-       DB::commit();
+            DB::commit();
 
-        event(new Registered($newUser));
+            event(new Registered($newUser));
 
-        Auth::login($newUser);
+            Auth::login($newUser);
 
-        return to_route('dashboard');
+            return to_route('dashboard');
     
 
         }catch(\Exception $e){

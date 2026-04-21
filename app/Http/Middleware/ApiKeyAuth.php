@@ -43,6 +43,8 @@ class ApiKeyAuth
         // Update last used timestamp
         $credential->update(['last_used_at' => now()]);
 
+        Log::info($credential);
+
         // Set the authenticated user
         $request->setUserResolver(function () use ($credential) {
             return $credential->user;

@@ -18,28 +18,14 @@ class ServiceController extends Controller
 {
     //
     function airtime(AirtimeServiceRequest $request){
-        $isTestMode = $request->user()?->activeToken()->environment === 'test';
-        $dbConnection = $isTestMode ? env('DB_CONNECTION') . '_test' : env('DB_CONNECTION');
-
         // check the discount plan for min and max amount
-        $discount = Discount::on("mysql_test")->airtime()->where(function($query) use($request) {
+        $discount = Discount::airtime()->where(function($query) use($request) {
             $query->where("name", $request->network)
             ->whereHas('planType',  function($q) use($request) {
                 $q->where('name', $request->plan_type);
             });
         })->first();
-        Log::alert([
-            "airtime" => Discount::on($dbConnection)->airtime()->get()->toArray(),
-        ]);
-        Log::info("Retrieved discount for airtime purchase", ['discount' => $discount ? $discount->toArray() : null]);
-        if ($discount) {
-            // If a record was found, check the connection of the retrieved instance
-            Log::info("The model retrieved the record using connection: " . $discount->getConnectionName());
-        } else {
-            // If no record was found, check what connection the model is CURRENTLY configured to use
-            $tempModel = new Discount();
-            Log::warning("No discount found. The model is currently configured to use connection: " . $tempModel->getConnectionName());
-        }
+        Log::debug('Retrieved discount plan', ['discount' => $discount]);
 
         if(!$discount) {
             return $this->fail(message: 'No airtime plan available for the specified plan type', code: 400);

@@ -14,6 +14,11 @@ class AirtimeProcessor
     public function process(User $user, array $payload): array
     {
         $provider = ProviderService::getProviderInstance('airtime');
+        
+        if (!$provider) {
+            return ['status' => 'error', 'message' => 'No airtime provider configured'];
+        }
+
         $txRef = $payload['tx_ref'] ?? 'VTM_' . uniqid();
         $payload['tx_ref'] = $txRef;
 
@@ -32,6 +37,7 @@ class AirtimeProcessor
             return ['status' => 'error', 'message' => $e->getMessage()];
         }
 
+        Log::info($payload);
         // 2. Format & Send Request
         try {
             $formattedPayload = $provider->formatPayload('airtime', $payload);

@@ -22,16 +22,17 @@ class ServiceController extends Controller
         // check the discount plan for min and max amount
         // change db
         DB::setDefaultConnection('mysql_test');
-        $discount = Discount::where(function($query) use($request) {
+        $discount = Discount::withoutGlobalScope('business_tenant')
+        ->where(function($query) use($request) {
             $query->where("name", $request->network)
             ->whereHas('planType',  function($q) use($request) {
-                $q->where('name', $request->plan_type);
+                $q->withoutGlobalScope('business_tenant') // Don't forget the relationship!
+                ->where('name', $request->plan_type);
             });
         })->first();
-        $allDiscount = Discount::all();
-        Log::debug('Retrieved discount plan', ['discount' => $discount, "connected_db" => $discount?->getConnection()->getName()]);
-        Log::debug('All discount plans', ['discounts' => $allDiscount]);
-        Log::debug(['connection' => DB::connection()->getName()]);
+
+        Log::info('Retrieved discount plan', ['discount' => $discount]);
+
 
         if(!$discount) {
             return $this->fail(message: 'No airtime plan available for the specified plan type', code: 400);

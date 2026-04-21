@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Class\Providers\Adex;
 use App\Class\Providers\ProviderAbstract;
 use App\Class\Providers\Sandbox;
+use App\Models\NetworkType;
 use App\Models\Provider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -51,6 +52,8 @@ class ProviderService
     // this is where the i get to put provider to make and get provder
     static function getProviderInstance($identifier): ?ProviderAbstract
     {
+        $type = NetworkType::all() ;
+        // Log::info($type);
         $provider = Provider::serviceProvider($identifier)->first();
         return $provider ? self::make($provider) : null;
     }

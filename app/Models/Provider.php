@@ -7,8 +7,10 @@ use App\Services\ProviderService;
 use App\Traits\EnvironmentAwareConnection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class Provider extends Model
 {
@@ -86,7 +88,8 @@ class Provider extends Model
             });
         });
     }
-    function netWorkTypeService(){
+    function netWorkTypeService():HasMany
+    {
         return $this->hasMany(NetworkType::class);
     }
 

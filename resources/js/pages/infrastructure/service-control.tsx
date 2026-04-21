@@ -7,10 +7,10 @@ import { Head, useForm } from '@inertiajs/react';
 import { CheckCircle, Layers, Lightbulb, Network, Save, Smartphone, Wifi } from 'lucide-react';
 import React from 'react';
 
-export default function ServiceControl({ providers, services, networkTypes, networks }: any) {
+export default function ServiceControl({ providers, networkTypes, networks }: any) {
     // Initialize state dynamically based on database rows
     const { data, setData, put, processing, recentlySuccessful } = useForm({
-        services: services.reduce((acc: any, curr: any) => ({ ...acc, [curr.id]: curr.provider_id?.toString() || 'none' }), {}),
+        // services: services.reduce((acc: any, curr: any) => ({ ...acc, [curr.id]: curr.provider_id?.toString() || 'none' }), {}),
         networkTypes: networkTypes.reduce((acc: any, curr: any) => ({ ...acc, [curr.id]: curr.provider_id?.toString() || 'none' }), {}),
         networks: networks.reduce((acc: any, curr: any) => ({ ...acc, [curr.id]: curr.provider_id?.toString() || 'none' }), {}),
     });
@@ -24,9 +24,9 @@ export default function ServiceControl({ providers, services, networkTypes, netw
     const groupedServices = {
         airtime: networkTypes.filter((s: any) => s.type === 'airtime'),
         data: networkTypes.filter((s: any) => s.type === 'data'),
-        cable: services.filter((s: any) => s.type === 'cable'),
-        electricity: services.filter((s: any) => s.type === 'electricity'),
-        others: services.filter((s: any) => !['cable', 'electricity'].includes(s.type)),
+        cable: networkTypes.filter((s: any) => s.type === 'cable'),
+        electricity: networkTypes.filter((s: any) => s.type === 'electricity'),
+        others: networkTypes.filter((s: any) => !['cable', 'electricity'].includes(s.type)),
     };
 
     // Reusable dropdown for assigning providers
@@ -127,7 +127,7 @@ export default function ServiceControl({ providers, services, networkTypes, netw
                         <TabsContent value="data" className="mt-0 outline-none">
                             {groupedServices.data.length > 0 ? (
                                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                    {groupedServices.data.map((service: any) => (
+                                    {groupedServices.data.map((service) => (
                                         <Card key={service.id} className="border-border bg-card shadow-sm">
                                             <CardHeader className="pb-3">
                                                 <CardTitle className="text-md text-foreground">{service.name}</CardTitle>
@@ -160,10 +160,10 @@ export default function ServiceControl({ providers, services, networkTypes, netw
                                                 <CardDescription className="text-xs text-muted-foreground">{service.type || 'Cable TV'}</CardDescription>
                                             </CardHeader>
                                             <CardContent>
-                                                <RouteSelect
+                                                {/* <RouteSelect
                                                     value={data.services[service.id]}
                                                     onChange={(val) => setData('services', { ...data.services, [service.id]: val })}
-                                                />
+                                                /> */}
                                             </CardContent>
                                         </Card>
                                     ))}
@@ -186,10 +186,10 @@ export default function ServiceControl({ providers, services, networkTypes, netw
                                                 <CardDescription className="text-xs text-muted-foreground">{service.type || 'Electricity'}</CardDescription>
                                             </CardHeader>
                                             <CardContent>
-                                                <RouteSelect
+                                                {/* <RouteSelect
                                                     value={data.services[service.id]}
                                                     onChange={(val) => setData('services', { ...data.services, [service.id]: val })}
-                                                />
+                                                /> */}
                                             </CardContent>
                                         </Card>
                                     ))}
@@ -212,10 +212,10 @@ export default function ServiceControl({ providers, services, networkTypes, netw
                                                 <CardDescription className="text-xs text-muted-foreground">{service.type || 'Other Service'}</CardDescription>
                                             </CardHeader>
                                             <CardContent>
-                                                <RouteSelect
+                                                {/* <RouteSelect
                                                     value={data.services[service.id]}
                                                     onChange={(val) => setData('services', { ...data.services, [service.id]: val })}
-                                                />
+                                                /> */}
                                             </CardContent>
                                         </Card>
                                     ))}

@@ -72,7 +72,7 @@ trait BelongsToBusiness
     {
         // Note: 'web' is the standard default guard, 'auth' is usually not a valid guard name
         return Auth::guard('sanctum')->user() 
-            ?? Auth::guard('web')->user() 
+            ?? Auth::guard('web')->user()
             ?? Auth::user();
     }
 

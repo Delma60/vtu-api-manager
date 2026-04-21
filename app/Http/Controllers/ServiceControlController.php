@@ -17,8 +17,6 @@ class ServiceControlController extends Controller
     {
         $providers = Provider::where('is_active', true)->get();
 
-        // Top level services (Airtime, Cable, Electricity, Exam)
-        $services = Service::orderBy('name')->get();
 
         // Data Types (SME, Gifting, CG)
         $networkTypes = NetworkType::with('typeable')->orderBy('name')->get();
@@ -28,7 +26,6 @@ class ServiceControlController extends Controller
 
         return Inertia::render('infrastructure/service-control', [
             'providers' => $providers,
-            'services' => $services,
             'networkTypes' => $networkTypes,
             'networks' => $networks,
         ]);
@@ -43,11 +40,7 @@ class ServiceControlController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            // Update Services
-            foreach ($request->services as $id => $providerId) {
-                Service::where('id', $id)->update(['provider_id' => $providerId === 'none' ? null : $providerId]);
-            }
-
+           
             // Update Data Types (SME, Gifting)
             foreach ($request->networkTypes as $id => $providerId) {
                 NetworkType::where('id', $id)->update(['provider_id' => $providerId === 'none' ? null : $providerId]);

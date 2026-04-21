@@ -21,7 +21,7 @@ class ServiceController extends Controller
     function airtime(AirtimeServiceRequest $request){
         // check the discount plan for min and max amount
         $all = Discount::all();
-        Log::info(["conn name: " => DB::getDatabaseName(), "Discounts" => $all->toArray()]);
+        
         $discount = Discount::where(function($query) use($request) {
             $query->where("name", $request->network)
             ->whereHas('planType',  function($q) use($request) {

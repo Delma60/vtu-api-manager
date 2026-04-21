@@ -70,6 +70,9 @@ trait BelongsToBusiness
 
     protected static function getTenantUser()
     {
+        if (request()->user()) {
+            return request()->user();
+        }
         // Note: 'web' is the standard default guard, 'auth' is usually not a valid guard name
         return Auth::guard('sanctum')->user() 
             ?? Auth::guard('web')->user()

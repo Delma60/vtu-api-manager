@@ -5,8 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\ApiCredential;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Log;
+use App\Services\ApiKeyManager;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApiKeyAuth
@@ -18,28 +17,15 @@ class ApiKeyAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $providedKey = $request->bearerToken();
+        $bearerToken = $request->bearerToken();
 
-        if (!$providedKey) {
+        if (!$bearerToken) {
             return response()->json(['error' => 'API key is missing.'], 401);
         }
 
-        // separate prefix and key
-        $prefix = substr($providedKey, 0, strpos($providedKey, '-'));
-        $keyPart = substr($providedKey, strpos($providedKey, '-') + 1);
-        // $api_cred = ApiCredential::all();
-        $credentials = ApiCredential::withoutGlobalScopes()->get();
+        $credential = ApiKeyManager::getCredentialFromToken($bearerToken);
 
-
-        $credential = $credentials->map(
-            function ($cred) use ($keyPart) {
-                $decryptedKey = Crypt::decryptString($cred->hashed_key);
-                $decryptedKeyPart = substr($decryptedKey, strpos($decryptedKey, '-') + 1);
-                return $decryptedKeyPart === $keyPart ? $cred : null;
-            }
-        )->filter()->first();
-
-        if (!$credential) {
+        if (!$credential || !$credential->user || !$credential->user->is_active || !$credential?->is_active) {
             return response()->json(['error' => 'Unauthorized. Invalid API key.'], 401);
         }
 

@@ -12,8 +12,7 @@ use App\BelongsToBusiness;
 use App\Services\ApiKeyManager;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Laravel\Sanctum\HasApiTokens;
-use Laravel\Sanctum\NewAccessToken;
+
 
 
 class User extends Authenticatable
@@ -98,14 +97,14 @@ class User extends Authenticatable
 
     function createToken(string $name, array $abilities = ['*']): string
     {
-        $key = ApiKeyManager::generateKey($this->id, $this->business?->mode, $name);
+        $key = ApiKeyManager::generateKey($this->id, $this->business?->id, $this->business?->mode, $name);
         return $key;
     }
 
     function activeToken(){
         $apiKey = request()->bearerToken();
         // Log::info(["authorization" =>$apiKey]);
-        return ApiKeyManager::activeToken($apiKey);
+        return ApiKeyManager::getCredentialFromToken($apiKey);
     }
 
 

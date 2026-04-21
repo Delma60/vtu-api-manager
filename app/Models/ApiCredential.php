@@ -23,10 +23,11 @@ class ApiCredential extends Model
         'key_prefix',
         'hashed_key',
         'last_used_at',
-        'mode'
+        'mode',
+        'is_active',
     ];
 
-    protected $appends = ["plain_token"];
+    protected $appends = ["plain_token", "prefix_plain_token"];
 
     protected $casts = [
         'last_used_at' => 'datetime',
@@ -56,5 +57,11 @@ class ApiCredential extends Model
     {
         // This is a virtual attribute to return the decrypted key if needed
         return $this->hashed_key ? Crypt::decryptString($this->hashed_key) : null;
+    }
+
+    function getPrefixPlainTokenAttribute()
+    {
+        // This is a virtual attribute to return the decrypted key if needed
+        return $this->hashed_key ?  $this->key_prefix . Crypt::decryptString($this->hashed_key) : null;
     }
 }

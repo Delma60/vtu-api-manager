@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Services\ApiKeyManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +22,6 @@ trait TenantEnvironmentScope
         
         // 2. Intercept READS (Selects)
         static::addGlobalScope('environment', function (Builder $builder) {
-            Log::info("Applying TenantEnvironmentScope for " . $builder->getModel()->getTable());
             $builder->where(
                 $builder->getQuery()->from . '.environment', 
                 self::determineCurrentEnvironment()
@@ -36,10 +36,11 @@ trait TenantEnvironmentScope
     {
         $request = request();
         $bearerToken = $request->bearerToken();
-
+        
         // 1. Determine environment from API Token
         if ($bearerToken) {
-            return str_starts_with($bearerToken, 'sk_test_') ? 'test' : 'live';
+            $credential = ApiKeyManager::getCredentialFromToken($bearerToken);
+            return $credential?->environment;
         } 
         
         // 2. Determine environment from Authenticated User Business Mode

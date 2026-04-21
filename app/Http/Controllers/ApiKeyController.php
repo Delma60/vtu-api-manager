@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ApiKeyManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
@@ -11,21 +12,11 @@ class ApiKeyController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-
-        $tokens = $user->tokens()->orderBy('created_at', 'desc')->get()->map(function ($token) {
-            return [
-                'id' => $token->id,
-                'name' => $token->name,
-                'token' => Crypt::decryptString($token->hashed_key) ?? "Unavailable",
-                'last_used_at' => $token->last_used_at,
-                'created_at' => $token->created_at,
-                'is_live' => $token->environment === 'live',
-            ];
-        });
+        $businessId = auth()->user()->business_id;
+        $apiKeys = ApiKeyManager::getTokensForBusiness($businessId);
 
         return Inertia::render('developers/api-keys', [
-            'keys' => $tokens,
+            'keys' => $apiKeys,
         ]);
     }
 

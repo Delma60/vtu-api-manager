@@ -40,6 +40,16 @@ class ApiLoggerMiddleware
 
         // 2. Decode the response content if it's JSON
         $responseContent = $response->getContent();
+        // get api key from request header
+        $apiKey = $request->header('Authorization');
+        // get prefix from api key
+        $prefix = substr($apiKey, 0, strpos($apiKey, '-')) ?? 'live';
+        Log::info('API Request', [
+            'endpoint' => $request->path(),
+            'method' => $request->method(),
+            'prefix' => $prefix,
+            'status_code' => $response->getStatusCode(),
+        ]);
         $responsePayload = json_decode($responseContent, true) ?? $responseContent;
 
 

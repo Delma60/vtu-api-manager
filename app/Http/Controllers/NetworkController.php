@@ -4,15 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Network;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class NetworkController extends Controller
 {
     //
         public function store(Request $request)
         {
+            $businessId = auth()->user()->business_id;
             $request->validate([
-                'name' => 'required|string|max:255|unique:networks,name',
-                'code' => 'required|string|max:255|unique:networks,code|regex:/^[a-z0-9_]+$/',
+                'name' => [
+                    'required', 'string', 'max:255',
+                    // Rule::unique('networks')->where(fn ($query) => $query->where('business_id', $businessId))
+                ],
+                'code' => [
+                    'required', 'string', 'max:255', 'regex:/^[a-z0-9_]+$/',
+                    // Rule::unique('networks')->where(fn ($query) => $query->where('business_id', $businessId))
+                ],
                 'description' => 'nullable|string',
                 // 'is_active' => 'boolean',
                 'airtime_api_id' => 'nullable|string|max:255',

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Cache;
 
 class Provider extends Model
 {
+    // 
     /** @use HasFactory<\Database\Factories\ProviderFactory> */
     use HasFactory, BelongsToBusiness, EnvironmentAwareConnection;
 
@@ -56,7 +57,7 @@ class Provider extends Model
         $user = Auth::user();
         // Safely check for mode. Super admins will default to 'live' cache keys
         $mode = ($user && $user->user_type !== 'admin' && $user->business) ? $user->business->mode : 'live';
-        
+
         $key = md5($this->base_url . $this->api_key . $this->api_secret . ($user?->id ?? "") . $mode);
         $provider = ProviderService::make($this);
         return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
@@ -68,7 +69,7 @@ class Provider extends Model
     {
         $user = Auth::user();
         $mode = ($user && $user->user_type !== 'admin' && $user->business) ? $user->business->mode : 'live';
-        
+
         $key = md5($this->base_url . $this->api_key . $this->api_secret . ($user?->id ?? "") . $mode);
         $provider = ProviderService::make($this);
         return Cache::remember($key, now()->addMinutes(60), function() use($provider) {

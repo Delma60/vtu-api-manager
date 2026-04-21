@@ -10,7 +10,7 @@ class NetworkType extends Model
 {
     use BelongsToBusiness, EnvironmentAwareConnection;
 
-    protected $fillable = ['name', 'is_active', 'type'];
+    protected $fillable = ['name', 'is_active', 'type', 'business_id'];
 
     public function typeable()
     {

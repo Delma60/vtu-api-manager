@@ -2,17 +2,20 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\ApiKeyManager;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
+
 
 class SwitchEnvironmentDatabase
 {
     public function handle(Request $request, Closure $next)
     {
         $bearerToken = $request->bearerToken();
-        
+
         // 1. API requests: Route based on token prefix (independent of user mode)
         if ($bearerToken) {
             if (str_starts_with($bearerToken, 'sk_test_')) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ApiLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ApiLogController extends Controller
@@ -11,6 +12,8 @@ class ApiLogController extends Controller
     public function index(Request $request)
     {
         $query = ApiLog::query()->latest();
+        
+        $query->where('mode', $request->user()->business?->mode);
         // Handle Search functionality
         if ($request->filled('search')) {
             $search = $request->input('search');

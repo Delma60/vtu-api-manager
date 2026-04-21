@@ -35,4 +35,31 @@ class ApiKeyManager
         // Return the plain text key. THIS IS THE ONLY TIME THE USER SEES IT.
         return $plainTextKey; 
     }
+
+    // encrypt and decrypt functions for manual use if needed
+    public static function encryptKey($plainTextKey)
+    {        
+        return Crypt::encryptString($plainTextKey);
+    }
+
+    public static function decryptKey($encryptedKey)
+    {
+        return Crypt::decryptString($encryptedKey);
+    }
+    public static function cleanBearerToken($token)
+    {
+        return self::activeToken($token);
+    }
+
+    public static function activeToken($token = null){
+        if(!$token) return null;
+        $keyPart = substr($token, strpos($token, '-') + 1);
+        return request()->user()->tokens()->get()->map(
+            function ($cred) use ($keyPart) {
+                $decryptedKey = ApiKeyManager::decryptKey($cred->hashed_key);
+                $decryptedKeyPart = substr($decryptedKey, strpos($decryptedKey, '-') + 1);
+                return $decryptedKeyPart === $keyPart ? $cred : null;
+            }
+        )->filter()->first();
+    }
 }

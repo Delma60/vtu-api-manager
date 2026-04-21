@@ -23,7 +23,7 @@ class StoreDiscountPlanRequest extends FormRequest
             'min_amount' => 'numeric|min:0',
             'max_amount' => 'numeric|min:0',
             'providerable' => 'required|array',
-            'providerable.provider_id' => 'required|exists:providers,id',
+            'providerable.provider_id' => 'required',
             'providerable.cost_price' => 'required|numeric|min:0',
             'providerable.margin_value' => 'required|numeric|min:0',
             'providerable.margin_type' => 'required|in:percentage,fixed',

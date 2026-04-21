@@ -102,6 +102,11 @@ class User extends Authenticatable
         return $key;
     }
 
+    function activeToken(){
+        $apiKey = request()->header('Authorization');
+        return ApiKeyManager::activeToken($apiKey);
+    }
+
 
     
 

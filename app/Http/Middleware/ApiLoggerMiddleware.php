@@ -42,18 +42,13 @@ class ApiLoggerMiddleware
         $responseContent = $response->getContent();
         // get api key from request header
         $apiKey = $request->header('Authorization');
-        // get prefix from api key
-        $prefix = substr($apiKey, 0, strpos($apiKey, '-')) ?? 'live';
-        Log::info('API Request', [
-            'endpoint' => $request->path(),
-            'method' => $request->method(),
-            'prefix' => $prefix,
-            'status_code' => $response->getStatusCode(),
-        ]);
+        
         $responsePayload = json_decode($responseContent, true) ?? $responseContent;
+        // user active token
+        $activeToken = $request->user()?->activeToken();
+        $connection = $activeToken->environment === 'test' ? 'mysql_test' : null;
 
-
-        ApiLog::create([
+        ApiLog::on($connection)->create([
             'user_id'          => $request->user()?->id,
             'business_id'      => $request->user()?->business_id,
             'provider_id'      => null,
@@ -64,7 +59,7 @@ class ApiLoggerMiddleware
             'duration_ms'      => $duration,
             'request_payload'  => $requestPayload,
             'response_payload' => $responsePayload,
-            'mode'             => Config::get('database.default') === (env('DB_CONNECTION') . '_test') ? 'test' : 'live',
+            'mode'             => $activeToken?->environment,
         ]);
 
         try {

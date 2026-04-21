@@ -7,6 +7,7 @@ use App\Models\Business;
 use App\Models\Provider;
 use App\Models\Service;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -66,7 +67,7 @@ class MetricsService
         ?string $network = null,
         bool $isSuccess = true
     ): void {
-        $date = now()->toDateString();
+        $date = Carbon::now()->toDateString(); 
 
         // Update daily metrics
         // $hourStart = now()->hour()->toDateString();
@@ -100,35 +101,51 @@ class MetricsService
         string $periodType,
         bool $isSuccess
     ): void {
-        $metric = ApiMetric::firstOrCreate(
-            [
-                'business_id' => $business->id,
-                'service_type' => $serviceType,
-                'endpoint' => $endpoint,
-                'provider_id' => $provider?->id,
-                'service_id' => $service?->id,
-                'network' => $network,
-                'period_date' => $date,
-                'period_type' => $periodType,
-            ],
-            [
-                'total_requests' => 0,
-                'successful_requests' => 0,
-                'failed_requests' => 0,
-                'success_rate' => 0,
-            ]
-        );
+        $attributes = [
+            'business_id'  => $business->id,
+            'service_type' => $serviceType,
+            'endpoint'     => $endpoint,
+            'provider_id'  => $provider?->id,
+            'service_id'   => $service?->id,
+            'network'      => $network,
+            'period_date'  => $date,
+            'period_type'  => $periodType,
+        ];
 
-        // Update counters
-        $metric->total_requests++;
-        if ($isSuccess) {
-            $metric->successful_requests++;
-        } else {
-            $metric->failed_requests++;
+        $connection = $business->mode === 'test' ? 'mysql_test' : null;
+
+        // 1. Prevent "Row Creation" Race Condition
+        try {
+            $metric = ApiMetric::on($connection)->firstOrCreate(
+                $attributes,
+                [
+                    'total_requests'      => 0,
+                    'successful_requests' => 0,
+                    'failed_requests'     => 0,
+                    'success_rate'        => 0,
+                ]
+            );
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Error 1062 means another concurrent request just inserted the row
+            if ($e->errorInfo[1] == 1062) {
+                $metric = ApiMetric::on($connection)->where($attributes)->first();
+                if (!$metric) throw $e; 
+            } else {
+                throw $e;
+            }
         }
 
-        // Calculate success rate
-        $metric->calculateSuccessRate();
+        // 2. Prevent "Lost Updates" Counter Race Condition via Atomic DB Updates
+        $successInc = $isSuccess ? 1 : 0;
+        $failedInc  = $isSuccess ? 0 : 1;
+
+        ApiMetric::on($connection)->where('id', $metric->id)->update([
+            'total_requests'      => DB::raw('total_requests + 1'),
+            'successful_requests' => DB::raw("successful_requests + {$successInc}"),
+            'failed_requests'     => DB::raw("failed_requests + {$failedInc}"),
+            // Atomically recalculate success rate inside SQL
+            'success_rate'        => DB::raw("((successful_requests + {$successInc}) / (total_requests + 1)) * 100")
+        ]);
     }
 
     /**

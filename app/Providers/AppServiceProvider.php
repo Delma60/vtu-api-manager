@@ -32,23 +32,17 @@ class AppServiceProvider extends ServiceProvider
         Transaction::observe(TransactionObserver::class);
         Sanctum::getAccessTokenFromRequestUsing(function ($request) {
             $token = $request->bearerToken();
-            Log::info('Attempting to extract access token from request');
 
             if (!$token) {
                 return null;
             }
 
             $token = trim($token);
-            Log::info($token);
 
             // Strip out custom prefixes so Sanctum can validate the real token
             if (str_starts_with($token, 'sk_test_')) {
                 $stripped = substr($token, 8);
-                Log::debug('Stripped test prefix token', [
-                    'original_length' => strlen($token),
-                    'stripped_length' => strlen($stripped),
-                    'stripped_token' =>  $stripped,
-                    ]);
+                
                 return $stripped;
             }
 

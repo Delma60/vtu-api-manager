@@ -32,10 +32,9 @@ return Application::configure(basePath: dirname(__DIR__))
             ]);
         $middleware->api(append: [
             ApiLoggerMiddleware::class,
-            ]);
+        ]);
         $middleware->alias([
             "api-auth" => ApiKeyAuth::class,
-
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -111,7 +111,6 @@ class DiscountController extends Controller
             ];
             $discount->providers()->sync($providerables);
         }
-        Log::info($validated);
         return back()->with("success", "Discount updated successfully");
     }
 

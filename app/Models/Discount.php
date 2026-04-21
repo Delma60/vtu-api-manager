@@ -19,6 +19,7 @@ class Discount extends Model
         'min_amount',
         'max_amount',
         'plan_type',
+        'environment',
     ];
     
     protected $append = ['active_provider'];

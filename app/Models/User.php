@@ -56,7 +56,7 @@ class User extends Authenticatable
         ];
     }
 
- 
+
 
 
     public function wallet()
@@ -74,7 +74,7 @@ class User extends Authenticatable
         return $this->hasMany(Provider::class);
     }
 
-   
+
 
     public function isSuperAdmin(): bool
     {
@@ -85,7 +85,7 @@ class User extends Authenticatable
     {
         return $this->user_type === "tenant";
     }
-    
+
     public function isCustomer(): bool
     {
         return $this->user_type === 'tentant_customer';
@@ -104,12 +104,12 @@ class User extends Authenticatable
 
     function activeToken(){
         $apiKey = request()->bearerToken();
-        Log::info(["authorization" =>$apiKey]);
+        // Log::info(["authorization" =>$apiKey]);
         return ApiKeyManager::activeToken($apiKey);
     }
 
 
-    
+
 
 }
 

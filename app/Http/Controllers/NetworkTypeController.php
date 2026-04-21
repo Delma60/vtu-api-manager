@@ -33,6 +33,7 @@ class NetworkTypeController extends Controller
                 'name' => $validated['name'],
                 'is_active' => $validated['is_active'] ?? true,
                 'type' => 'cable',
+                'environment' => auth()->user()->business->mode,
             ]);
         } else {
             // It's Airtime/Data, so it requires a base Network to attach to
@@ -44,6 +45,7 @@ class NetworkTypeController extends Controller
                 'name' => $validated['name'],
                 'is_active' => $validated['is_active'] ?? true,
                 'type' => $validated['type'] ?? null,
+                'environment' => auth()->user()->business->mode,
             ]);
         }
 

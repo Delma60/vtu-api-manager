@@ -3,20 +3,21 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
+use App\Traits\HasDefaultProvider;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\TenantEnvironmentScope;
 
 
 class NetworkType extends Model
 {
-    use BelongsToBusiness, TenantEnvironmentScope;
+    use BelongsToBusiness, TenantEnvironmentScope, HasDefaultProvider;
 
-    protected $fillable = ['name', 'is_active', 'type', 'business_id'];
+    protected $fillable = ['name', 'is_active', 'type', 'business_id', 'environment'];
 
     public function typeable()
     {
         // This tells Laravel to look at typeable_id and typeable_type
-        return $this->morphTo(); 
+        return $this->morphTo();
     }
 
 

@@ -61,7 +61,7 @@ const NetworkTypeTab = ({ networks, network_types }: NetworkTypeTabProps) => {
                                     type="text"
                                     placeholder="e.g., Enterprise, Corporate"
                                     value={typeData.name}
-                                    onChange={(e) => setTypeData('name', e.target.value)}
+                                    onChange={(e) => setTypeData('name', e.target.value.toString().toUpperCase())}
                                 />
                                 <InputError message={typeErrors.name} />
                             </div>

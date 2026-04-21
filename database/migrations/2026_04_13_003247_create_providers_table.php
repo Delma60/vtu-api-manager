@@ -12,29 +12,44 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('providers', function (Blueprint $table) {
-           $table->id();
+            $table->id();
+            
+            // Moved business_id up here so it naturally falls after id
+            $table->foreignId('business_id')
+                  ->nullable()
+                  ->constrained('businesses')
+                  ->cascadeOnDelete();
+                  
+            // Moved environment up here so it naturally falls after business_id
+            $table->enum('environment', ['live', 'test'])->default('live');
 
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
 
             // 1. Identity
-            $table->string('name'); // e.g., 'VTpass', 'MTN Direct', 'MobileVTU'
-            $table->string('code')->unique(); // e.g., 'vtpass', 'mtn_direct' (used for backend service resolution)
-
+            $table->string('name'); 
+            $table->string('code'); 
+            
             // 2. Connection Details
             $table->string('base_url');
-            $table->text('api_key')->nullable(); // Store encrypted in production
-            $table->text('api_secret')->nullable(); // For providers that require a Secret/Hash
-
+            $table->text('api_key')->nullable(); 
+            
+            // Removed ->after('api_key') and ->after('meta')
+            $table->json('meta')->nullable();
+            $table->string('logo_url')->nullable();
+            
+            $table->text('api_secret')->nullable(); 
+            
             // 3. Routing & Failover Logic
-            $table->integer('priority')->default(1); // 1 is highest priority. If 1 fails, dispatcher tries 2.
-            $table->integer('timeout_ms')->default(5000); // Specific timeout before failing over
-            $table->boolean('is_active')->default(true); // Master kill switch for the provider
-
-            // 4. Cached Upstream Metrics (Updated via a scheduled background job)
-            $table->decimal('cached_balance', 15, 2)->default(0.00); // To trigger low balance warnings
-            $table->decimal('success_rate_7d', 5, 2)->default(100.00); // e.g., 98.50
-
+            $table->integer('priority')->default(1); 
+            $table->integer('timeout_ms')->default(5000); 
+            $table->boolean('is_active')->default(true); 
+            
+            // 4. Cached Upstream Metrics
+            $table->decimal('cached_balance', 15, 2)->default(0.00); 
+            $table->decimal('success_rate_7d', 5, 2)->default(100.00); 
+            
             $table->timestamps();
+            $table->unique(['business_id', 'environment', 'code'], 'net_bus_env_code_unique');
         });
 
         // providerable

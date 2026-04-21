@@ -12,14 +12,22 @@ class NetworkController extends Controller
         public function store(Request $request)
         {
             $businessId = auth()->user()->business_id;
+            $mode = auth()->user()->business->mode;
+
             $request->validate([
                 'name' => [
                     'required', 'string', 'max:255',
-                    // Rule::unique('networks')->where(fn ($query) => $query->where('business_id', $businessId))
+                    Rule::unique('networks')
+                    ->where(fn ($query) => $query->where('business_id', $businessId))
+                    ->where(fn ($query) => $query->where('environment', $mode))
+
                 ],
                 'code' => [
                     'required', 'string', 'max:255', 'regex:/^[a-z0-9_]+$/',
-                    // Rule::unique('networks')->where(fn ($query) => $query->where('business_id', $businessId))
+                    Rule::unique('networks')
+                    ->where(fn ($query) => $query->where('business_id', $businessId))
+                    ->where(fn ($query) => $query->where('environment', $mode))
+
                 ],
                 'description' => 'nullable|string',
                 // 'is_active' => 'boolean',
@@ -29,7 +37,7 @@ class NetworkController extends Controller
                 'data_pin_api_id' => 'nullable|string|max:255',
 
             ]);
-    
+
             $network = new \App\Models\Network();
             $network->create([
                 'name' => $request->name,
@@ -40,8 +48,9 @@ class NetworkController extends Controller
                 'data_api_id' => $request->data_api_id,
                 'airtime_pin_api_id' => $request->airtime_pin_api_id,
                 'data_pin_api_id' => $request->data_pin_api_id,
+                'environment' => $mode,
             ]);
-    
+
             return redirect()->back()->with('success', 'Network created successfully!');
         }
 

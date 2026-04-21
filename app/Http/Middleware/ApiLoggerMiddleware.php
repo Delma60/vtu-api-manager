@@ -46,8 +46,6 @@ class ApiLoggerMiddleware
         $responsePayload = json_decode($responseContent, true) ?? $responseContent;
         // user active token
         $activeToken = $request->user()?->activeToken();
-        Log::info($apiKey);
-        Log::info($activeToken);
 
         ApiLog::create([
             'user_id'          => $request->user()?->id,

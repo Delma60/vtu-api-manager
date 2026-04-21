@@ -69,7 +69,7 @@ const NetworkTab = ({ networks }: NetworkTabProps) => {
                                         type="text"
                                         placeholder="e.g., Smile Data"
                                         value={data.name}
-                                        onChange={(e) => setData('name', e.target.value)}
+                                        onChange={(e) => setData('name', e.target.value.toString().toLocaleUpperCase())}
                                     />
                                     <InputError message={errors.name} />
                                 </div>

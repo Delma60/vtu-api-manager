@@ -49,7 +49,7 @@ const AirtimeTab = ({ airtime_plans }: AirtimeTabProps) => {
                             return (
                                 <tr key={net.id} className={net.is_active ? 'hover:bg-muted/30' : 'opacity-50'}>
                                     <td className="px-6 py-5">
-                                        <span className="font-semibold">{net.plan_type.name}</span>
+                                        <span className="font-semibold">{net.plan_type?.name}</span>
                                     </td>
                                     <td className="px-6 py-5">
                                         <span className="border-border bg-muted text-muted-foreground rounded-md border px-2 py-1 font-mono text-xs">

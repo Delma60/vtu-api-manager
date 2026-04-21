@@ -11,10 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::table('networks', function (Blueprint $table) {
-            //
-            $table->enum('environment', ['live', 'test'])->default('live')->after('business_id');
-        });
+      
 
         Schema::table('discounts', function (Blueprint $table) {
             //

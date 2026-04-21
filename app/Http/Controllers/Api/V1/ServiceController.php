@@ -20,12 +20,13 @@ class ServiceController extends Controller
     //
     function airtime(AirtimeServiceRequest $request){
         // check the discount plan for min and max amount
-        $discount = Discount::withoutGlobalScope('business_tenant')
-        ->where(function($query) use($request) {
+        $all = Discount::all();
+        Log::info($all);
+        $discount = Discount::where(function($query) use($request) {
             $query->where("name", $request->network)
             ->whereHas('planType',  function($q) use($request) {
-                $q->withoutGlobalScope('business_tenant') // Don't forget the relationship!
-                ->where('name', $request->plan_type);
+                // $q->withoutGlobalScope('business_tenant') // Don't forget the relationship!
+               $q->where('name', $request->plan_type);
             });
         })->first();
 

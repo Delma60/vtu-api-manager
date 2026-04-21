@@ -67,7 +67,7 @@ class MetricsService
         ?string $network = null,
         bool $isSuccess = true
     ): void {
-        $date = Carbon::now()->toDateString(); 
+        $date = Carbon::now()->toDateString();
 
         // Update daily metrics
         // $hourStart = now()->hour()->toDateString();
@@ -116,7 +116,7 @@ class MetricsService
 
         // 1. Prevent "Row Creation" Race Condition
         try {
-            $metric = ApiMetric::on($connection)->firstOrCreate(
+            $metric = ApiMetric::firstOrCreate(
                 $attributes,
                 [
                     'total_requests'      => 0,
@@ -128,8 +128,8 @@ class MetricsService
         } catch (\Illuminate\Database\QueryException $e) {
             // Error 1062 means another concurrent request just inserted the row
             if ($e->errorInfo[1] == 1062) {
-                $metric = ApiMetric::on($connection)->where($attributes)->first();
-                if (!$metric) throw $e; 
+                $metric = ApiMetric::where($attributes)->first();
+                if (!$metric) throw $e;
             } else {
                 throw $e;
             }
@@ -139,7 +139,7 @@ class MetricsService
         $successInc = $isSuccess ? 1 : 0;
         $failedInc  = $isSuccess ? 0 : 1;
 
-        ApiMetric::on($connection)->where('id', $metric->id)->update([
+        ApiMetric::where('id', $metric->id)->update([
             'total_requests'      => DB::raw('total_requests + 1'),
             'successful_requests' => DB::raw("successful_requests + {$successInc}"),
             'failed_requests'     => DB::raw("failed_requests + {$failedInc}"),

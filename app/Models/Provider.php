@@ -97,7 +97,6 @@ class Provider extends Model
     function scopeServiceProvider($query, $service)
     {
         return $query->whereHas('netWorkTypeService', function ($q) use ($service) {
-            Log::info(["query" =>json_encode($q), "service" => $service]);
             $q->where(function($sub_q) use($service){
                 $sub_q->where('name', 'like', '%'.$service.'%');
                     //   ->orWhere('type', 'like', '%'.$service.'%');

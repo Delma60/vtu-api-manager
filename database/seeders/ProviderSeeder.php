@@ -15,11 +15,11 @@ class ProviderSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::on('mysql')->first();
+        $user = User::first();
 
         // 3. If the database is completely empty (e.g., fresh migration), create a system admin dummy user
         if (!$user) {
-            $user = User::on('mysql')->create([
+            $user = User::create([
                 'name' => 'System Admin',
                 'email' => 'admin@vtu-manager.local',
                 'password' => Hash::make('password'),

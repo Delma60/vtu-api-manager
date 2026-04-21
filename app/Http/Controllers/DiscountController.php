@@ -40,6 +40,7 @@ class DiscountController extends Controller
             'plan_type' => $validated['plan_type'],
             'min_amount' => $validated['min_amount'] ?? null,
             'max_amount' => $validated['max_amount'] ?? null,
+            
         ]);
         
         $pivotData = [];

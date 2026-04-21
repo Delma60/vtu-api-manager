@@ -27,13 +27,12 @@ class ApiKeyAuth
         // separate prefix and key
         $prefix = substr($providedKey, 0, strpos($providedKey, '-'));
         $keyPart = substr($providedKey, strpos($providedKey, '-') + 1);
-        $api_cred = ApiCredential::all();
-        Log::info(["Api Cred: " => $api_cred]);
-        
-        $credential = ApiCredential::all()->map(
+        // $api_cred = ApiCredential::all();
+        $credentials = ApiCredential::withoutGlobalScopes()->get();
+
+
+        $credential = $credentials->map(
             function ($cred) use ($keyPart) {
-                Log::info($keyPart);
-                
                 $decryptedKey = Crypt::decryptString($cred->hashed_key);
                 $decryptedKeyPart = substr($decryptedKey, strpos($decryptedKey, '-') + 1);
                 return $decryptedKeyPart === $keyPart ? $cred : null;

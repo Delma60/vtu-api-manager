@@ -150,9 +150,9 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                                     <p className="mb-1 text-xs font-medium text-muted-foreground">Upstream Balance</p>
                                     {/* Visual warning if balance is low */}
                                     <p
-                                        className={`font-mono text-lg font-bold ${parseFloat(provider.balance) <= 2000 ? 'text-destructive' : parseFloat(provider.balance) <= 10000 ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'}`}
+                                        className={`font-mono text-lg font-bold ${parseFloat(provider.cached_balance) <= 2000 ? 'text-destructive' : parseFloat(provider.cached_balance) <= 10000 ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'}`}
                                     >
-                                        ₦{parseFloat(provider.balance)?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                        ₦{parseFloat(provider.cached_balance)?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </p>
                                 </div>
 
@@ -238,6 +238,8 @@ const CreateProvider = ({
             setData('code', generatedCode);
         }
     }, [data.name]);
+
+    console.log(errors)
 
     return (
         <Dialog

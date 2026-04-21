@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreProviderRequest extends FormRequest
 {
@@ -25,7 +26,12 @@ class StoreProviderRequest extends FormRequest
         return [
             //
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['nullable', 'string', 'max:255', 'unique:providers,code'],
+            'code' => ['nullable', 'string', 'max:255', 
+            // rule to ensure code is unique within the same business and environment
+            Rule::unique('providers')
+                ->where(fn ($query) => $query->where('business_id', auth()->user()->business_id))
+                ->where(fn ($query) => $query->where('environment', auth()->user()->business->mode))
+            ],
             'base_url' => ['required', 'url', 'max:255'],
             'api_key' => ['required', 'string', 'max:255'],
             'api_secret' => ['nullable', 'string', 'max:255'],

@@ -16,7 +16,7 @@ return new class extends Migration
              $table->foreignId('business_id')
                   ->nullable()
                   ->after('id')
-                  ->constrained('vtu_api_manager.businesses')
+                  ->constrained('businesses')
                   ->cascadeOnDelete();
         });
     }

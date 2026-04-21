@@ -15,10 +15,7 @@ return new class extends Migration
             $table->foreignId('provider_id')->nullable()->constrained('providers')->nullOnDelete()->default(1);
         });
 
-        // 2. For DSTV, GOTV, Startimes (Assuming they are stored as Networks)
-        Schema::table('networks', function (Blueprint $table) {
-            $table->foreignId('provider_id')->nullable()->constrained('providers')->nullOnDelete()->default(1);
-        });
+
     }
 
     /**
@@ -31,9 +28,5 @@ return new class extends Migration
             $table->dropColumn('provider_id');
         });
 
-        Schema::table('networks', function (Blueprint $table) {
-            $table->dropForeign(['provider_id']);
-            $table->dropColumn('provider_id');
-        });
     }
 };

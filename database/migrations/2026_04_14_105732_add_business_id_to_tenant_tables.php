@@ -28,14 +28,7 @@ return new class extends Migration
                   ->constrained('businesses')
                   ->cascadeOnDelete();
         });
-        // to provider 
-        Schema::table('providers', function (Blueprint $table) {
-            $table->foreignId('business_id')
-                  ->nullable()
-                  ->after('id')
-                  ->constrained('businesses')
-                  ->cascadeOnDelete();
-        });
+        
 
         Schema::table('roles', function (Blueprint $table) {
             $table->foreignId('business_id')

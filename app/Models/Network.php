@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
+use App\Traits\HasDefaultProvider;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Traits\TenantEnvironmentScope;
@@ -10,7 +11,7 @@ use App\Traits\TenantEnvironmentScope;
 
 class Network extends Model
 {
-    use BelongsToBusiness, TenantEnvironmentScope;
+    use BelongsToBusiness, TenantEnvironmentScope, HasDefaultProvider;
 
     protected $fillable = [
         'name',
@@ -21,13 +22,14 @@ class Network extends Model
         'airtime_pin_api_id',
         'data_api_id',
         'data_pin_api_id',
+        'environment',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
     ];
 
-   
+
     public function networkTypes():MorphMany
     {
         // Notice this is morphMany, not morphToMany!

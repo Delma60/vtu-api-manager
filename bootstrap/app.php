@@ -3,7 +3,6 @@
 use App\Http\Middleware\ApiKeyAuth;
 use App\Http\Middleware\ApiLoggerMiddleware;
 use App\Http\Middleware\HandleInertiaRequests;
-use App\Http\Middleware\SwitchEnvironmentDatabase;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -28,7 +27,6 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
         $middleware->append([
-            SwitchEnvironmentDatabase::class,
             ]);
         $middleware->api(append: [
             ApiLoggerMiddleware::class,

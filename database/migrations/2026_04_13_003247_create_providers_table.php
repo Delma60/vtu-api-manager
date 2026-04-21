@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('providers', function (Blueprint $table) {
            $table->id();
 
-            $table->foreignId('user_id')->constrained('vtu_api_manager.users')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
 
             // 1. Identity
             $table->string('name'); // e.g., 'VTpass', 'MTN Direct', 'MobileVTU'

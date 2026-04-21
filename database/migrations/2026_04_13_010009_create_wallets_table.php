@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->unique()->constrained('vtu_api_manager.users')->cascadeOnDelete();
+            $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
             $table->decimal('balance', 15, 2)->default(0); // Current available balance
             $table->decimal('reserved', 15, 2)->default(0); // Amount reserved/pending
             $table->decimal('total_funded', 15, 2)->default(0); // Cumulative amount funded

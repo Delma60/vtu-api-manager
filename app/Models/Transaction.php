@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
-use App\Traits\EnvironmentAwareConnection;
+use App\Traits\TenantEnvironmentScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -11,14 +11,14 @@ use Illuminate\Support\Str;
 class Transaction extends Model
 {
     /** @use HasFactory<\Database\Factories\TransactionFactory> */
-    use HasFactory, EnvironmentAwareConnection, BelongsToBusiness;
+    use HasFactory, BelongsToBusiness, TenantEnvironmentScope;
 
     protected $fillable = [
         'user_id', 'transaction_type', 'provider', 'account_or_phone', 'amount',
         'quantity', 'status', 'transaction_reference', 'payment_reference',
         'funding_method', 'balance_before', 'balance_after', 'completed_at',
         'response_message', 'service_fee', 'platform', 'receiver', 'plan_type', 'token',
-        'promotion_id', 'discount_amount', 'mode', 'business_id'
+        'promotion_id', 'discount_amount', 'mode', 'business_id', 'environment'
     ];
 
     protected $casts = [
@@ -26,6 +26,19 @@ class Transaction extends Model
         'updated_at' => 'datetime',
         'meta_data' => 'json',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($model) {
+            if (!$model->environment) {
+                $model->environment = request()->bearerToken() && str_starts_with(request()->bearerToken(), 'sk_test_') 
+                    ? 'test' 
+                    : (Auth::user()?->business?->mode ?? 'live');
+            }
+        });
+    }
 
     public function user()
     {

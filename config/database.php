@@ -61,6 +61,7 @@ return [
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
+
         'mysql_test' => [
             'driver' => 'mysql',
             'host' => env('DB_2_HOST', '127.0.0.1'),

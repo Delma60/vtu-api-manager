@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\BelongsToBusiness;
 use App\EnvironmentAware;
-use App\Traits\EnvironmentAwareConnection;
+use App\Traits\TenantEnvironmentScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ApiLog extends Model
 {
     // use ;
-    use HasFactory, HasUuids, Prunable, BelongsToBusiness, EnvironmentAwareConnection;
+    use HasFactory, HasUuids, Prunable, BelongsToBusiness, TenantEnvironmentScope;
 
 
     protected $fillable = [
@@ -30,7 +30,21 @@ class ApiLog extends Model
         'request_payload',
         'response_payload',
         'mode',
+        'environment',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($model) {
+            if (!$model->environment) {
+                $model->environment = request()->bearerToken() && str_starts_with(request()->bearerToken(), 'sk_test_') 
+                    ? 'test' 
+                    : (Auth::user()?->business?->mode ?? 'live');
+            }
+        });
+    }
 
     protected function casts(): array
     {

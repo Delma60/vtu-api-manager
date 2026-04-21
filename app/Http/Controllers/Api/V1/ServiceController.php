@@ -20,8 +20,6 @@ class ServiceController extends Controller
     //
     function airtime(AirtimeServiceRequest $request){
         // check the discount plan for min and max amount
-        // change db
-        DB::setDefaultConnection('mysql_test');
         $discount = Discount::withoutGlobalScope('business_tenant')
         ->where(function($query) use($request) {
             $query->where("name", $request->network)
@@ -30,8 +28,6 @@ class ServiceController extends Controller
                 ->where('name', $request->plan_type);
             });
         })->first();
-
-        Log::info('Retrieved discount plan', ['discount' => $discount]);
 
 
         if(!$discount) {
@@ -44,7 +40,7 @@ class ServiceController extends Controller
         }
 
         $response = service()->airtime()->process($request->user(), $request->validated());
-        
+
         // Check if the response indicates an error
         if (($response['status'] ?? '') === 'error') {
             return $this->fail(
@@ -53,10 +49,10 @@ class ServiceController extends Controller
                 meta: $response
             );
         }
-        
+
         return $this->success(
-            data: $response['data'] ?? null, 
-            message: $response['message'] ?? 'Airtime purchase successful', 
+            data: $response['data'] ?? null,
+            message: $response['message'] ?? 'Airtime purchase successful',
             code: $response['code'] ?? 200,
             meta: $response
         );
@@ -83,8 +79,8 @@ class ServiceController extends Controller
             );
         }
         return $this->success(
-            data: $dataPlan['data'] ?? null, 
-            message: $dataPlan['message'] ?? 'Data plans retrieved successfully', 
+            data: $dataPlan['data'] ?? null,
+            message: $dataPlan['message'] ?? 'Data plans retrieved successfully',
             code: $dataPlan['code'] ?? 200,
             meta: $dataPlan
         );
@@ -112,19 +108,19 @@ class ServiceController extends Controller
             );
         }
         return $this->success(
-            data: $cablePlan['data'] ?? null, 
-            message: $cablePlan['message'] ?? 'Cable plans retrieved successfully', 
+            data: $cablePlan['data'] ?? null,
+            message: $cablePlan['message'] ?? 'Cable plans retrieved successfully',
             code: $cablePlan['code'] ?? 200,
             meta: $cablePlan
         );
 
     }
 
-    
+
     function data(DataPurchaseRequest $request){
         // Log::debug('Data purchase request received', ['request' => $request->validated()]);
         $response = service()->data()->process($request->user(), $request->validated());
-        
+
         // Check if the response indicates an error
         if (($response['status'] ?? '') === 'error') {
             return $this->fail(
@@ -133,10 +129,10 @@ class ServiceController extends Controller
                 meta: $response
             );
         }
-        
+
         return $this->success(
-            data: $response['data'] ?? null, 
-            message: $response['message'] ?? 'Data purchase successful', 
+            data: $response['data'] ?? null,
+            message: $response['message'] ?? 'Data purchase successful',
             code: $response['code'] ?? 200,
             meta: $response
         );
@@ -145,7 +141,7 @@ class ServiceController extends Controller
     function cable(CablePurchaseRequest $request){
         // Log::debug('Data purchase request received', ['request' => $request->validated()]);
         $response = service()->cable()->process($request->user(), $request->validated());
-        
+
         // Check if the response indicates an error
         if (($response['status'] ?? '') === 'error') {
             return $this->fail(
@@ -154,10 +150,10 @@ class ServiceController extends Controller
                 meta: $response
             );
         }
-        
+
         return $this->success(
-            data: $response['data'] ?? null, 
-            message: $response['message'] ?? 'Data purchase successful', 
+            data: $response['data'] ?? null,
+            message: $response['message'] ?? 'Data purchase successful',
             code: $response['code'] ?? 200,
             meta: $response
         );

@@ -10,7 +10,6 @@ use App\Models\Transaction;
 use App\Models\User;
 class Business extends Model
 {
-    protected $connection = 'mysql';
     protected $fillable = [
         'name',
         'support_email',

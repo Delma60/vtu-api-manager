@@ -55,6 +55,8 @@ class ProviderService
         $type = NetworkType::all() ;
         // Log::info($type);
         $provider = Provider::serviceProvider($identifier)->first();
+        // model connection name
+        // Log::info($provider->getConnectionName());
         return $provider ? self::make($provider) : null;
     }
 

@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
-use App\Traits\EnvironmentAwareConnection;
 use Illuminate\Database\Eloquent\Model;
 
 class NetworkType extends Model
 {
-    use BelongsToBusiness, EnvironmentAwareConnection;
+    use BelongsToBusiness;
 
     protected $fillable = ['name', 'is_active', 'type', 'business_id'];
 

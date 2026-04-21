@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
-use App\Traits\EnvironmentAwareConnection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Network extends Model
 {
-    use BelongsToBusiness, EnvironmentAwareConnection;
+    use BelongsToBusiness;
 
     protected $fillable = [
         'name',

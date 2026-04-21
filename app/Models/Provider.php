@@ -4,19 +4,20 @@ namespace App\Models;
 
 use App\BelongsToBusiness;
 use App\Services\ProviderService;
-use App\Traits\EnvironmentAwareConnection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\TenantEnvironmentScope;
 
 class Provider extends Model
 {
-    // 
+    //
     /** @use HasFactory<\Database\Factories\ProviderFactory> */
-    use HasFactory, BelongsToBusiness, EnvironmentAwareConnection;
+    use HasFactory, BelongsToBusiness, TenantEnvironmentScope;
 
     protected $fillable = [
         'user_id',
@@ -33,6 +34,7 @@ class Provider extends Model
         'success_rate_7d',
         'meta',
         'logo_url',
+        'environment',
     ];
 
     protected $casts = [
@@ -41,6 +43,19 @@ class Provider extends Model
         'success_rate_7d' => 'decimal:2',
         'meta' => 'array',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($model) {
+            if (!$model->environment) {
+                $model->environment = request()->bearerToken() && str_starts_with(request()->bearerToken(), 'sk_test_') 
+                    ? 'test' 
+                    : (Auth::user()?->business?->mode ?? 'live');
+            }
+        });
+    }
 
     protected $appends = ['connection', 'balance'];
 
@@ -82,9 +97,10 @@ class Provider extends Model
     function scopeServiceProvider($query, $service)
     {
         return $query->whereHas('netWorkTypeService', function ($q) use ($service) {
+            Log::info(["query" =>json_encode($q), "service" => $service]);
             $q->where(function($sub_q) use($service){
-                $sub_q->where('name', 'like', '%'.$service.'%')
-                      ->orWhere('type', 'like', '%'.$service.'%');
+                $sub_q->where('name', 'like', '%'.$service.'%');
+                    //   ->orWhere('type', 'like', '%'.$service.'%');
             });
         });
     }

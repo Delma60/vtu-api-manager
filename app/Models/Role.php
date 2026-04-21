@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
-use App\Traits\EnvironmentAwareConnection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Role extends Model
 {
-    use BelongsToBusiness, EnvironmentAwareConnection;
+    use BelongsToBusiness;
     // protected $connection = 'mysql';
     
     protected $fillable = ['name', 'slug', 'service_cost_margins', 'business_id'];

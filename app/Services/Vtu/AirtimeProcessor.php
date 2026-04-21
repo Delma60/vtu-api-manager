@@ -2,9 +2,11 @@
 
 namespace App\Services\Vtu;
 
+use App\Models\Provider;
 use App\Models\User;
 use App\Services\ProviderService;
 use App\Services\TransactionService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AirtimeProcessor
@@ -13,7 +15,14 @@ class AirtimeProcessor
 
     public function process(User $user, array $payload): array
     {
+        // DB::setDefaultConnection("mysql_test");
         $provider = ProviderService::getProviderInstance('airtime');
+        $p = Provider::on("mysql_test")->withoutGlobalScopes()->with("netWorkTypeService")->get();
+        Log::info(["providers: " =>$p->toArray()]);
+        $p->map(function($p) use ($payload){
+            Log::info($p);
+            Log::info("Provider: " . $p->name . " supports airtime: " . $p->netWorkTypeService()->where('name', 'like', '%airtime%')->exists());
+        });
         
         if (!$provider) {
             return ['status' => 'error', 'message' => 'No airtime provider configured'];
@@ -37,7 +46,6 @@ class AirtimeProcessor
             return ['status' => 'error', 'message' => $e->getMessage()];
         }
 
-        Log::info($payload);
         // 2. Format & Send Request
         try {
             $formattedPayload = $provider->formatPayload('airtime', $payload);

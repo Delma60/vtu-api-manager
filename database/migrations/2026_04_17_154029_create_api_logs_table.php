@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('api_logs', function (Blueprint $table) {
            $table->uuid('id')->primary(); // UUID for secure Request Tracking
            
-            $table->foreignId('user_id')->nullable()->constrained('vtu_api_manager.users')->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('business_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('provider_id')->nullable()->constrained()->cascadeOnDelete();
             

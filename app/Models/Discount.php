@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use App\BelongsToBusiness;
-use App\Traits\EnvironmentAwareConnection;
 use Illuminate\Database\Eloquent\Model;
 
 class Discount extends Model
 {
-    use BelongsToBusiness, EnvironmentAwareConnection;
+    use BelongsToBusiness;
 
     //
     protected $fillable = [

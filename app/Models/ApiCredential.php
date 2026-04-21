@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Auth;
+
 
 class ApiCredential extends Model
 {
@@ -21,6 +23,7 @@ class ApiCredential extends Model
         'key_prefix',
         'hashed_key',
         'last_used_at',
+        'mode'
     ];
 
     protected $appends = ["plain_token"];

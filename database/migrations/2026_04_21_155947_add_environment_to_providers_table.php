@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('providers', function (Blueprint $table) {
             //
+            $table->enum('environment', ['live', 'test'])->default('live')->after('business_id');
         });
     }
 
@@ -21,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('providers', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('providers');
     }
 };

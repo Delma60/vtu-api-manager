@@ -4,10 +4,12 @@ namespace App\Models;
 
 use App\BelongsToBusiness;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantEnvironmentScope;
+
 
 class NetworkType extends Model
 {
-    use BelongsToBusiness;
+    use BelongsToBusiness, TenantEnvironmentScope;
 
     protected $fillable = ['name', 'is_active', 'type', 'business_id'];
 

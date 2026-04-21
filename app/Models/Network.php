@@ -5,10 +5,12 @@ namespace App\Models;
 use App\BelongsToBusiness;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use App\Traits\TenantEnvironmentScope;
+
 
 class Network extends Model
 {
-    use BelongsToBusiness;
+    use BelongsToBusiness, TenantEnvironmentScope;
 
     protected $fillable = [
         'name',

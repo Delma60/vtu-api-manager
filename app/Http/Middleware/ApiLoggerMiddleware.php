@@ -46,9 +46,8 @@ class ApiLoggerMiddleware
         $responsePayload = json_decode($responseContent, true) ?? $responseContent;
         // user active token
         $activeToken = $request->user()?->activeToken();
-        $connection = $activeToken->environment === 'test' ? 'mysql_test' : null;
 
-        ApiLog::on($connection)->create([
+        ApiLog::create([
             'user_id'          => $request->user()?->id,
             'business_id'      => $request->user()?->business_id,
             'provider_id'      => null,

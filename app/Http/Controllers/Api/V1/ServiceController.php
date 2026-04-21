@@ -10,6 +10,7 @@ use App\Models\Discount;
 use App\Models\Network;
 use App\Models\NetworkType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 // use Illuminate\Support\Facades\Log;
@@ -19,13 +20,18 @@ class ServiceController extends Controller
     //
     function airtime(AirtimeServiceRequest $request){
         // check the discount plan for min and max amount
-        $discount = Discount::airtime()->where(function($query) use($request) {
+        // change db
+        DB::setDefaultConnection('mysql_test');
+        $discount = Discount::where(function($query) use($request) {
             $query->where("name", $request->network)
             ->whereHas('planType',  function($q) use($request) {
                 $q->where('name', $request->plan_type);
             });
         })->first();
-        Log::debug('Retrieved discount plan', ['discount' => $discount]);
+        $allDiscount = Discount::all();
+        Log::debug('Retrieved discount plan', ['discount' => $discount, "connected_db" => $discount?->getConnection()->getName()]);
+        Log::debug('All discount plans', ['discounts' => $allDiscount]);
+        Log::debug(['connection' => DB::connection()->getName()]);
 
         if(!$discount) {
             return $this->fail(message: 'No airtime plan available for the specified plan type', code: 400);

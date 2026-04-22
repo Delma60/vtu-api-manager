@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\ApiLog;
 use App\Models\Provider;
+use App\Models\SystemSetting;
 use App\Models\Transaction;
 use App\Services\MetricsService;
 use App\Services\ProviderService;
@@ -77,6 +78,9 @@ class DashboardController extends Controller
             'providerHealth' => $providerHealth,
             'recentTransactions' => $recentTransactions,
             'volumeChartData' => $volumeChartData,
+            'settings' => [
+                "low_balance_threshold" => SystemSetting::getKeyValue("low_balance_threshold", 5000)
+            ]
         ]);
     }
     // toggleMode

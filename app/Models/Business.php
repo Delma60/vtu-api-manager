@@ -13,6 +13,9 @@ class Business extends Model
     protected $fillable = [
         'name',
         'support_email',
+        'support_phone', 
+        'address',       
+        'logo_path',     
         'is_active',
         'slug',
         'bot_code',
@@ -20,6 +23,12 @@ class Business extends Model
         'telegram_welcome_message',
         'mode',
     ];
+    protected $appends = ['logo_url'];
+
+    public function getLogoUrlAttribute()
+    {
+        return $this->logo_path ? asset('storage/' . $this->logo_path) : null;
+    }
 
     public function owner(): HasOne
     {

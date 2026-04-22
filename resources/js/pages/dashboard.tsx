@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger } fro
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { SelectValue } from '@radix-ui/react-select';
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -22,6 +22,7 @@ export default function Dashboard({
     providerHealth,
     recentTransactions,
     volumeChartData,
+    low_balance_threshold,
 }: {
     metrics?: {
         totalBalance: number;
@@ -45,6 +46,7 @@ export default function Dashboard({
         time: string; // ISO timestamp
     }[];
     volumeChartData?: { date: string; requests: number; success: number }[];
+    low_balance_threshold?:number;
 }) {
     const stats = metrics;
 
@@ -62,6 +64,9 @@ export default function Dashboard({
             },
         );
     };
+
+    const { props } = usePage();
+    console.log(props)
 
     // resources/js/pages/dashboard.tsx
 

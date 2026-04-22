@@ -17,9 +17,10 @@ interface Props {
         auto_failover: boolean;
         timeout_ms: number;
     };
+    low_balance_threshold:number
 }
 
-export default function ProvidersPage({ providers, routingConfig: config }: Props) {
+export default function ProvidersPage({ providers, routingConfig: config, low_balance_threshold }: Props) {
     console.log(providers[0]);
     const [autoFailover, setAutoFailover] = useState(config.auto_failover);
     const [timeout, setTimeoutMs] = useState(config.timeout_ms);
@@ -202,7 +203,7 @@ export default function ProvidersPage({ providers, routingConfig: config }: Prop
                                     <p className="text-muted-foreground mb-1 text-xs font-medium">Upstream Balance</p>
                                     {/* Visual warning if balance is low */}
                                     <p
-                                        className={`font-mono text-lg font-bold ${parseFloat(provider.balance) <= 2000 ? 'text-destructive' : parseFloat(provider.balance) <= 10000 ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'}`}
+                                        className={`font-mono text-lg font-bold ${parseFloat(provider.balance) <= low_balance_threshold ? 'text-destructive' : parseFloat(provider.balance) <= (low_balance_threshold * 2) ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'}`}
                                     >
                                         ₦{parseFloat(provider.balance)?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </p>

@@ -4,23 +4,16 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
+import { Bell, Building, Layout, Shield, User, Users } from 'lucide-react';
 
-const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profile',
-        url: '/settings/profile',
-        icon: null,
-    },
-    {
-        title: 'Password',
-        url: '/settings/password',
-        icon: null,
-    },
-    {
-        title: 'Appearance',
-        url: '/settings/appearance',
-        icon: null,
-    },
+const sidebarNavItems = [
+    { title: "Profile", href: route('settings.profile.edit'), icon: User },
+    { title: "Security", href: route('settings.password.edit'), icon: Shield },
+    { title: "Appearance", href: route('settings.appearance.edit'), icon: Layout },
+    // New ones:
+    { title: "Business Profile", href: route('settings.business.edit'), icon: Building },
+    { title: "Notifications", href: route('settings.notifications.edit'), icon: Bell },
+    // { title: "Team Management", href: route('settings.team.index'), icon: Users },
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
@@ -35,15 +28,15 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                     <nav className="flex flex-col space-y-1 space-x-0">
                         {sidebarNavItems.map((item) => (
                             <Button
-                                key={item.url}
+                                key={item.href}
                                 size="sm"
                                 variant="ghost"
                                 asChild
                                 className={cn('w-full justify-start', {
-                                    'bg-muted': currentPath === item.url,
+                                    'bg-muted': currentPath === item.href,
                                 })}
                             >
-                                <Link href={item.url} prefetch>
+                                <Link href={item.href} prefetch>
                                     {item.title}
                                 </Link>
                             </Button>

@@ -346,7 +346,7 @@ const CableNetworkDialog = ({ cable, children }: { cable?: any; children?: React
                             type="text"
                             placeholder="e.g., DSTV, GOTV"
                             value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
+                            onChange={(e) => setData('name', e.target.value.toUpperCase())}
                             className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder-slate-500 transition-colors outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                         />
                         <InputError message={errors.name} />

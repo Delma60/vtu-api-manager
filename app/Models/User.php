@@ -107,6 +107,10 @@ class User extends Authenticatable
         return ApiKeyManager::getCredentialFromToken($apiKey);
     }
 
+    public function settings()
+    {
+        return $this->morphMany(SystemSetting::class, 'settingable');
+    }
 
 
 

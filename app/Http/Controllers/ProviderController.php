@@ -29,7 +29,8 @@ class ProviderController extends Controller
 
         return Inertia::render('infrastructure/providers', [
             'providers' => $providers,
-            'routingConfig' => $routingConfig
+            'routingConfig' => $routingConfig,
+            'low_balance_threshold' => SystemSetting::getKeyValue("low_balance_threshold", 5000)
         ]);
     }
     /**

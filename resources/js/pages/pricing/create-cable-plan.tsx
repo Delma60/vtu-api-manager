@@ -11,14 +11,14 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useMemo } from 'react';
 
 export default function CreateDataPlan({ networks: activeNetworks, providers }: any) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         cable_network: '',
         plan_Name: '',
         use_provider_as_providerable: false,
         provider: '',
         is_active:true,
         providerable: {
-            provider_id: '1',
+            provider_id: providers[0].id ?? "1",
             cost_price: '0.00',
             server_id: '',
             margin_value: '0.00',
@@ -28,7 +28,9 @@ export default function CreateDataPlan({ networks: activeNetworks, providers }: 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('cable-plans.store'));
+        post(route('cable-plans.store', {
+            onSuccess: () => reset()
+        }));
     };
 
 

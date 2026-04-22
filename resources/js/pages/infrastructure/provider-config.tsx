@@ -21,14 +21,16 @@ import { useState } from 'react';
 
 export default function ProviderConfig({
     provider: currentProvider,
-    services,
+    
     recentErrors,
 }: {
     provider: Provider;
     services: any;
     recentErrors: any;
+    config: { auto_failover: boolean, timeout_ms: number };
 }) {
     const [activeTab, setActiveTab] = useState('credentials');
+    
 
     const { data: formData, setData, errors, patch, processing } = useForm<Provider>(currentProvider);
     const [changePassword, setChangePassword] = useState(true);
@@ -36,6 +38,7 @@ export default function ProviderConfig({
     const onSave = () => {
         patch(route('providers.update', currentProvider.id));
     };
+
 
     return (
         <AppLayout>
@@ -239,7 +242,7 @@ export default function ProviderConfig({
                                         <p className="mt-1 text-sm text-muted-foreground">Recent connection errors and health checks.</p>
                                     </div>
                                     <button
-                                        onClick={() => router.get(route('provders.diagnose', currentProvider.id))}
+                                        onClick={() => router.get(route('providers.diagnose', currentProvider.id))}
                                         className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                                     >
                                         <Server className="h-3.5 w-3.5" />

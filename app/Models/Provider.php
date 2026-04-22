@@ -22,6 +22,8 @@ class Provider extends Model
     protected $fillable = [
         'user_id',
         'business_id',
+        'uuid',
+        'uuid',
         'name',
         'code',
         'base_url',
@@ -49,10 +51,17 @@ class Provider extends Model
         parent::boot();
         
         static::creating(function ($model) {
-            if (!$model->environment) {
-                $model->environment = request()->bearerToken() && str_starts_with(request()->bearerToken(), 'sk_test_') 
-                    ? 'test' 
-                    : (Auth::user()?->business?->mode ?? 'live');
+            if (empty($model->uuid)) {
+                $model->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+            if (empty($model->priority)) {
+                // Find the highest priority currently assigned for this specific business and environment
+                $maxPriority = static::where('business_id', $model->business_id)
+                                     ->where('environment', $model->environment)
+                                     ->max('priority');
+
+                // If a max priority exists, add 1. Otherwise, start at 1.
+                $model->priority = $maxPriority ? $maxPriority + 1 : 1;
             }
         });
     }
@@ -87,7 +96,7 @@ class Provider extends Model
         $user = Auth::user();
         $mode = ($user && $user->user_type !== 'admin' && $user->business) ? $user->business->mode : 'live';
 
-        $key = md5($this->base_url . $this->api_key . $this->api_secret . ($user?->id ?? "") . $mode);
+        $key = md5($this->base_url . $this->api_key . $this->api_secret . ($user?->id ?? "") . $mode . "3");
         $provider = ProviderService::make($this);
         return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
             return $provider->checkBalance();
@@ -110,6 +119,11 @@ class Provider extends Model
     function netWorkTypeService():HasMany
     {
         return $this->hasMany(NetworkType::class);
+    }
+
+    public function getCallbackUrlAttribute()
+    {
+        return url('/webhook/' . $this->uuid);
     }
 
 }

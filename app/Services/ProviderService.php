@@ -14,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class ProviderService
 {
+    public static $defaultTimeoutMs = 5000;
     public const SUPPORTED_AUTHORS = [
         'ADEX DEVELOPER',
         "SMEPLUG"
@@ -112,7 +113,7 @@ class ProviderService
 
         if (Str::contains($url, ['/api', '/v1'])) {
             $url = preg_replace('/(\/api|\/v1).*$/', '', $url);
-            $data['base_url'] = $url;
+            // $data['base_url'] = $url;
         }
 
         try {
@@ -199,10 +200,10 @@ class ProviderService
     /**
      * Handle incoming webhooks for a specific provider.
      */
-    public static function webhook(Request $request, string $identifier)
+    public static function webhook(Request $request, string $uuid)
     {
         // Use firstOrFail so it automatically aborts with a 404 if the vendor doesn't exist
-        $vendor = Provider::whereIdentifier($identifier)->firstOrFail();
+        $vendor = Provider::where('uuid', $uuid)->firstOrFail();
         
         $vendorInstance = self::make($vendor);
         $vendorInstance->webhook($request);
@@ -222,5 +223,56 @@ class ProviderService
                 'base_url' => "This is not a supported VTU provider API. {$detected}."
             ]);
         }
+    }
+
+    /**
+     * Get a list of fallback provider instances, prioritized by the primary network type provider.
+     *
+     * @param string $service The requested service (e.g., 'data', 'airtime')
+     * @param int|null $networkTypeId The ID of the specific network type (e.g., MTN SME)
+     * @return array<\App\Class\Providers\ProviderAbstract>
+     */
+    public static function getFallbackProviders(string $service, ?int $networkTypeId = null): array
+    {
+        $primaryProviderId = null;
+
+        // 1. Identify the primary provider assigned to this specific network type
+        if ($networkTypeId) {
+            $networkType = \App\Models\NetworkType::find($networkTypeId);
+            if ($networkType && $networkType->provider_id) {
+                $primaryProviderId = $networkType->provider_id;
+            }
+        }
+
+        // 2. Fetch all active providers within the current business scope
+        $activeProviders = Provider::where('is_active', true)->get();
+
+        // 3. Sort the collection so the primary provider is always at index 0
+        if ($primaryProviderId) {
+            $activeProviders = $activeProviders->sortByDesc(function ($provider) use ($primaryProviderId) {
+                // Return 1 if it's the primary, 0 for everything else, then sort descending
+                return $provider->id === $primaryProviderId ? 1 : 0;
+            })->values(); // Reset the array keys to be sequential
+        }
+
+        $fallbackInstances = [];
+
+        // 4. Instantiate and filter by supported services
+        foreach ($activeProviders as $provider) {
+            try {
+                // Dynamically instantiate the class using your config factory
+                $instance = self::make($provider);
+                
+                // Only add to our fallback pool if the class explicitly supports the service
+                if ($instance->supportsService($service)) {
+                    $fallbackInstances[] = $instance;
+                }
+            } catch (\Exception $e) {
+                // If a provider fails to instantiate (e.g., missing from config, bad config), we log and safely skip it
+                Log::warning("Failover Setup: Skipped provider '{$provider->name}' - " . $e->getMessage());
+            }
+        }
+
+        return $fallbackInstances;
     }
 }

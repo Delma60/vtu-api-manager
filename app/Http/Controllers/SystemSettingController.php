@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SystemSetting;
 use App\Http\Requests\StoreSystemSettingRequest;
 use App\Http\Requests\UpdateSystemSettingRequest;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SystemSettingController extends Controller
@@ -74,6 +75,32 @@ class SystemSettingController extends Controller
         //
     }
 
+    // In App\Http\Controllers\SystemSettingController.php
+    
+    public function updateSingle(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'key' => 'required|string',
+            'value' => 'required'
+        ]);
+
+        $businessId = auth()->user()->business_id ?? 1; // Fallback or retrieve dynamically
+        $environment = auth()->user()->business?->mode ?? 'live';
+
+        \App\Models\SystemSetting::updateOrCreate(
+            [
+                'key' => $request->key,
+                'business_id' => $businessId,
+                'environment' => $environment,
+                // We explicitly look for global settings where settingable is null
+                'settingable_id' => null, 
+                'settingable_type' => null
+            ],
+            ['value' => (string) $request->value]
+        );
+
+        return back()->with('success', 'Routing setting updated successfully');
+    }
     /**
      * Remove the specified resource from storage.
      */

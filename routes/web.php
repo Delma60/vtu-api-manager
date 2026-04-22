@@ -44,6 +44,10 @@ Route::get('pay/{paymentLink}/failed', [PaymentLinkController::class, 'paymentFa
 
 Route::post('/webhook/telegram/sk_super_secret_string', [TelegramController::class, 'handleWebhook']);
 
+Route::post('/webhook/{uuid}', function (Request $request, string $uuid) {
+    return \App\Services\ProviderService::webhook($request, $uuid);
+});
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -106,6 +110,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::resource('settings', SystemSettingController::class)->only(['index', 'store', 'destroy']);
     });
+    Route::post('/settings', [SystemSettingController::class, "updateSingle"])
+        ->name('settings.update.single');
 
 });
 

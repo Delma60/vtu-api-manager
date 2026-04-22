@@ -34,18 +34,6 @@ class ApiLog extends Model
         'environment',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($model) {
-            if (!$model->environment) {
-                $model->environment = request()->bearerToken() && str_starts_with(request()->bearerToken(), 'sk_test_') 
-                    ? 'test' 
-                    : (Auth::user()?->business?->mode ?? 'live');
-            }
-        });
-    }
 
     protected function casts(): array
     {

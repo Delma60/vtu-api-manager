@@ -6,6 +6,7 @@ use App\Models\Provider;
 use App\Http\Requests\StoreProviderRequest;
 use App\Http\Requests\UpdateProviderRequest;
 use App\Models\Service;
+use App\Models\SystemSetting;
 use App\Services\ProviderService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -20,13 +21,15 @@ class ProviderController extends Controller
     {
         // Fetch all providers ordered by their routing priority
         $providers = Provider::orderBy('priority', 'asc')->get();
+        // setting to get routing config
+        $routingConfig = [
+            'auto_failover' => SystemSetting::getKeyValue('auto_failover', true), // This could come from a system setting in the future
+            'timeout_ms' => SystemSetting::getKeyValue('timeout_ms', 5000), // If a vendor doesn't reply in 5s, switch
+        ];
 
         return Inertia::render('infrastructure/providers', [
             'providers' => $providers,
-            'routingConfig' => [
-                'auto_failover' => true,
-                'timeout_ms' => 5000, // If a vendor doesn't reply in 5s, switch
-            ]
+            'routingConfig' => $routingConfig
         ]);
     }
     /**

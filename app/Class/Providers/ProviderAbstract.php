@@ -4,6 +4,7 @@ namespace App\Class\Providers;
 
 use App\Interfaces\ProviderInterface;
 use App\Models\Provider;
+use App\Models\SystemSetting;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +17,7 @@ abstract class ProviderAbstract implements ProviderInterface
     protected Provider $provider;
     protected string $providerName;
     protected bool $isSandbox = false;
+    static public int $defaultTimeoutMs = 5000;
 
 
     protected array $networkIDs = [
@@ -155,6 +157,17 @@ abstract class ProviderAbstract implements ProviderInterface
         }
 
         return 0.0; // fallback if parsing fails
+    }
+
+    public function getProviderModel(): Provider
+    {
+        return $this->provider;
+    }
+
+    public function getTimeout(){
+        // convert to s from ms
+        $globalTimeoutMs = SystemSetting::getKeyValue('timeout_ms', config('vtu.default_timeout_ms', self::$defaultTimeoutMs));
+        return  ($this->provider->timeout_ms ?$this->provider->timeout_ms:$globalTimeoutMs) / 1000;
     }
 
     abstract protected function normalizeError(array $responseData, string $service): string;

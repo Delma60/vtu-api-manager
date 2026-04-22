@@ -12,10 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('system_settings', function (Blueprint $table) {
-           $table->id();
-            $table->string('key')->unique();
+            $table->id();
+            $table->string('key'); 
             $table->text('value')->nullable();
+            $table->unsignedBigInteger('business_id');
+            $table->string('environment')->default('production');
+            
+            $table->nullableMorphs('settingable'); 
+            
             $table->timestamps();
+            
+            $table->unique(['key', 'business_id', 'environment', 'settingable_id', 'settingable_type'], 'sys_settings_unique');
         });
     }
 

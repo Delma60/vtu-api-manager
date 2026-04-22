@@ -19,20 +19,40 @@ interface Props {
     };
 }
 
-export default function ProvidersPage({ providers, routingConfig }: Props) {
+export default function ProvidersPage({ providers, routingConfig:config }: Props) {
+    console.log(providers[0]);
+    const [autoFailover, setAutoFailover] = useState(config.auto_failover)
+    const [timeout, setTimeout] = useState(config.timeout_ms);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
     // Fallback data if props are missing during UI dev
     const activeProviders = (providers || []).map((provider) => ({
         ...provider,
         // Map database fields to UI fields
-        upstream_balance: parseFloat(provider.cached_balance) || 0,
+        upstream_balance: parseFloat(provider.balance) || 0,
         success_rate: parseFloat(provider.success_rate_7d) || 0,
         status: provider.is_active ? (parseFloat(provider.success_rate_7d) >= 95 ? 'operational' : 'degraded') : 'disabled',
         latency: `${provider.timeout_ms}ms`,
     }));
 
-    const config = routingConfig || { auto_failover: true, timeout_ms: 5000 };
+
+    const handleFailoverToggle = (checked: boolean) => {
+        setAutoFailover(checked); // Update UI instantly for perceived performance
+        
+        // Send the update to the backend silently
+        router.post(route('settings.update.single'), { 
+            key: 'auto_failover', 
+            value: checked 
+        }, {
+            preserveScroll: true,
+            preserveState: true,
+            onError: () => {
+                // Revert UI if the server request fails
+                setAutoFailover(!checked);
+                alert("Failed to update failover setting.");
+            }
+        });
+    };
 
     // Helper for status colors using semantic/tailwind dynamic colors
     const getStatusColor = (status: string) => {
@@ -100,13 +120,7 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                         </div>
                         <div className="flex flex-col items-center">
                             <label className="mb-2 text-xs font-medium text-muted-foreground">Enable Feature</label>
-                            <div
-                                className={`flex h-6 w-11 cursor-pointer items-center rounded-full px-1 transition-colors ${config.auto_failover ? 'bg-primary' : 'bg-muted'}`}
-                            >
-                                <div
-                                    className={`h-4 w-4 transform rounded-full bg-background transition-transform ${config.auto_failover ? 'translate-x-5' : ''}`}
-                                ></div>
-                            </div>
+                           <Switch checked={config.auto_failover} onCheckedChange={handleFailoverToggle} />
                         </div>
                     </div>
                 </div>
@@ -150,9 +164,9 @@ export default function ProvidersPage({ providers, routingConfig }: Props) {
                                     <p className="mb-1 text-xs font-medium text-muted-foreground">Upstream Balance</p>
                                     {/* Visual warning if balance is low */}
                                     <p
-                                        className={`font-mono text-lg font-bold ${parseFloat(provider.cached_balance) <= 2000 ? 'text-destructive' : parseFloat(provider.cached_balance) <= 10000 ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'}`}
+                                        className={`font-mono text-lg font-bold ${parseFloat(provider.balance) <= 2000 ? 'text-destructive' : parseFloat(provider.balance) <= 10000 ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'}`}
                                     >
-                                        ₦{parseFloat(provider.cached_balance)?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                        ₦{parseFloat(provider.balance)?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </p>
                                 </div>
 

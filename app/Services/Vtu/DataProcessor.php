@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\ProviderService;
 use App\Services\TransactionService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DataProcessor
 {
@@ -13,7 +14,7 @@ class DataProcessor
 
     public function process(User $user, array $payload): array
     {
-        $provider = ProviderService::getProviderInstance("data");
+        // $provider = ProviderService::getProviderInstance("data");
         $txRef = $payload['tx_ref'] ?? 'VTM_' . uniqid();
         $payload['tx_ref'] = $txRef;
 
@@ -36,23 +37,55 @@ class DataProcessor
             return ['status' => 'error', 'message' => $e->getMessage()];
         }
 
-        // 2. Format & Send Request
-        try {
-            $formattedPayload = $provider->formatPayload('data', $payload);
-            $response = $provider->sendRequest('data', $formattedPayload);
+        $providersToTry = ProviderService::getFallbackProviders('data', $payload['network_type_id'] ?? null);
 
-            if (isset($response['status']) && $response['status'] === 'success') {
-                $this->transactionService->markAsSuccessful($transaction, $response);
-                return $response;
+        // If no providers are configured at all
+        if (empty($providersToTry)) {
+            $this->transactionService->markAsFailed($transaction, 'No active providers available for this service.', []);
+            return ['status' => 'error', 'message' => 'No active providers available. Wallet refunded.'];
+        }
+
+        $lastResponse = null;
+
+
+        // 2. Format & Send Request
+        foreach ($providersToTry as $providerInstance) {
+            try {
+                // Update the transaction record to reflect the current provider being attempted
+                $transaction->update(['provider_id' => $providerInstance->getProviderModel()->id]);
+
+                // Format the payload specifically for THIS provider
+                $formattedPayload = $providerInstance->formatPayload('data', $payload);
+                // Attempt the transaction
+                $response = $providerInstance->sendRequest('data', $formattedPayload);
+                $lastResponse = $response;
+
+                // If successful, mark it and break out of the loop!
+                if (isset($response['status']) && $response['status'] === 'success') {
+                    $this->transactionService->markAsSuccessful($transaction, $response);
+                    return $response; // Return early on success
+                }
+
+                // If we get here, the current provider failed. 
+                // Log it, and the loop will naturally proceed to the NEXT provider.
+                Log::warning("Provider Failover: " . $providerInstance->getProviderModel()->name . " failed for TX: " . $txRef, ['response' => $response]);
+
+            } catch (\Exception $e) {
+                // Catch timeouts or HTTP errors for the current provider
+                Log::error("Provider Exception during Failover: " . $providerInstance->getProviderModel()->name . " - " . $e->getMessage());
+                $lastResponse = ['status' => 'error', 'message' => $e->getMessage()];
+                // Loop continues to the next provider
             }
 
-            $this->transactionService->markAsFailed($transaction, $response['message'] ?? 'Provider failed to process the request', $response);
-            return $response;
-        } catch (\Exception $e) {
-            Log::error('Data Processing Error: ' . $e->getMessage(), ['payload' => $payload]);
-            $this->transactionService->markAsFailed($transaction, 'An unexpected error occurred.', ['error' => $e->getMessage()]);
-            return ['status' => 'error', 'message' => 'An unexpected error occurred. Wallet refunded.'];
         }
+        $errorMessage = $lastResponse['message'] ?? 'All available providers failed to process the request';
+    
+        $this->transactionService->markAsFailed($transaction, $errorMessage, $lastResponse ?? []);
+        
+        return [
+            'status' => 'error', 
+            'message' => $errorMessage
+        ];
     }
 
     public function getDataPlans($networkId)

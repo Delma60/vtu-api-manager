@@ -25,7 +25,7 @@ class Adex extends ProviderAbstract
      function sendRequest(string $service, array $payload): array
     {
         $response = Http::withHeaders($this->getAuthHeaders())
-        ->timeout(15)
+        ->timeout($this->getTimeout())
         // ->retry(2, 100)
         ->post($this->buildEndpoint($service), $payload)->json();
 

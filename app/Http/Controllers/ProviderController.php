@@ -107,4 +107,13 @@ class ProviderController extends Controller
         ProviderService::diagnose($provider);
         return back()->with('success', 'Provider diagnosis completed. Check logs for details.');
     }
+
+
+    public function regenerateUuid(Provider $provider)
+    {
+        $provider->uuid = (string) \Illuminate\Support\Str::uuid();
+        $provider->save();
+
+        return back()->with('success', 'Webhook callback URL regenerated successfully.');
+    }
 }

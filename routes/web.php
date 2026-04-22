@@ -51,7 +51,7 @@ Route::post('/webhook/{uuid}', function (Request $request, string $uuid) {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     Route::get('toggle-mode', [DashboardController::class, 'toggleMode'])->name('toggle-mode');
 
     Route::resource('transactions', TransactionController::class);
@@ -60,6 +60,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('networks', NetworkController::class);
     Route::resource('providers', ProviderController::class);
     Route::get("/providers/{provider}/diagnose", [ProviderController::class, "diagnose"])->name("providers.diagnose");
+    Route::post('/providers/{provider}/regenerate-uuid', [ProviderController::class, 'regenerateUuid'])->name('providers.regenerate-uuid');
+
     Route::resource('service-controls', ServiceControlController::class);
     Route::put('/service-controls/bulk-update', [ServiceControlController::class, 'bulkUpdate'])
     ->name('service-controls.bulk-update');
@@ -154,9 +156,9 @@ Route::middleware(['auth', SuperAdminMiddleware::class])
     ->prefix('admin')
     ->name('super-admin.')
     ->group(function () {
-        
+
         Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
-        
+
         // Future routes go here:
         Route::post('businesses/{business}/toggle', [BusinessController::class, 'toggleStatus'])
         ->name('businesses.toggle');

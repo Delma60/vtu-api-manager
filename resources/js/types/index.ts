@@ -49,13 +49,16 @@ export interface Provider {
         name: string;
         priority: number;
         cached_balance: number;
-        success_rate_7d: number;
+        // success_rate_7d: number;
         timeout_ms: number;
         is_active: boolean;
         base_url:string;
         code:string;
         connection:boolean;
         balance:string;
+        callback_url:string;
+        success_rate_7d: number;
+        avg_latency: number;
         meta?:{
             diagnostics?:{
                 time:Date,

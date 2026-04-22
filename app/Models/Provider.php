@@ -49,7 +49,7 @@ class Provider extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($model) {
             if (empty($model->uuid)) {
                 $model->uuid = (string) \Illuminate\Support\Str::uuid();
@@ -66,7 +66,7 @@ class Provider extends Model
         });
     }
 
-    protected $appends = ['connection', 'balance'];
+    protected $appends = ['connection', 'balance', 'callback_url', 'avg_latency'];
 
     public function user()
     {
@@ -126,4 +126,49 @@ class Provider extends Model
         return url('/webhook/' . $this->uuid);
     }
 
+    public function apiLogs()
+    {
+        return $this->hasMany(ApiLog::class);
+    }
+
+    // 3. Dynamic Attribute for Average Latency (Last 24 Hours)
+    public function getAvgLatencyAttribute()
+    {
+        // Cache the latency calculation for 5 minutes to prevent heavy DB load
+        return \Illuminate\Support\Facades\Cache::remember(
+            "provider_latency_{$this->id}",
+            now()->addMinutes(5),
+            function () {
+                $avg = $this->apiLogs()
+                    ->where('created_at', '>=', now()->subDay())
+                    ->avg('duration_ms');
+
+                // Return calculated average, or fallback to the configured timeout
+                return $avg ? round($avg, 0) : $this->timeout_ms;
+            }
+        );
+    }
+
+    // 4. Method to calculate and update the 7-day success rate
+    public function calculateAndUpdateSuccessRate()
+    {
+        $query = $this->transactions()->where('created_at', '>=', now()->subDays(7));
+
+        $total = (clone $query)->count();
+
+        if ($total === 0) {
+            return $this->success_rate_7d; // Leave as is if no recent transactions
+        }
+
+        // Adjust 'successful' based on your actual Transaction status string
+        $successful = (clone $query)->where('status', 'successful')->count();
+
+        $rate = ($successful / $total) * 100;
+
+        $this->update([
+            'success_rate_7d' => round($rate, 2)
+        ]);
+
+        return round($rate, 2);
+    }
 }

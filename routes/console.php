@@ -1,11 +1,21 @@
 <?php
 
+use App\Models\Provider;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+Schedule::call(function () {
+    $providers = Provider::where('is_active', true)->get();
+
+    foreach ($providers as $provider) {
+        $provider->calculateAndUpdateSuccessRate();
+    }
+})->hourly()->name('update-provider-success-rates');
 
 Artisan::command('migrate:both {--fresh} {--seed} {--force}', function () {
     $connections = ['mysql', 'mysql_test'];

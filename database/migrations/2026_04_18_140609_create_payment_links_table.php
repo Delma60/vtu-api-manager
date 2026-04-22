@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payment_links', function (Blueprint $table) {
             $table->uuid('id')->primary(); // Secure public URL identifier
-                $table->foreignId('business_id')->constrained('vtu_api_manager.businesses')->cascadeOnDelete();
+                $table->foreignId('business_id')->constrained('businesses')->cascadeOnDelete();
             $table->string('customer_name')->nullable();
             $table->string('customer_email')->nullable();
             $table->decimal('amount', 12, 2)->nullable();

@@ -10,9 +10,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ProviderService
 {
+    public const SUPPORTED_AUTHORS = [
+        'ADEX DEVELOPER',
+        "SMEPLUG"
+        // Add other supported API authors here in the future
+    ];
+
     /**
      * Instantiate the correct provider instance.
      */
@@ -35,12 +42,17 @@ class ProviderService
         }
 
         $author = $provider->meta['meta_author'] ?? 'sandbox';
+        
+        // 1. Fetch the mapped class from our config file
+        $supportedProviders = config('vtu.providers', []);
 
-        return match ($author) {
-            'ADEX DEVELOPER' => new Adex($provider),
-            'sandbox'        => new Sandbox($provider),
-            default          => throw new \InvalidArgumentException("Unsupported provider author: {$author}"),
-        };
+        if (!array_key_exists($author, $supportedProviders)) {
+            throw new \InvalidArgumentException("Unsupported provider author: {$author}");
+        }
+
+        // 2. Dynamically instantiate the class
+        $providerClass = $supportedProviders[$author];
+        return new $providerClass($provider);
     }
 
     /**
@@ -66,15 +78,14 @@ class ProviderService
      */
     public static function getProviderInstance(string $identifier): ?ProviderAbstract
     {
-        Log::info("Fetching provider with identifier: {$identifier}");
-        $provider = Provider::serviceProvider($identifier)->first();
-        
+        $provider = Provider::withoutGlobalScopes()->where('is_active', true)->first();
         return $provider ? self::make($provider) : null;
     }
 
     public static function createProvider(array $data): Provider
     {
         $meta = self::processUrlMetadata($data);
+        self::ensureProviderIsSupported($meta);
         return Provider::create($meta);
     }
 
@@ -82,6 +93,7 @@ class ProviderService
     {
         $meta = self::processUrlMetadata($data);
         $provider = Provider::findOrFail($meta['id']);
+        self::ensureProviderIsSupported($meta);
         $provider->update($meta);
         
         return $provider;
@@ -98,39 +110,66 @@ class ProviderService
 
         $url = rtrim($data['base_url'], '/');
 
-        // 1. Transform /api or /v1 to the root app URL if found
         if (Str::contains($url, ['/api', '/v1'])) {
             $url = preg_replace('/(\/api|\/v1).*$/', '', $url);
-            $data['base_url'] = $url; // Save the stripped URL back to the data array
+            $data['base_url'] = $url;
         }
 
-        // 2. Fetch the metadata
         try {
-            $response = Http::timeout(5)->get($url);
+            $response = Http::withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            ])->timeout(15)->get($url);
+
+        
             
-            if ($response->successful()) {
+            if ($response->successful()) 
+                {
+                    // ... inside the try-catch block ...
+                
                 $html = $response->body();
+                $extractedName = null;
                 
-                // Use regex to find the <meta name="author" ...> tag
+                // 1. Try the standard Meta Tag first
                 if (preg_match('/<meta\s+name=["\']author["\']\s+content=["\']([^"\']+)["\']\s*\/?>/i', $html, $matches)) {
-                    $data['meta']['meta_author'] = $matches[1];
+                    $extractedName = strtoupper(trim($matches[1]));
+                } 
+                // 2. Try Regex to search the HTML body for "Designed/Developed/Powered By"
+                elseif (preg_match('/(?:designed|developed|powered)\s+by\s*(?:<[^>]+>\s*)?([a-zA-Z0-9\s&]+)/i', $html, $matches)) {
+                    $extractedName = strtoupper(trim($matches[1]));
                 }
-                
-                // Check for website logo
-                if (preg_match('/<link.*?rel=["\'](?:shortcut )?icon["\'].*?href=["\']([^"\']+)["\']/i', $html, $logoMatches)) {
-                    $logoUrl = $logoMatches[1];
+                // 3. NEW: Fallback to the Page Title for enterprise providers like SME Plug
+                elseif (preg_match('/<title>([^<]+)<\/title>/i', $html, $matches)) {
+                    $extractedName = strtoupper(trim($matches[1]));
+                }
+
+                // 4. Format the extracted name dynamically against the config list
+                if ($extractedName) {
+                    $normalizedName = str_replace('A D E', 'ADEX', $extractedName);
+                    $matched = false;
                     
-                    // Handle relative paths (e.g., /favicon.ico)
-                    if (!Str::startsWith($logoUrl, ['http://', 'https://', '//'])) {
-                        $logoUrl = $url . '/' . ltrim($logoUrl, '/');
+                    $supportedAuthors = array_keys(config('vtu.providers', []));
+
+                    foreach ($supportedAuthors as $supportedAuthor) {
+                        if ($supportedAuthor === 'sandbox') continue;
+
+                        // Grab the primary keyword (e.g., 'SME' from 'SME PLUG' or 'SMEPLUG')
+                        // We use str_replace to handle spaces so 'SME PLUG' matches 'SMEPLUG'
+                        $primaryKeyword = str_replace(' ', '', explode(' ', $supportedAuthor)[0]); 
+                        
+                        if (Str::contains(str_replace(' ', '', $normalizedName), $primaryKeyword)) {
+                            $data['meta']['meta_author'] = $supportedAuthor;
+                            $matched = true;
+                            break;
+                        }
                     }
-                    
-                    $data['logo_url'] = $logoUrl;
+
+                    if (!$matched) {
+                        $data['meta']['meta_author'] = $extractedName;
+                    }
                 }
-            }
+                }
         } catch (\Exception $e) {
-            // Log the actual error message alongside the URL for easier debugging
-            Log::warning("Could not fetch metadata for: {$url}. Error: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::warning("Could not fetch metadata for: {$url}. Error: " . $e->getMessage());
         }
 
         return $data;
@@ -169,5 +208,19 @@ class ProviderService
         $vendorInstance->webhook($request);
         
         return response()->noContent();
+    }
+
+    private static function ensureProviderIsSupported(array $data): void
+    {
+        $author = $data['meta']['meta_author'] ?? null;
+        $supportedProviders = config('vtu.providers', []);
+
+        if (!array_key_exists($author, $supportedProviders)) {
+            $detected = $author ? "Detected author: {$author}" : "No valid API author tag found at this URL";
+            
+            throw ValidationException::withMessages([
+                'base_url' => "This is not a supported VTU provider API. {$detected}."
+            ]);
+        }
     }
 }

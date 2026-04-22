@@ -13,9 +13,14 @@ return new class extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); // e.g., 'Agent', 'API'
-            $table->string('slug')->unique();
+            $table->string('name'); // e.g., 'Agent', 'API'
+            $table->string('slug');
             $table->timestamps();
+            // foreign key to business
+            $table->foreignId('business_id')->constrained()->onDelete('cascade');
+
+            $table->unique(['name', 'business_id'], 'roles_name_business_unique');
+            $table->unique(['slug', 'business_id'], 'roles_slug_business_unique');
         });
     }
 

@@ -20,14 +20,15 @@ class Adex extends ProviderAbstract
      */
     protected string $providerName = 'adex';
     private ?string $accessToken = null;
-    
+
 
      function sendRequest(string $service, array $payload): array
     {
         $response = Http::withHeaders($this->getAuthHeaders())
-        ->timeout($this->provider->timeout_ms)
-        // ->retry(2, 100) 
+        ->timeout(15)
+        // ->retry(2, 100)
         ->post($this->buildEndpoint($service), $payload)->json();
+
 
         return $response;
     }
@@ -110,7 +111,7 @@ class Adex extends ProviderAbstract
             default => throw new \InvalidArgumentException("No endpoint mapped for service [$service]")
             };
     }
-    
+
     protected function buildEndpoint(string $service): string
     {
         return $this->baseUrl() . $this->endpoint($service);
@@ -419,10 +420,10 @@ class Adex extends ProviderAbstract
                 'message' => $e->getMessage(),
                 'data' => null,
             ];
-            
+
         }
 
-        
+
     }
 
     protected function getPlans(?array $payload = null): mixed
@@ -454,7 +455,7 @@ class Adex extends ProviderAbstract
                 'data' => null,
             ];
         }
-        
+
         $plans = $network->networkTypes()->with('dataPlans')->get()->pluck('dataPlans')->flatten();
 
         return [
@@ -462,7 +463,7 @@ class Adex extends ProviderAbstract
             'message' => 'Data plans retrieved successfully',
             'data' => $plans,
         ];
-        
+
     }
 
     private function getCablePlans(string $cable_network):mixed {
@@ -474,7 +475,7 @@ class Adex extends ProviderAbstract
                 'data' => null,
             ];
         }
-        
+
         $plans = $network->cablePlans()->get();
 
         return [
@@ -482,7 +483,7 @@ class Adex extends ProviderAbstract
             'message' => 'Cable plans retrieved successfully',
             'data' => $plans,
         ];
-        
+
     }
 
     function callback(Request $request):array
@@ -507,20 +508,20 @@ class Adex extends ProviderAbstract
 
         return match (true) {
             // 1. Adex Wallet Exhausted (Note: comma acts as an OR operator in match)
-            str_contains($messageLower, 'insufficient account'), 
-            str_contains($messageLower, 'fund your wallet') 
+            str_contains($messageLower, 'insufficient account'),
+            str_contains($messageLower, 'fund your wallet')
                 => $this->handleEmptyWalletError($rawMessage, $service),
 
             // 2. Adex Network Downtime
-            str_contains($messageLower, 'timeout'), 
-            str_contains($messageLower, 'unavailable') 
+            str_contains($messageLower, 'timeout'),
+            str_contains($messageLower, 'unavailable')
                 => 'The network provider is currently experiencing downtime. Please try again.',
 
             // 3. Adex Invalid Number
-            str_contains($messageLower, 'invalid number') 
+            str_contains($messageLower, 'invalid number')
                 => 'The provided phone number is invalid for this network.',
             // invalid cable plan id, some message else especially if user set wrong cable id
-            str_contains($messageLower, 'invalid cable plan') 
+            str_contains($messageLower, 'invalid cable plan')
                 => 'The selected cable plan is invalid. Please verify the plan from provider and try again.',
 
             // Default Fallback
@@ -531,15 +532,15 @@ class Adex extends ProviderAbstract
     {
         Log::critical('ADEX WALLET EMPTY: ' . $rawMessage);
         $this->diagnose($service, 'Insufficient Balance', $rawMessage, 'warning');
-        
+
         return 'This service is currently unavailable. Please try again later.';
     }
     public function diagnose (string $service, string $title, string $body, ?string $type = "error"): void{
         $meta = $this->provider->meta ?? [];
-    
+
                 // 2. Ensure 'diagnostics' exists as an array
                 $diagnostics = $meta['diagnostics'] ?? [];
-    
+
                 // 3. Append the new error to the array
                 $diagnostics[] = [
                     "time"     => now()->toDateTimeString(),
@@ -548,16 +549,16 @@ class Adex extends ProviderAbstract
                     'title' => $title,
                     'type' => $type,
                 ];
-    
+
                 // 4. PRO TIP: Prevent database bloat by keeping only the last 10 logs
                 // If there are more than 10, slice off the oldest ones from the front
                 if (count($diagnostics) > 10) {
                     $diagnostics = array_slice($diagnostics, -10);
                 }
-    
+
                 // 5. Put it back into the meta array and update the model
                 $meta['diagnostics'] = $diagnostics;
-    
+
                 $this->provider->update([
                     'meta' => $meta
                 ]);

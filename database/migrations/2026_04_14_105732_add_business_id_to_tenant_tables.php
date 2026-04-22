@@ -30,13 +30,7 @@ return new class extends Migration
         });
         
 
-        Schema::table('roles', function (Blueprint $table) {
-            $table->foreignId('business_id')
-                  ->nullable()
-                  ->after('id')
-                  ->constrained('businesses')
-                  ->cascadeOnDelete();
-        });
+       
         
     }
 
@@ -60,10 +54,7 @@ return new class extends Migration
             $table->dropColumn('business_id');
         });
 
-        Schema::table('roles', function (Blueprint $table) {
-            $table->dropForeign(['business_id']);
-            $table->dropColumn('business_id');
-        });
+        
         
         
     }

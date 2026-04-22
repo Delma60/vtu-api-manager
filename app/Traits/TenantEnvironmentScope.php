@@ -36,6 +36,7 @@ trait TenantEnvironmentScope
     {
         $request = request();
         $bearerToken = $request->bearerToken();
+        $user = request()->user() ?? Auth::user(); 
         
         // 1. Determine environment from API Token
         if ($bearerToken) {
@@ -44,8 +45,8 @@ trait TenantEnvironmentScope
         } 
         
         // 2. Determine environment from Authenticated User Business Mode
-        if (Auth::check() && Auth::user()->user_type !== 'admin') {
-            return Auth::user()->business?->mode ?? 'live';
+        if ($user && $user->user_type !== 'admin') {
+            return $user->business?->mode ?? 'live';
         }
 
         // Default fallback

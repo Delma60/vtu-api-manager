@@ -18,7 +18,16 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ProviderSeeder::class,
             RoleSeeder::class,
-            TransactionSeeder::class
+            TransactionSeeder::class,
+            NetworkSeeder::class,
+            DataPlanSeeder::class,
+            CablePlanSeeder::class,
+            DiscountSeeder::class,
+            PaymentGatewaySeeder::class,
+            ServiceSeeder::class,
+            SystemSettingSeeder::class,
+            WalletSeeder::class,
+            WebhookSeeder::class,
         ]);
 
     }

@@ -6,6 +6,7 @@ use App\Models\ApiCredential;
 use Closure;
 use Illuminate\Http\Request;
 use App\Services\ApiKeyManager;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApiKeyAuth
@@ -33,6 +34,7 @@ class ApiKeyAuth
         $credential->update(['last_used_at' => now()]);
 
         // Set the authenticated user
+        Auth::setUser($credential->user);
         $request->setUserResolver(function () use ($credential) {
             return $credential->user;
         });

@@ -39,7 +39,7 @@ class TransactionFactory extends Factory
         $previousBalance = $this->faker->numberBetween(10000, 100000);
 
         return [
-            'reference' => 'txn_' . Str::random(12),
+            'transaction_reference' => 'txn_' . Str::random(12),
             'vendor_reference' => $this->faker->randomElement([null, 'ven_' . Str::random(15)]),
             'type' => $type,
             'network' => $network,

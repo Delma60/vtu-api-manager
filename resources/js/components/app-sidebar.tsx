@@ -30,11 +30,15 @@ export function SidebarComponent() {
     const [activeTab, setActiveTab] = useState(url);
     const [isLiveMode, setIsLiveMode] = useState(props.mode === 'live');
     const [expandedItems, setExpandedItems] = useState<string[]>(['pricing']);
-    const { state } = useSidebar();
+    const { state, isMobile, setOpenMobile } = useSidebar();
 
     const handleChange = (routeName: string) => {
         setActiveTab(routeName);
         router.visit(route(routeName));
+
+        if (isMobile) {
+            setOpenMobile(false);
+        }
     };
 
     const toggleExpanded = (itemName: string) => {

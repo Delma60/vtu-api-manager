@@ -17,12 +17,29 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+type TransactionRow = {
+    transaction_reference?: string | number;
+    id?: string | number;
+    provider?: string;
+    transaction_type?: string;
+    account_or_phone?: string;
+    receiver?: string;
+    amount: string | number;
+    status: 'success' | 'processing' | 'failed' | 'fail' | string;
+    created_at: string;
+};
+
+type VolumeDataPoint = {
+    date: string;
+    requests: number;
+    success: number;
+};
+
 export default function Dashboard({
     metrics,
     providerHealth,
     recentTransactions,
     volumeChartData,
-    low_balance_threshold,
 }: {
     metrics?: {
         totalBalance: number;
@@ -37,16 +54,8 @@ export default function Dashboard({
         status: 'operational' | 'degraded' | 'partial' | 'major';
         latency: number; // in ms
     }[];
-    recentTransactions?: {
-        reference: string;
-        network: string;
-        destination: string;
-        amount: number;
-        status: 'success' | 'processing' | 'failed';
-        time: string; // ISO timestamp
-    }[];
-    volumeChartData?: { date: string; requests: number; success: number }[];
-    low_balance_threshold?:number;
+    recentTransactions?: TransactionRow[];
+    volumeChartData?: VolumeDataPoint[];
 }) {
     const stats = metrics;
 
@@ -74,7 +83,7 @@ export default function Dashboard({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             {/* Swapped bg-slate-950 and text-slate-200 for bg-background and text-foreground */}
-            <div className="bg-background text-foreground min-h-screen flex-1 p-8 font-sans">
+            <div className="bg-background text-foreground min-h-screen flex-1 p-4 md:p-8 font-sans">
                 <header className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Overview</h1>
@@ -89,7 +98,7 @@ export default function Dashboard({
                 </header>
 
                 {/* Top KPIs Grid */}
-                <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     {/* Metric 1: Balance - Swapped bg-[#0f172a] and border-slate-800 for bg-card and border-border */}
                     <div className="group bg-card text-card-foreground relative overflow-hidden rounded-xl border p-6 shadow-sm">
                         <div className="absolute top-0 right-0 p-4 opacity-10 transition-opacity group-hover:opacity-20">
@@ -146,9 +155,9 @@ export default function Dashboard({
                 {/* Middle Section: Chart & Provider Health */}
                 <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
                     <div className="bg-card text-card-foreground flex flex-col rounded-xl border p-6 shadow-sm lg:col-span-2">
-                        <div className="mb-6 flex items-center justify-between">
+                        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <h3 className="text-base font-semibold">Transaction Volume</h3>
-                            <div className="w-[200px]">
+                            <div className="w-full max-w-xs">
                                 <Select onValueChange={handleRangeChange} defaultValue="7days">
                                     <SelectTrigger>
                                         <SelectValue />
@@ -168,7 +177,16 @@ export default function Dashboard({
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={volumeChartData}>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
-                                        <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                                        <XAxis
+                                            dataKey="date"
+                                            stroke="#94a3b8"
+                                            fontSize={10}
+                                            tickLine={false}
+                                            axisLine={false}
+                                            interval={0}
+                                            height={24}
+                                            tickFormatter={(value) => String(value).slice(5).replace(/-/g, '/')}
+                                        />
                                         <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
 
                                         {/* Pass the custom component to the cursor prop */}
@@ -260,7 +278,8 @@ export default function Dashboard({
                     </CardHeader>
 
                     <CardContent className="p-0">
-                        <Table>
+                        <div className="w-full overflow-x-auto">
+                            <Table>
                             <TableHeader className="bg-muted/30">
                                 <TableRow className="hover:bg-transparent">
                                     <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
@@ -285,7 +304,7 @@ export default function Dashboard({
                             </TableHeader>
                             <TableBody>
                                 {recentTransactions && recentTransactions.length > 0 ? (
-                                    recentTransactions.map((txn: any) => (
+                                    recentTransactions.map((txn: TransactionRow) => (
                                         <TableRow key={txn.transaction_reference || txn.id} className="group hover:bg-muted/50 transition-colors">
                                             {/* Reference */}
                                             <TableCell className="px-6 py-4">
@@ -305,7 +324,7 @@ export default function Dashboard({
                                                     <div className="flex flex-col">
                                                         <span className="text-sm leading-none font-medium">{txn.provider || 'System'}</span>
                                                         <span className="text-muted-foreground mt-1 text-xs">
-                                                            {formatTransactionType(txn.transaction_type)}
+                                                            {formatTransactionType(txn.transaction_type ?? '')}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -317,7 +336,7 @@ export default function Dashboard({
                                             </TableCell>
 
                                             {/* Amount */}
-                                            <TableCell className="px-6 py-4 font-semibold">₦{parseFloat(txn.amount).toLocaleString()}</TableCell>
+                                            <TableCell className="px-6 py-4 font-semibold">₦{parseFloat(String(txn.amount)).toLocaleString()}</TableCell>
 
                                             {/* Status Badge */}
                                             <TableCell className="px-6 py-4">
@@ -378,6 +397,7 @@ export default function Dashboard({
                                 )}
                             </TableBody>
                         </Table>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -386,12 +406,21 @@ export default function Dashboard({
 }
 
 // 1. Define the custom cursor above or inside your component
-const CustomHoverBackground = (props: any) => {
+type HoverBackgroundProps = {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+};
+
+const CustomHoverBackground = (props: HoverBackgroundProps) => {
     const { x, y, width, height } = props;
     const bgWidth = 50; // Slightly wider than your maxBarSize of 40
-    const centeredX = x + (width - bgWidth) / 2; // Centers the gray box over the bar
+    const xValue = x ?? 0;
+    const widthValue = width ?? bgWidth;
+    const centeredX = xValue + (widthValue - bgWidth) / 2; // Centers the gray box over the bar
 
-    return <Rectangle fill="#334155" opacity={0.2} x={centeredX} y={y} width={bgWidth} height={height} rx={4} />;
+    return <Rectangle fill="#334155" opacity={0.2} x={centeredX} y={y ?? 0} width={bgWidth} height={height ?? 0} rx={4} />;
 };
 
 // Helper to format time relative to now

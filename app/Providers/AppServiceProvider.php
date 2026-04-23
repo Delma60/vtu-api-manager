@@ -30,31 +30,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Register model observers
         Transaction::observe(TransactionObserver::class);
-        Sanctum::getAccessTokenFromRequestUsing(function ($request) {
-            $token = $request->bearerToken();
-
-            if (!$token) {
-                return null;
-            }
-
-            $token = trim($token);
-
-            // Strip out custom prefixes so Sanctum can validate the real token
-            if (str_starts_with($token, 'sk_test_')) {
-                $stripped = substr($token, 8);
-                
-                return $stripped;
-            }
-
-            if (str_starts_with($token, 'sk_live_')) {
-                $stripped = substr($token, 8);
-                // Log::debug('Stripped live prefix token', ['original_length' => strlen($token), 'stripped_length' => strlen($stripped)]);
-                return $stripped;
-            }
-
-            // No custom prefix, return token as-is
-            return $token;
-        });
+       if(str_contains(env("APP_URL"), "ngrok") ){
+            URL::forceScheme('https');
+        }
     }
 }
 

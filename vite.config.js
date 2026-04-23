@@ -18,4 +18,7 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
+    server: {
+        host: 'https://04b8-105-127-6-246.ngrok-free.app'
+    }
 });

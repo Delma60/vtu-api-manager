@@ -54,6 +54,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('toggle-mode', [DashboardController::class, 'toggleMode'])->name('toggle-mode');
 
+    Route::resource('system-settings', SystemSettingController::class);
+    Route::post('/settings', [SystemSettingController::class, "updateSingle"])
+        ->name('settings.update.single');
+
     Route::resource('transactions', TransactionController::class);
     Route::resource('payment-links', PaymentLinkController::class);
     Route::resource('wallets', WalletController::class);
@@ -110,10 +114,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/service-types/rankings', 'serviceTypeRankings')->name('service-types.rankings');
         Route::post('/regenerate', 'regenerate')->name('regenerate');
 
-        Route::resource('settings', SystemSettingController::class)->only(['index', 'store', 'destroy']);
-    });
-    Route::post('/settings', [SystemSettingController::class, "updateSingle"])
-        ->name('settings.update.single');
+        // Route::resource('settings', SystemSettingController::class)->only(['index', 'store', 'destroy']);
+        });
+        
 
 });
 

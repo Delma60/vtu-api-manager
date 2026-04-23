@@ -23,7 +23,7 @@ export default function SystemSettingsIndex({ settings }: Props) {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('admin.settings.store'), {
+        post(route('system-settings.store'), {
             preserveScroll: true,
         });
     };

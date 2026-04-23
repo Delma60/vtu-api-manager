@@ -3,8 +3,11 @@
 namespace App\Http\Middleware;
 
 use App\Models\Provider;
+use App\Models\SystemSetting;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -37,12 +40,22 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+
+        $globalSettings = Cache::remember('global_system_settings', 60 * 60 * 24, function () {
+            // Fetch global settings (where settingable_id is null)
+            // Assuming business_id 1 is the main/default platform
+            return SystemSetting::whereNull('settingable_id')
+                ->where('business_id', 2) 
+                ->where('environment', 'live') // adjust this if you need dynamic environments
+                ->pluck('value', 'key')
+                ->toArray();
+        });
+
+        Log::info($globalSettings);
 
         return array_merge(parent::share($request), [
             ...parent::share($request),
             'name' => config('app.name'),
-            'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user()?->load('settings'),
             ],
@@ -54,6 +67,10 @@ class HandleInertiaRequests extends Middleware
             'unreadNotificationsCount' => $request->user() ? $request->user()->unreadNotifications()->count() : 0,
             'is_super_admin' => $request->user() ? $request->user()->isSuperAdmin() : false,
             'is_business_admin' => $request->user() ? $request->user()->isBusinessAdmin() : false,
+            'general' => [
+
+                // "app_name" SystemSettings
+            ],
             'flash' => function () {
                 return [
                     'success' => session('success'),

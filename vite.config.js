@@ -7,6 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
     plugins: [
+        
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             ssr: 'resources/js/ssr.jsx',
@@ -19,6 +20,12 @@ export default defineConfig({
         jsx: 'automatic',
     },
     server: {
-        host: 'https://04b8-105-127-6-246.ngrok-free.app'
+        host: "0.0.0.0",
+        cors: true,
+        hmr: {
+            host: '5e8f-105-127-7-98.ngrok-free.app',
+            protocol: 'wss',
+        }
     }
+    
 });

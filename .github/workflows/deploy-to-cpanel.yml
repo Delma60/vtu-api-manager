@@ -1,0 +1,66 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+      - name: Deploy to cPanel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.CPANEL_FTP_HOST }}
+          username: ${{ secrets.CPANEL_FTP_USER }}
+          password: ${{ secrets.CPANEL_FTP_PASSWORD }}
+          server-dir: ${{ secrets.CPANEL_FTP_TARGET_DIR }}
+          local-dir: .
+          git-ftp-args: --ftp-create-dirs
+          exclude: |
+            .git*
+            .github
+            tests
+            node_modules
+            .env*
+            composer.json
+            composer.lock
+            package-lock.json
+            package.json
+            tsconfig.json
+            vite.config.js
+            .vscode
+            README.md
+            docker-compose.yml
+            Dockerfile
+            docs
+            temp_migration.txt

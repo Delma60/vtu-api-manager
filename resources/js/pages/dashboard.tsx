@@ -75,7 +75,7 @@ export default function Dashboard({
     };
 
     const { props } = usePage();
-    console.log(props)
+    console.log(props);
 
     // resources/js/pages/dashboard.tsx
 
@@ -83,17 +83,19 @@ export default function Dashboard({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             {/* Swapped bg-slate-950 and text-slate-200 for bg-background and text-foreground */}
-            <div className="bg-background text-foreground min-h-screen flex-1 p-4 md:p-8 font-sans">
-                <header className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+            <div className="bg-background text-foreground min-h-screen flex-1 p-4 font-sans md:p-8">
+                <header className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Overview</h1>
                         {/* Swapped text-slate-400 for text-muted-foreground */}
                         <p className="text-muted-foreground text-sm">Welcome back. Here is what's happening with your API today.</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         {/* Swapped borders and bg for theme variables */}
-                        <Button variant="outline">Download Report</Button>
-                        <Button>Top Up Wallet</Button>
+                        <Button variant="outline" className="flex-1 sm:flex-none">
+                            Download Report
+                        </Button>
+                        <Button className="flex-1 sm:flex-none">Top Up Wallet</Button>
                     </div>
                 </header>
 
@@ -279,124 +281,136 @@ export default function Dashboard({
 
                     <CardContent className="p-0">
                         <div className="w-full overflow-x-auto">
-                            <Table>
-                            <TableHeader className="bg-muted/30">
-                                <TableRow className="hover:bg-transparent">
-                                    <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
-                                        Reference
-                                    </TableHead>
-                                    <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
-                                        Service
-                                    </TableHead>
-                                    <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
-                                        Destination
-                                    </TableHead>
-                                    <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
-                                        Amount
-                                    </TableHead>
-                                    <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
-                                        Status
-                                    </TableHead>
-                                    <TableHead className="text-muted-foreground px-6 py-4 text-right text-xs font-semibold tracking-wider uppercase">
-                                        Time
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {recentTransactions && recentTransactions.length > 0 ? (
-                                    recentTransactions.map((txn: TransactionRow) => (
-                                        <TableRow key={txn.transaction_reference || txn.id} className="group hover:bg-muted/50 transition-colors">
-                                            {/* Reference */}
-                                            <TableCell className="px-6 py-4">
-                                                <span className="text-muted-foreground group-hover:text-foreground font-mono text-xs transition-colors">
-                                                    {txn.transaction_reference}
-                                                </span>
-                                            </TableCell>
+                            <Table className="min-w-full">
+                                <TableHeader className="bg-muted/30">
+                                    <TableRow className="hover:bg-transparent">
+                                        <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
+                                            Reference
+                                        </TableHead>
+                                        <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
+                                            Service
+                                        </TableHead>
+                                        <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
+                                            Destination
+                                        </TableHead>
+                                        <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
+                                            Amount
+                                        </TableHead>
+                                        <TableHead className="text-muted-foreground px-6 py-4 text-xs font-semibold tracking-wider uppercase">
+                                            Status
+                                        </TableHead>
+                                        <TableHead className="text-muted-foreground px-6 py-4 text-right text-xs font-semibold tracking-wider uppercase">
+                                            Time
+                                        </TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {recentTransactions && recentTransactions.length > 0 ? (
+                                        recentTransactions.map((txn: TransactionRow) => (
+                                            <TableRow key={txn.transaction_reference || txn.id} className="group hover:bg-muted/50 transition-colors">
+                                                {/* Reference */}
+                                                <TableCell className="px-6 py-4">
+                                                    <span className="text-muted-foreground group-hover:text-foreground font-mono text-xs transition-colors">
+                                                        {txn.transaction_reference}
+                                                    </span>
+                                                </TableCell>
 
-                                            {/* Provider & Transaction Type */}
-                                            <TableCell className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    {txn.provider && (
-                                                        <span
-                                                            className={`h-2.5 w-2.5 flex-shrink-0 rounded-full shadow-sm ${getProviderColor(txn.provider)}`}
-                                                        ></span>
-                                                    )}
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm leading-none font-medium">{txn.provider || 'System'}</span>
-                                                        <span className="text-muted-foreground mt-1 text-xs">
-                                                            {formatTransactionType(txn.transaction_type ?? '')}
-                                                        </span>
+                                                {/* Provider & Transaction Type */}
+                                                <TableCell className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        {txn.provider && (
+                                                            <span
+                                                                className={`h-2.5 w-2.5 flex-shrink-0 rounded-full shadow-sm ${getProviderColor(txn.provider)}`}
+                                                            ></span>
+                                                        )}
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm leading-none font-medium">{txn.provider || 'System'}</span>
+                                                            <span className="text-muted-foreground mt-1 text-xs">
+                                                                {formatTransactionType(txn.transaction_type ?? '')}
+                                                            </span>
+                                                        </div>
                                                     </div>
+                                                </TableCell>
+
+                                                {/* Destination (Account or Phone) */}
+                                                <TableCell className="px-6 py-4 font-mono text-sm">
+                                                    {txn.account_or_phone || txn.receiver || 'N/A'}
+                                                </TableCell>
+
+                                                {/* Amount */}
+                                                <TableCell className="px-6 py-4 font-semibold">
+                                                    ₦{parseFloat(String(txn.amount)).toLocaleString()}
+                                                </TableCell>
+
+                                                {/* Status Badge */}
+                                                <TableCell className="px-6 py-4">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className={`gap-1 border-transparent capitalize shadow-sm ${getStatusBadge(txn.status)}`}
+                                                    >
+                                                        {txn.status === 'success' ? (
+                                                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={3}
+                                                                    d="M5 13l4 4L19 7"
+                                                                />
+                                                            </svg>
+                                                        ) : txn.status === 'fail' ? (
+                                                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={3}
+                                                                    d="M6 18L18 6M6 6l12 12"
+                                                                />
+                                                            </svg>
+                                                        ) : (
+                                                            <svg
+                                                                className="h-3 w-3 animate-spin"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                stroke="currentColor"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={2}
+                                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                                />
+                                                            </svg>
+                                                        )}
+                                                        {txn.status}
+                                                    </Badge>
+                                                </TableCell>
+
+                                                {/* Relative Time using created_at */}
+                                                <TableCell className="text-muted-foreground px-6 py-4 text-right text-xs font-medium">
+                                                    {formatRelativeTime(txn.created_at)}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        /* Empty State */
+                                        <TableRow>
+                                            <TableCell colSpan={6} className="h-32 text-center">
+                                                <div className="text-muted-foreground flex flex-col items-center justify-center space-y-3">
+                                                    <svg className="h-8 w-8 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                        />
+                                                    </svg>
+                                                    <span className="text-sm">No recent transactions to display.</span>
                                                 </div>
                                             </TableCell>
-
-                                            {/* Destination (Account or Phone) */}
-                                            <TableCell className="px-6 py-4 font-mono text-sm">
-                                                {txn.account_or_phone || txn.receiver || 'N/A'}
-                                            </TableCell>
-
-                                            {/* Amount */}
-                                            <TableCell className="px-6 py-4 font-semibold">₦{parseFloat(String(txn.amount)).toLocaleString()}</TableCell>
-
-                                            {/* Status Badge */}
-                                            <TableCell className="px-6 py-4">
-                                                <Badge
-                                                    variant="outline"
-                                                    className={`gap-1 border-transparent capitalize shadow-sm ${getStatusBadge(txn.status)}`}
-                                                >
-                                                    {txn.status === 'success' ? (
-                                                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                    ) : txn.status === 'fail' ? (
-                                                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={3}
-                                                                d="M6 18L18 6M6 6l12 12"
-                                                            />
-                                                        </svg>
-                                                    ) : (
-                                                        <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                                            />
-                                                        </svg>
-                                                    )}
-                                                    {txn.status}
-                                                </Badge>
-                                            </TableCell>
-
-                                            {/* Relative Time using created_at */}
-                                            <TableCell className="text-muted-foreground px-6 py-4 text-right text-xs font-medium">
-                                                {formatRelativeTime(txn.created_at)}
-                                            </TableCell>
                                         </TableRow>
-                                    ))
-                                ) : (
-                                    /* Empty State */
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="h-32 text-center">
-                                            <div className="text-muted-foreground flex flex-col items-center justify-center space-y-3">
-                                                <svg className="h-8 w-8 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                    />
-                                                </svg>
-                                                <span className="text-sm">No recent transactions to display.</span>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
+                                    )}
+                                </TableBody>
+                            </Table>
                         </div>
                     </CardContent>
                 </Card>

@@ -121,7 +121,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-slate-950 py-12 font-sans selection:bg-indigo-500 selection:text-white sm:px-6 lg:px-8">
+        <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-slate-950 py-12 font-sans selection:bg-indigo-500 selection:text-white sm:px-6 lg:px-8 p-4">
             {/* Background Decorative Blurs */}
             <div className="pointer-events-none absolute top-0 left-1/2 h-[500px] w-full max-w-lg -translate-x-1/2 rounded-full bg-gradient-to-b from-indigo-500/20 to-purple-500/0 blur-3xl"></div>
 
@@ -130,7 +130,7 @@ export default function LoginPage() {
                     <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30"></div>
                     <span className="text-2xl font-bold tracking-tight text-white">NexusVTU</span>
                 </div>
-                <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-white">Sign in to your dashboard</h2>
+                <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-white">Sign in to your dashboar</h2>
                 <p className="mt-2 text-center text-sm text-slate-400">
                     Or{' '}
                     <a href="/register" className="font-medium text-indigo-400 transition-colors hover:text-indigo-300">

@@ -1,13 +1,10 @@
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
-import {
-    defineConfig
-} from 'vite';
+import { defineConfig } from 'vite';
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
     plugins: [
-        
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             ssr: 'resources/js/ssr.jsx',
@@ -20,12 +17,12 @@ export default defineConfig({
         jsx: 'automatic',
     },
     server: {
-        host: "0.0.0.0",
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
         cors: true,
         hmr: {
-            host: '5e8f-105-127-7-98.ngrok-free.app',
-            protocol: 'wss',
+            host: '10.48.245.210',
         }
     }
-    
 });

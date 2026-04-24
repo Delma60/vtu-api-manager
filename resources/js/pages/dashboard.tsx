@@ -83,7 +83,7 @@ export default function Dashboard({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             {/* Swapped bg-slate-950 and text-slate-200 for bg-background and text-foreground */}
-            <div className="bg-background text-foreground min-h-screen flex-1 p-4 font-sans md:p-8">
+            <div className="bg-background text-foreground min-h-screen  p-4 font-sans md:p-8">
                 <header className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Overview</h1>

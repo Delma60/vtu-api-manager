@@ -130,7 +130,7 @@ export default function LoginPage() {
                     <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30"></div>
                     <span className="text-2xl font-bold tracking-tight text-white">NexusVTU</span>
                 </div>
-                <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-white">Sign in to your dashboar</h2>
+                <h2 className="mt-6 text-center md:text-3xl text-2xl font-extrabold tracking-tight text-white">Sign in to your dashboard</h2>
                 <p className="mt-2 text-center text-sm text-slate-400">
                     Or{' '}
                     <a href="/register" className="font-medium text-indigo-400 transition-colors hover:text-indigo-300">

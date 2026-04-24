@@ -214,4 +214,34 @@ class FlutterWave extends PaymentBase
         return $response;
     }
 
+    function resolveBank(array $data) 
+    {
+        $response = Http::withHeaders($this->getHeaders())
+                // ->get($this->provider->base_url . '/banks/NG')
+                ->post($this->provider->base_url . '/accounts/resolve', [
+                'account_number' => "0690000032",//  $data['account_number'],
+                'account_bank' => "044",//$data['account_bank'],
+        ]);
+
+        return $response;
+    }
+
+
+    function transfer(array $data) 
+    {
+        $response = Http::withHeaders($this->getHeaders())
+                ->post($this->provider->base_url . '/transfers', [
+                    'account_bank' => $data['account_bank'],
+                    'account_number' => $data['account_number'],
+                    'amount' => $data['amount'],
+                    'narration' => $data['narration'] ?? 'Wallet Withdrawal',
+                    'currency' => 'NGN',
+                    'reference' => $data['reference'],
+                    'callback_url' => $data['callback_url'] ?? null,
+                    'debit_currency' => 'NGN'
+                ]);
+
+        return $response;
+    }
+
 }

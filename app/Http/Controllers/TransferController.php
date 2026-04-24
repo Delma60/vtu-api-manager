@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Class\PaymentProvider\Payment;
 use App\Models\Customer;
+use App\Models\SystemSetting;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
@@ -12,17 +13,25 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class TransferController extends Controller
 {
-    // 1. Render the Unified Transfer Page
+    
+
     public function index(Request $request)
     {
-        $business = $request->user()->business;
+        $user = $request->user();
 
-        // Fetch customers for Wallet Transfer
-        $customers = Customer::where('business_id', $business->id)
-            ->with('wallet')
+        // Get transfers from the last 30 days
+        $recentTransfers = Transaction::where('business_id', $user->business_id)
+            ->whereIn('transaction_type', ['transfer_out', 'payout', 'debit'])
+            ->where('created_at', '>=', now()->subDays(30))
+            ->latest()
+            ->get();
+
+        // Get Beneficiaries (For now, your wallet customers. You can expand to saved banks later)
+         $beneficiaries = Customer::with('wallet')
             ->select('id', 'name', 'email')
             ->get()
             ->map(function ($customer) {
@@ -34,17 +43,69 @@ class TransferController extends Controller
                 ];
             });
 
-        // Fetch banks for Bank Transfer (Cached for 24 hrs to speed up page load)
-        $banks = cache()->remember('flw_banks', 86400, function () {
-            
-            return Payment::banks(); // You can also directly return $response->json()['data'] if you want to skip the Payment class abstraction
-        });
-
         return Inertia::render('transfers/index', [
-            'customers' => $customers,
-            'banks' => $banks,
-            'walletBalance' => $request->user()->wallet->balance ?? 0,
+            'transfers' => $recentTransfers,
+            'beneficiaries' => $beneficiaries,
+            'walletBalance' => $user->wallet->balance ?? 0,
         ]);
+    }
+
+    // 2. Handles the "Select Type" page AND the "Transfer Form" page
+    public function create(Request $request)
+    {
+        $type = $request->query('type');
+        $user = $request->user();
+
+        // If no type is selected yet, show the Selection Page
+        if (!$type) {
+            return Inertia::render('transfers/select', [
+                'walletBalance' => $user->wallet->balance ?? 0,
+            ]);
+        }
+
+        $setting = [
+            'bank' => [
+                'value' => SystemSetting::getKeyValue("site_name", 0),
+                'type' => SystemSetting::getKeyValue("bank_transfer_charge_type", 'fixed'),
+            ],
+            'wallet' => [
+                'value' => SystemSetting::getKeyValue("wallet_transfer_charge_value", 0),
+                'type' => SystemSetting::getKeyValue("wallet_transfer_charge_type", 'fixed'),
+            ],
+        ];
+        Log::info($setting);
+
+        // If 'wallet' is selected, fetch customers and go to the form
+        if ($type === 'wallet') {
+            $customers = Customer::where('business_id', $user->business_id)
+                ->select('id', 'name', 'email', 'wallet_balance')
+                ->get();
+
+            return Inertia::render('transfers/create', [
+                'type' => 'wallet',
+                'customers' => $customers,
+                'walletBalance' => $user->wallet->balance ?? 0,
+                'settings' => $setting,
+            ]);
+        }
+
+        // If 'bank' is selected, fetch banks and go to the form
+        if ($type === 'bank') {
+            $banks = cache()->remember('flw_banks', 86400, function () {
+                
+                return Payment::banks();// : [];
+            });
+
+            return Inertia::render('transfers/create', [
+                'type' => 'bank',
+                'banks' => $banks,
+                'walletBalance' => $user->wallet->balance ?? 0,
+                'settings' => $setting,
+
+            ]);
+        }
+
+        return redirect()->route('transfers.index')->with('error', 'Invalid transfer type.');
     }
 
     // 2. Resolve Bank Account Name
@@ -55,10 +116,11 @@ class TransferController extends Controller
             'account_bank' => 'required|string',
         ]);
 
-        $response = Http::withToken(env('FLW_SECRET_KEY'))
-            ->post('https://api.flutterwave.com/v3/accounts/resolve', [
+        // Log::info('Resolving bank account:', $request->only(['account_number', 'account_bank']));
+
+        $response = Payment::resolveBank([
                 'account_number' => $request->account_number,
-                'account_bank' => $request->account_bank,
+                'account_bank' => (int)$request->account_bank,
             ]);
 
         if ($response->successful()) {
@@ -152,7 +214,9 @@ class TransferController extends Controller
     {
         $user = $request->user();
         $amount = $request->amount;
-        $fee = 50; // Flat Flutterwave/Monnify transfer fee
+        $feeValue = SystemSetting::getKeyValue("bank_transfer_charge_value", 0);
+        $feeType = SystemSetting::getKeyValue("bank_transfer_charge_type", 'fixed');
+        $fee = $feeType === 'percentage' ? ($amount * ($feeValue / 100)) : $feeValue;
         $totalDeduction = $amount + $fee;
 
         DB::transaction(function () use ($user, $request, $amount, $totalDeduction, $fee) {
@@ -178,8 +242,7 @@ class TransferController extends Controller
                 'description' => "Bank Transfer to {$request->account_number} ({$request->narration})",
             ]);
 
-            $response = Http::withToken(env('FLW_SECRET_KEY'))
-                ->post('https://api.flutterwave.com/v3/transfers', [
+         $response = Payment::transfer([
                     'account_bank' => $request->account_bank,
                     'account_number' => $request->account_number,
                     'amount' => $amount,
@@ -188,7 +251,7 @@ class TransferController extends Controller
                     'reference' => $txRef,
                     'callback_url' => route('webhook.flutterwave'),
                     'debit_currency' => 'NGN'
-                ]);
+                ]);// : [];
 
             if (!$response->successful()) {
                 throw new Exception("Gateway error: " . ($response->json()['message'] ?? 'Transfer failed.'));

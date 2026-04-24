@@ -14,7 +14,8 @@ class SystemSetting extends Model
     protected $fillable = ['key', 'value', 'business_id', 'environment', 'settingable_id', 'settingable_type'];
 
     // Helper method to get setting value by key
-    public function scopeGetKeyValue($query, $key, $default=null){
-        return $query->where('key', $key)->value('value') ?? $default;
+    public static function getKeyValue($key, $default = null)
+    {
+        return static::where('key', $key)->value('value') ?? $default;
     }
 }

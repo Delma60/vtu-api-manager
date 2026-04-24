@@ -1,3 +1,4 @@
+import TopupWallet from '@/components/toup-wallet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -98,7 +99,8 @@ export default function Dashboard({
                         <Button variant="outline" className="flex-1 sm:flex-none">
                             Download Report
                         </Button>
-                        <Button className="flex-1 sm:flex-none">Top Up Wallet</Button>
+                        {/* <Button className="flex-1 sm:flex-none">Top Up Wallet</Button> */}
+                        <TopupWallet />
                     </div>
                 </header>
                 <div className="space-y-4">
@@ -266,7 +268,7 @@ export default function Dashboard({
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">
-                                    ₦{Number(metrics.wallet_balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                    ₦{Number(metrics.availableBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </div>
                                 <p className="text-muted-foreground mt-1 text-xs">Available funds for funding transactions</p>
                             </CardContent>

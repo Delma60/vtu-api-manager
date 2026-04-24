@@ -64,9 +64,13 @@ Route::post('/webhook/{uuid}', function (Request $request, string $uuid) {
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/transfer', [\App\Http\Controllers\TransferController::class, 'index'])->name('transfers.index');
+    Route::resource('transfers', \App\Http\Controllers\TransferController::class);
+    // ->name('transfers.index');
     Route::post('/transfer/resolve', [\App\Http\Controllers\TransferController::class, 'resolveAccount'])->name('transfer.resolve');
     Route::post('/transfer', [\App\Http\Controllers\TransferController::class, 'process'])->name('transfer.process');
+
+    Route::post('/wallets/fund', [\App\Http\Controllers\WalletController::class, 'fund'])->name('wallet.fund');
+    Route::get('/wallets/fund/verify', [\App\Http\Controllers\WalletController::class, 'verify'])->name('wallet.fund.verify');
 
     Route::post('/settings/billing/subscribe', [BillingController::class, 'subscribe'])->name('billing.subscribe');
     Route::get('/settings/billing/verify', [BillingController::class, 'verify'])->name('billing.verify'); // <-- New Route

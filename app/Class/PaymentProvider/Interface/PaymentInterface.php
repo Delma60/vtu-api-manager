@@ -14,4 +14,6 @@ interface PaymentInterface
     public function isHealthy(): bool;
     public function checkout(array $data): array;
     public function banks(): array;
+    public function resolveBank(array $bank);
+    public function transfer(array $data);
 }

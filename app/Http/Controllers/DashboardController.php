@@ -7,6 +7,7 @@ use App\Models\ApiLog;
 use App\Models\Provider;
 use App\Models\SystemSetting;
 use App\Models\Transaction;
+use App\Models\Wallet;
 use App\Services\MetricsService;
 use App\Services\ProviderService;
 use Carbon\Carbon;
@@ -26,6 +27,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $business = $request->user()->business;
+        $user = $request->user();
         $today = now()->toDateString();
         $range = $request->input('range', '7days');
 
@@ -43,7 +45,7 @@ class DashboardController extends Controller
 
         // 2. Wallet Balance
         // (Assuming the tenant's wallet is tied to the User model. If it's tied to the Business, change to $business->wallet->balance)
-        $walletBalance = $user->wallet->balance ?? 0;
+        $walletBalance = (Wallet::whereUserId($user->id)->first()->balance ?? 0);
 
         $metrics = [
             'totalBalance' => (float) ProviderService::sumAllBalances(),

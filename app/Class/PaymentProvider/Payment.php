@@ -12,14 +12,6 @@ class Payment
 {
 
 
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
-    {
-        //
-    }
-
 
     static function generateAccount(User $user){
         $providers = Provider::getPaymentProviders()->get();
@@ -41,5 +33,21 @@ class Payment
         $default_provider = PaymentGateway::default();
         $providerInstance = PaymentFactory::make($default_provider);
         return $providerInstance->banks();
+    }
+
+    static function resolveBank(array $bank) {
+         $default_provider = PaymentGateway::default();
+        $providerInstance = PaymentFactory::make($default_provider);
+        // return ;
+        return $providerInstance->resolveBank($bank);
+
+    }
+
+    static function transfer(array $bank) {
+         $default_provider = PaymentGateway::default();
+        $providerInstance = PaymentFactory::make($default_provider);
+        // return ;
+        return $providerInstance->transfer($bank);
+
     }
 }

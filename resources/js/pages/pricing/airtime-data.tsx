@@ -8,14 +8,16 @@ import DataTab from './components/data-tab';
 import NetworkTab from './components/network-tab';
 import NetworkTypeTab from './components/network-type-tab';
 import { DataPlan, DiscountPlan, Network, NetworkType } from '@/types';
+import AirtimePinTab from './components/airtime-pin-tab';
 
 interface Props {
     networks: Network[];
     network_types: NetworkType[];
     airtime_discounts: DiscountPlan[];
     data_plans: DataPlan[];
+    airtime_pin_discounts: DiscountPlan[];
 }
-export default function PricingManager({ networks, network_types, airtime_discounts, data_plans }: Props) {
+export default function PricingManager({ networks, network_types, airtime_discounts, data_plans, airtime_pin_discounts }: Props) {
     // get tab from url
     const url = new URL(window.location.href);
 
@@ -82,7 +84,7 @@ export default function PricingManager({ networks, network_types, airtime_discou
                             </TabsContent>
 
                             <TabsContent value="airtime_pin" className="m-0 h-min flex-1 overflow-x-auto outline-none">
-                                {/* {renderAirtimeTable('Airtime PIN Discounts', false)} */}
+                                <AirtimePinTab airtime_pin_plans={airtime_pin_discounts} />
                             </TabsContent>
 
                             {/* TAB 5 & 6: Data Plans & Data PINs */}

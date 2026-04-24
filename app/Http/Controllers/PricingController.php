@@ -18,11 +18,14 @@ class PricingController extends Controller
 
     public function createAirtimePlan()
     {
+        $dis = Discount::where('type', 'airtimePin')->with(['providers'])->get();
+        Log::info($dis);
         return Inertia::render('pricing/create-airtime-plan', [
             'networks' => Network::with('networkTypes')->get(),
             'providers' => Provider::all(),
+            'airtime_pin_discounts' => $dis,
             "plan_types" => NetworkType::airtime()->get(),
-            // 'airtime_discounts' => Discount::where('type', 'airtime')->with('network', 'plan_type')->get(),
+            // 'airtime_pin_discounts' => Discount::where('type', 'airtimePin')->with(['planType'])->get(),
         ]);
     }
 
@@ -86,6 +89,17 @@ class PricingController extends Controller
         return inertia('pricing/cable', [
             'cablePlans' => $cablePlans,
             'cableNetworks' => $cableNetworks,
+        ]);
+    }
+
+    // app/Http/Controllers/PricingController.php
+
+    public function createAirtimePinPlan()
+    {
+        return \Inertia\Inertia::render('pricing/create-airtime-pin-plan', [
+            'networks' => \App\Models\Network::with('networkTypes')->get(),
+            'providers' => \App\Models\Provider::all(),
+            'plan_types' => \App\Models\NetworkType::airtime()->get(),
         ]);
     }
 }

@@ -19,14 +19,18 @@ class StoreDiscountPlanRequest extends FormRequest
         return [
             'network_id' => 'required|exists:networks,id',
             'type' => 'required|in:airtime,exam,airtimeToCash,user_upgrade,bulksms,airtimePin,electricity,airtime2cash',
-            'plan_type' => 'required|exists:network_types,id',
+            'plan_type' => 'nullable',//'required_unless:type,airtimePin|exists:network_types,id',
             'min_amount' => 'numeric|min:0',
             'max_amount' => 'numeric|min:0',
-            'providerable' => 'required|array',
-            'providerable.provider_id' => 'required',
-            'providerable.cost_price' => 'required|numeric|min:0',
-            'providerable.margin_value' => 'required|numeric|min:0',
-            'providerable.margin_type' => 'required|in:percentage,fixed',
+            'pin_source' => 'nullable|in:api,local',
+            'pins' => 'nullable|string|required_if:pin_source,local',
+
+            // Make providerable strictly required ONLY if we are using an API provider
+            'providerable' => 'nullable|array|required_unless:pin_source,local',
+            'providerable.provider_id' => 'nullable|required_unless:pin_source,local',
+            'providerable.cost_price' => 'nullable|numeric|min:0',
+            'providerable.margin_value' => 'nullable|numeric|min:0',
+            'providerable.margin_type' => 'nullable|in:percentage,fixed',
             'providerable.server_id' => 'nullable',
         ];
     }

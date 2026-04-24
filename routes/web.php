@@ -107,10 +107,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('pricing/airtime-data', [PricingController::class, 'airtimeAndData'])->name('pricing.airtime-data');
     Route::get('pricing/airtime-plan/create', [PricingController::class, 'createAirtimePlan'])->name('pricing.airtime-plan.create');
     Route::get('pricing/airtime-plan/edit/{plan}', [PricingController::class, 'editAirtimePlan'])->name('pricing.airtime-plan.edit');
-   Route::prefix("pricing")->group(function() {
+    
+   Route::prefix("pricing")->name("pricing.")->group(function() {
        Route::resource('data-plans', DataPlanController::class);
        Route::resource('cable-plans', CablePlanController::class)->except(['show']);
        Route::post('/cable-plans/{cablePlan}/toggle-status', [CablePlanController::class, 'toggleStatus'])->name('cable-plans.toggle-status');
+    // routes/web.php
+        Route::get('pricing/airtime-pin-plan/create', [\App\Http\Controllers\PricingController::class, 'createAirtimePinPlan'])->name('airtime-pin-plan.create');
+        Route::get('pricing/airtime-pin-plan/edit/{plan}', [\App\Http\Controllers\PricingController::class, 'editAirtimePinPlan'])->name('airtime-pin-plan.edit');
    });
 
     Route::prefix('developers')->group(function() {

@@ -37,22 +37,54 @@ class DiscountController extends Controller
         $discount = Discount::create([
             'name' => $network->name,
             'type' => $validated['type'],
-            'plan_type' => $validated['plan_type'],
+            'plan_type' => $validated['plan_type'] ?? null,
             'min_amount' => $validated['min_amount'] ?? null,
             'max_amount' => $validated['max_amount'] ?? null,
             
         ]);
+
+        $pinSource = $validated['pin_source'] ?? 'api';
         
-        $pivotData = [];
-        $item = $validated['providerable'];
-        $pivotData[$item['provider_id']] = [
-            'cost_price'   => $item['cost_price'],
-            'margin_value' => $item['margin_value'],
-            'margin_type'  => $item['margin_type'],
-            'server_id'    => $item['server_id'] ?? null,
-        ];
-        $discount->providers()->attach($pivotData);
+        if ($pinSource === 'api' && isset($validated['providerable']['provider_id'])) {
+            $pivotData = [];
+            $item = $validated['providerable'];
+            $pivotData[$item['provider_id']] = [
+                'cost_price'   => $item['cost_price'] ?? 0,
+                'margin_value' => $item['margin_value'] ?? 0,
+                'margin_type'  => $item['margin_type'] ?? 'fixed',
+                'server_id'    => $item['server_id'] ?? null,
+            ];
+            $discount->providers()->attach($pivotData);
+        }
+
+        if ($pinSource === 'local' && !empty($validated['pins'])) {
+            // Split text area by newline, trim whitespace, and filter out empty lines
+            $rawPins = array_filter(array_map('trim', explode("\n", $validated['pins'])));
+            
+            $pinsToInsert = [];
+            foreach ($rawPins as $pin) {
+                if (!empty($pin)) {
+                    $pinsToInsert[] = [
+                        'discount_id' => $discount->id,
+                        'network_id' => $network->id,
+                        'pin' => $pin, // *Note: In production, consider encrypting this value*
+                        'amount' => $validated['min_amount'], // Denomination
+                        'status' => 'unused',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+            }
+
+            if (!empty($pinsToInsert)) {
+                \App\Models\AirtimePin::insert($pinsToInsert);
+            }
+        }
         // Log::info($validated);
+        if ($validated['type'] === 'airtime_pin') {
+             return redirect()->route('pricing.airtime-data', ['tab' => 'airtime_pin'])
+                              ->with("success", "Airtime PIN Plan created successfully.");
+        }
         return back()->with("success", "Discount created successfully");
     }
 

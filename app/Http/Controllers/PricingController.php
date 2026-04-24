@@ -18,12 +18,10 @@ class PricingController extends Controller
 
     public function createAirtimePlan()
     {
-        $dis = Discount::where('type', 'airtimePin')->with(['providers'])->get();
-        Log::info($dis);
         return Inertia::render('pricing/create-airtime-plan', [
             'networks' => Network::with('networkTypes')->get(),
             'providers' => Provider::all(),
-            'airtime_pin_discounts' => $dis,
+            'airtime_pin_discounts' => Discount::where('type', 'airtimePin')->with(['providers'])->get(),
             "plan_types" => NetworkType::airtime()->get(),
             // 'airtime_pin_discounts' => Discount::where('type', 'airtimePin')->with(['planType'])->get(),
         ]);
@@ -75,6 +73,8 @@ class PricingController extends Controller
                 $q->whereIn('type', ['airtime', 'data']);
             })->get(),
             'data_plans' => DataPlan::all(),
+            'airtime_pin_discounts' => Discount::where('type', 'airtimePin')->with(['providers'])->get(),
+            'data_pin_discounts' => \App\Models\Discount::whereIn('type', ['data_pin', 'dataPin'])->with(['providers'])->get(),
         ]);
     }
 
@@ -100,6 +100,14 @@ class PricingController extends Controller
             'networks' => \App\Models\Network::with('networkTypes')->get(),
             'providers' => \App\Models\Provider::all(),
             'plan_types' => \App\Models\NetworkType::airtime()->get(),
+        ]);
+    }
+
+    public function createDataPinPlan()
+    {
+        return \Inertia\Inertia::render('pricing/create-data-pin-plan', [
+            'networks' => \App\Models\Network::with('networkTypes')->get(),
+            'providers' => \App\Models\Provider::all(),
         ]);
     }
 }

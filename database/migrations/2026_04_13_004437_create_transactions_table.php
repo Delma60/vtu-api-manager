@@ -17,7 +17,7 @@ return new class extends Migration
 
             $table->enum('transaction_type', [
                 'airtime_recharge', 'data_subscription', 'cable_subscription', 'electric_bill', 'exam',
-                'betting_funding', 'airtime_pin', 'data_pin', 'wallet_funding', 'manual_funding', 'bulksms', 'payment_link', 'bank_transfer'
+                'betting_funding', 'airtimePin', 'dataPin', 'wallet_funding', 'manual_funding', 'bulksms', 'payment_link', 'bank_transfer'
             ]);
 
             $table->string('provider')->nullable();

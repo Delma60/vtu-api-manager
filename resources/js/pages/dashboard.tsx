@@ -77,11 +77,9 @@ export default function Dashboard({
         );
     };
 
-    const { props } = usePage();
     const apiPercentage =
         metrics.monthlyApiUsage.limit > 0 ? Math.min(100, (metrics.monthlyApiUsage.usage / metrics.monthlyApiUsage.limit) * 100) : 0;
 
-    // resources/js/pages/dashboard.tsx
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

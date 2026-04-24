@@ -82,7 +82,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/settings', [SystemSettingController::class, "updateSingle"])
         ->name('settings.update.single');
 
-    
+
     Route::resource('transactions', TransactionController::class);
     Route::resource('payment-links', PaymentLinkController::class);
     Route::resource('wallets', WalletController::class);
@@ -107,14 +107,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('pricing/airtime-data', [PricingController::class, 'airtimeAndData'])->name('pricing.airtime-data');
     Route::get('pricing/airtime-plan/create', [PricingController::class, 'createAirtimePlan'])->name('pricing.airtime-plan.create');
     Route::get('pricing/airtime-plan/edit/{plan}', [PricingController::class, 'editAirtimePlan'])->name('pricing.airtime-plan.edit');
-    
+
    Route::prefix("pricing")->name("pricing.")->group(function() {
        Route::resource('data-plans', DataPlanController::class);
        Route::resource('cable-plans', CablePlanController::class)->except(['show']);
        Route::post('/cable-plans/{cablePlan}/toggle-status', [CablePlanController::class, 'toggleStatus'])->name('cable-plans.toggle-status');
     // routes/web.php
-        Route::get('pricing/airtime-pin-plan/create', [\App\Http\Controllers\PricingController::class, 'createAirtimePinPlan'])->name('airtime-pin-plan.create');
-        Route::get('pricing/airtime-pin-plan/edit/{plan}', [\App\Http\Controllers\PricingController::class, 'editAirtimePinPlan'])->name('airtime-pin-plan.edit');
+        // routes/web.php
+        Route::get('data-pin-plan/create', [\App\Http\Controllers\PricingController::class, 'createDataPinPlan'])->name('data-pin-plan.create');
+        Route::get('data-pin-plan/edit/{plan}', [\App\Http\Controllers\PricingController::class, 'editDataPinPlan'])->name('data-pin-plan.edit');
+        Route::get('airtime-pin-plan/create', [\App\Http\Controllers\PricingController::class, 'createAirtimePinPlan'])->name('airtime-pin-plan.create');
+        Route::get('airtime-pin-plan/edit/{plan}', [\App\Http\Controllers\PricingController::class, 'editAirtimePinPlan'])->name('airtime-pin-plan.edit');
    });
 
     Route::prefix('developers')->group(function() {
@@ -145,43 +148,23 @@ Route::middleware(['auth'])->group(function () {
 
         // Route::resource('settings', SystemSettingController::class)->only(['index', 'store', 'destroy']);
         });
-        
+
 
 });
 
 // routes/web.php
-Route::prefix('docs')->group(function () {
-    Route::get('/introduction', function () {
-        return Inertia::render('docs/introduction');
-    })->name('docs.introduction');
-
-    Route::get('/quick-start', function () {
-        return Inertia::render('docs/quick-start');
-    })->name('docs.quick-start');
-
-    Route::get('/airtime', function () {
-        return Inertia::render('docs/airtime');
-    })->name('docs.airtime');
-    // Add more doc routes here as you build them
-    // authentication
-    Route::get('/authentication', function () {
-        return Inertia::render('docs/authentication');
-    })->name('docs.authentication');
-
-    Route::get('/api-keys', function () {
-        return Inertia::render('docs/api-keys');
-    })->name('docs.api-keys');
-
-    // data
-    Route::get('/data', function () {
-        return Inertia::render('docs/data');
-    })->name('docs.data');
-
-    Route::get('/data-plans', function () {
-        return Inertia::render('docs/data-plans');
-    })->name('docs.data-plans');
-    //
-
+Route::prefix('docs')
+->name("docs.")
+->controller(DocumentationController::class)->group(function () {
+    Route::redirect('/', '/docs/introduction');
+    Route::get('/introduction', 'show')->name('introduction');
+    Route::get('/quick-start', 'quickStart')->name('quick-start');
+    Route::get('/airtime', 'airtime')->name('airtime');
+    Route::get('/authentication', 'authentication')->name('authentication');
+    Route::get('/api-keys', 'apiKey')->name('api-keys');
+    Route::get('/data', 'data')->name('data');
+    Route::get('/data-plans', 'dataPlans')->name('data-plans');
+    Route::get('/pins', 'pins')->name('pins');
 });
 
 Route::middleware(['auth', SuperAdminMiddleware::class])

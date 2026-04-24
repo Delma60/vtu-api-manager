@@ -14,7 +14,7 @@ interface DataTabProps {
 
 const DataTab = ({ data_plans }: DataTabProps) => {
     const updateService = (id: string | number, field: string, value: string | number | boolean) => {
-        router.patch(route('data-plans.update', id), { [field]: value });
+        router.patch(route('pricing.data-plans.update', id), { [field]: value });
     };
     return (
         <div className="flex flex-1 flex-col overflow-x-auto">
@@ -23,7 +23,7 @@ const DataTab = ({ data_plans }: DataTabProps) => {
                     <h2 className="text-base font-semibold">Direct Data Plans</h2>
                     <p className="text-muted-foreground mt-1 text-xs">Configure your cost price and your selling price.</p>
                 </div>
-                <Link href={route('data-plans.create')}>
+                <Link href={route('pricing.data-plans.create')}>
                     <Button size="sm" className="gap-1.5">
                         <Plus className="h-4 w-4" /> Add New Plan
                     </Button>

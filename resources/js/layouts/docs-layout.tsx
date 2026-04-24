@@ -1,6 +1,6 @@
 import DocsTableOfContents from '@/components/docs-table-of-contents';
 import { Head, Link } from '@inertiajs/react';
-import { BookOpen, Code2, Menu, Settings, Shield, Terminal, X, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Code2, KeyRound, Menu, Settings, Shield, Terminal, X, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface DocsLayoutProps {
@@ -40,6 +40,7 @@ export default function DocsLayout({ children, title, currentPath, nextPage, pre
                 { title: 'Data Bundles', path: '/docs/data-plans', icon: Terminal },
                 { title: 'Cable TV', path: '/docs/cable', icon: Terminal },
                 { title: 'Utilities', path: '/docs/utilities', icon: Terminal },
+                { title: 'PINs & Vouchers', url: route("docs.pins"), icon: KeyRound },
             ],
         },
     ];
@@ -152,6 +153,30 @@ export default function DocsLayout({ children, title, currentPath, nextPage, pre
 
                             {/* Navigation Footer */}
                             {/* ... (Keep your existing footer code here) ... */}
+                            <div className="mt-12 flex items-center justify-between border-t border-slate-800/30 pt-6">
+                                {prevPage ? (
+                                    <Link
+                                        href={prevPage.path}
+                                        className="flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-slate-200"
+                                    >
+                                        <ArrowLeft className="h-4 w-4" />
+                                        {prevPage.title}
+                                    </Link>
+                                ) : (
+                                    <div />
+                                )}
+                                {nextPageLink ? (
+                                    <Link
+                                        href={nextPageLink.path}
+                                        className="flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-slate-200"
+                                    >
+                                        {nextPageLink.title}
+                                        <ArrowRight className="h-4 w-4" />
+                                    </Link>
+                                ) : (
+                                    <div />
+                                )}
+                            </div>
                         </div>
                     </div>
                 </main>

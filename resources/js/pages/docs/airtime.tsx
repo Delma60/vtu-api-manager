@@ -7,7 +7,7 @@ import Callout from '@/components/docs-callout';
 
 export default function AirtimeDocs() {
     return (
-        <DocsLayout currentPath='' title="Airtime Top-up">
+        <DocsLayout currentPath='/docs/airtime' title="Airtime Top-up">
             <div className="max-w-4xl">
                 <h1 className="text-3xl font-bold text-white mb-4">Airtime Top-up</h1>
                 <p className="text-slate-400 text-lg mb-8 leading-relaxed">

@@ -18,7 +18,8 @@ class StoreDiscountPlanRequest extends FormRequest
     {
         return [
             'network_id' => 'required|exists:networks,id',
-            'type' => 'required|in:airtime,exam,airtimeToCash,user_upgrade,bulksms,airtimePin,electricity,airtime2cash',
+            'type' => 'required|in:airtime,exam,airtimeToCash,user_upgrade,bulksms,airtimePin,dataPin,electricity,airtime2cash',
+            'name' => 'nullable|string|max:255',
             'plan_type' => 'nullable',//'required_unless:type,airtimePin|exists:network_types,id',
             'min_amount' => 'numeric|min:0',
             'max_amount' => 'numeric|min:0',

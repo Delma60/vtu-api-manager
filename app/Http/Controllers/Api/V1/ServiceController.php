@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AirtimePinRequest;
 use App\Http\Requests\AirtimeServiceRequest;
 use App\Http\Requests\CablePurchaseRequest;
+use App\Http\Requests\DataPinRequest;
 use App\Http\Requests\DataPurchaseRequest;
 use App\Models\Discount;
 use App\Models\Network;
@@ -157,6 +159,70 @@ class ServiceController extends Controller
             code: $response['code'] ?? 200,
             meta: $response
         );
+    }
+
+
+    public function airtimePin(AirtimePinRequest $request)
+    {
+        $payload = $request->validated();
+        $user = $request->user(); // Assuming api.key middleware sets the user/business
+
+        try {
+            // Dispatch to VtuManager using 'airtime_pin' type
+            $response = $this->vtuManager->process('airtime_pin', $user, $payload);
+
+            $status = ($response['status'] === 'success') ? 200 : 400;
+            return response()->json($response, $status);
+
+        } catch (\Exception $e) {
+            Log::error('Airtime PIN API Error: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while processing the request.',
+                'error' => env('APP_DEBUG') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Process Data PIN Generation
+     */
+    public function dataPin(DataPinRequest $request)
+    {
+        $payload = $request->validated();
+        $user = $request->user();
+
+        // The PinProcessor requires 'amount', but the user payload only sent 'name'. 
+        // We need to look up the exact plan cost before passing it to the processor so it knows how much to deduct.
+        $discountPlan = \App\Models\Discount::where('name', $payload['name'])
+            ->whereIn('type', ['data_pin', 'dataPin'])
+            ->first();
+
+        if (!$discountPlan) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The specified Data PIN plan could not be found.'
+            ], 404);
+        }
+
+        // Attach the required denomination amount to the payload for the Processor
+        $payload['amount'] = $discountPlan->min_amount;
+
+        try {
+            // Dispatch to VtuManager using 'data_pin' type
+            $response = $this->vtuManager->process('data_pin', $user, $payload);
+
+            $status = ($response['status'] === 'success') ? 200 : 400;
+            return response()->json($response, $status);
+
+        } catch (\Exception $e) {
+            Log::error('Data PIN API Error: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while processing the request.',
+                'error' => env('APP_DEBUG') ? $e->getMessage() : null
+            ], 500);
+        }
     }
 
 }

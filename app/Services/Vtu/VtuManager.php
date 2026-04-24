@@ -14,6 +14,11 @@ class VtuManager
         return app(DataProcessor::class);
     }
 
+    public function pin(): PinProcessor
+    {   
+        return app(PinProcessor::class);
+    }
+
     public function cable(): CableProcessor
     {
         return app(CableProcessor::class);

@@ -35,7 +35,7 @@ class DiscountController extends Controller
         $validated = $request->validated();
         $network = Network::find($validated['network_id']);
         $discount = Discount::create([
-            'name' => $network->name,
+            'name' => !empty($validated['name']) ? $validated['name'] : $network->name,
             'type' => $validated['type'],
             'plan_type' => $validated['plan_type'] ?? null,
             'min_amount' => $validated['min_amount'] ?? null,

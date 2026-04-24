@@ -3,34 +3,31 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { DiscountPlan } from '@/types';
 import { Link, router } from '@inertiajs/react';
 import { Database, Plus, Server } from 'lucide-react';
 
-interface AirtimePinTabProps {
-    airtime_pin_discounts: DiscountPlan[];
+interface DataPinTabProps {
+    data_pin_plans: any[];
 }
 
-const AirtimePinTab = ({ airtime_pin_discounts }: AirtimePinTabProps) => {
+const DataPinTab = ({ data_pin_plans = [] }: DataPinTabProps) => {
     const updateDiscount = (id: string | number, field: string, value: string | number | boolean) => {
         router.patch(route('discounts.update', id), { [field]: value });
     };
-
-    console.log("PIN Plans Data:", airtime_pin_discounts);
 
     return (
         <Card className="h-min flex-1 overflow-x-auto rounded-none border-0 bg-transparent shadow-none">
             <div className="border-border bg-muted/50 flex items-center justify-between border-b p-5">
                 <div>
-                    <h2 className="text-base font-semibold">Airtime PIN Plans</h2>
+                    <h2 className="text-base font-semibold">Data PIN Plans</h2>
                     <p className="text-muted-foreground mt-1 text-xs">
-                        Manage fixed-denomination plans for Airtime PINs (Vouchers) fetched from APIs or Local Uploads.
+                        Manage Data Vouchers/PINs (e.g., 1.5GB PINs) fetched from APIs or Local Uploads.
                     </p>
                 </div>
-                <Link href={route('pricing.airtime-pin-plan.create')}>
+                <Link href={route('pricing.data-pin-plan.create')}>
                     <Button size="sm">
                         <Plus className="mr-2 h-4 w-4" />
-                        <span>Create Airtime PIN Plan</span>
+                        <span>Create Data PIN Plan</span>
                     </Button>
                 </Link>
             </div>
@@ -38,33 +35,30 @@ const AirtimePinTab = ({ airtime_pin_discounts }: AirtimePinTabProps) => {
                 <table className="w-full text-left text-sm">
                     <thead className="border-border bg-muted/50 text-muted-foreground border-b text-[11px] font-semibold uppercase">
                         <tr>
-                            <th className="px-6 py-3">Network</th>
-                            <th className="px-6 py-3">Denomination</th>
+                            <th className="px-6 py-3">Plan Name / Volume</th>
+                            <th className="px-6 py-3">Amount</th>
                             <th className="px-6 py-3">Source Route</th>
                             <th className="px-6 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-border divide-y">
-                        {airtime_pin_discounts?.length === 0 && (
+                        {data_pin_plans.length === 0 && (
                             <tr>
                                 <td colSpan={4} className="text-muted-foreground px-6 py-8 text-center">
-                                    No Airtime PIN plans configured yet.
+                                    No Data PIN plans configured yet.
                                 </td>
                             </tr>
                         )}
-                        {airtime_pin_discounts?.map((net: any) => {
-                            // Check if the plan is attached to a 3rd party API Provider
+                        {data_pin_plans.map((net: any) => {
                             const isApiRouted = net.providers && net.providers.length > 0;
 
                             return (
                                 <tr key={net.id} className={net.is_active ? 'hover:bg-muted/30' : 'opacity-50'}>
-                                    <td className="px-6 py-5">
-                                        <span className="border-border bg-muted text-muted-foreground rounded-md border px-2 py-1 font-mono text-xs font-bold uppercase tracking-wider">
-                                            {net.name}
-                                        </span>
+                                    <td className="flex flex-col gap-1 px-6 py-5">
+                                        <span className="text-base font-semibold">{net.name}</span>
                                     </td>
                                     <td className="px-6 py-5">
-                                        <span className="text-base font-semibold">₦{net.min_amount}</span>
+                                        <span className="text-sm font-semibold">₦{net.min_amount}</span>
                                     </td>
                                     <td className="px-6 py-5">
                                         {isApiRouted ? (
@@ -81,19 +75,12 @@ const AirtimePinTab = ({ airtime_pin_discounts }: AirtimePinTabProps) => {
                                     </td>
                                     <td className="px-6 py-5 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => router.get(route('pricing.airtime-pin-plan.edit', net.id))}
-                                                className="text-muted-foreground hover:text-primary text-xs font-medium transition-colors"
-                                            >
-                                                Edit
-                                            </Button>
                                             <Separator orientation="vertical" className="mr-2 h-5" />
                                             <div className="flex items-center gap-2 pr-1">
                                                 <DeleteButton
                                                     className="text-destructive hover:text-destructive/80 m-0 bg-transparent p-0 text-sm"
                                                     route={route('discounts.destroy', net.id)}
-                                                    resourceName={'PIN Plan'}
+                                                    resourceName={'Data PIN Plan'}
                                                     buttonSize="sm"
                                                     variant="link"
                                                 >
@@ -119,4 +106,4 @@ const AirtimePinTab = ({ airtime_pin_discounts }: AirtimePinTabProps) => {
     );
 };
 
-export default AirtimePinTab;
+export default DataPinTab;

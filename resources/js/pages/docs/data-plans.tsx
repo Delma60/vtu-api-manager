@@ -6,7 +6,7 @@ import DocsLayout from '@/layouts/docs-layout';
 
 export default function DataPlansDocs() {
     return (
-        <DocsLayout title="Fetch Data Plans">
+        <DocsLayout currentPath='/dcos/data-plans' title="Fetch Data Plans">
             <div className="max-w-4xl">
                 <h1 className="mb-4 text-3xl font-bold text-white">Fetch Data Plans</h1>
                 <p className="mb-8 text-lg leading-relaxed text-slate-400">

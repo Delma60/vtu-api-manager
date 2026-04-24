@@ -7,7 +7,7 @@ import Callout from '@/components/docs-callout';
 
 export default function DataDocs() {
     return (
-        <DocsLayout title="Data Top-up">
+        <DocsLayout currentPath='/docs/data' title="Data Top-up">
             <div className="max-w-4xl">
                 <h1 className="text-3xl font-bold text-white mb-4">Data Top-up</h1>
                 <p className="text-slate-400 text-lg mb-8 leading-relaxed">

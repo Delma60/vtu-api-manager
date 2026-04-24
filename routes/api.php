@@ -22,6 +22,10 @@ Route::post('/debug', function (Request $request) {
 
 Route::prefix('v1')->middleware(['api_key_auth', 'api.monthly_limit'])->group(function () {
     Route::post('/airtime', [ServiceController::class, 'airtime']);
+
+    Route::post('/airtime-pin', [ServiceController::class, 'airtimePin']);
+    Route::post('/data-pin', [ServiceController::class, 'dataPin']);
+    
     Route::prefix("data")->group(function(){
         Route::post('', [ServiceController::class, 'data'])->name('data.purchase');
         Route::get('/plans', [ServiceController::class, 'dataPlans'])->name('data.plans');

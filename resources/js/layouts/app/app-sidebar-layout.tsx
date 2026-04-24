@@ -10,11 +10,11 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }: { child
         <>
         <AppShell variant="sidebar">
             <FlashMessages />
-            {/* <AppSidebar /> */}
-            {/* <AppContent variant="sidebar"> */}
-                {/* <AppSidebarHeader breadcrumbs={breadcrumbs} /> */}
+            <AppSidebar />
+            <AppContent variant="sidebar">
+                <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 {children}
-            {/* </AppContent> */}
+            </AppContent>
         </AppShell>
         </>
     );

@@ -130,7 +130,6 @@ class PaymentLinkController extends Controller
 
     public function paymentSuccess(Request $request, Transaction $transaction, TransactionService $transactionService)
     {
-        Log::info("Payment...");
         $data = $request->validate([
             "paymentLink" => ['nullable', 'string'],
             'type' => ['in:payment_link,subscription'],

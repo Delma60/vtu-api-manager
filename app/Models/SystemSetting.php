@@ -14,8 +14,14 @@ class SystemSetting extends Model
     protected $fillable = ['key', 'value', 'business_id', 'environment', 'settingable_id', 'settingable_type'];
 
     // Helper method to get setting value by key
-    public static function getKeyValue($key, $default = null)
+    public static function getKeyValue($key, $default = null, ?array $options = [  ])
     {
-        return static::where('key', $key)->value('value') ?? $default;
+        if(isset($options['ignore-scopes']) && $options['ignore-scopes'] === true)
+            return static::withoutGlobalScopes()
+        ->where('key', $key)
+        ->value('value') ?? $default;
+        else
+            return static::where('key', $key)->value('value') ?? $default;
+            // return static::where('key', $key)->value('value') ?? $default;
     }
 }

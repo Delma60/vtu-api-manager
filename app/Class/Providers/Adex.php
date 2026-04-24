@@ -42,7 +42,6 @@ class Adex extends ProviderAbstract
         try {
             $res = $this->login();
              $cleaned = preg_replace('/[^\d.]/', '', $res['balance']);
-            //  Log::info(["data" => $cleaned]);
             return (float) $cleaned;
         } catch (\Throwable $th) {
             // Log the exception if needed: error_log($th->getMessage());
@@ -71,7 +70,6 @@ class Adex extends ProviderAbstract
                     return $data ?? [];
                 } catch (\Throwable $th) {
                     //throw $th;
-                    // Log::info(["login" => $th->getMessage()]);
 
                     return [];
                 }
@@ -141,7 +139,6 @@ class Adex extends ProviderAbstract
                 ];
             case 'cable':
                 $cablePlan = CablePlan::with("providers")->find($payload['cable_plan']);
-                Log::info($payload);
                 $cableName = $payload['cable_network'] ?? $payload['cable'] ?? '';
                 return [
                     'cable' => $this->cableNetworkIDs[$cableName],
@@ -374,8 +371,7 @@ class Adex extends ProviderAbstract
         } elseif ($service == 'electricity') {
             $disco = Discount::getElectricity($payload['disco']);
             $discoId = $disco->{str_replace(" ", "_", $this->provider->name)} ?? null;
-            // Log::info($disco);
-            // Log::info($discoId);
+            
             $meterType = $options['meter_type'] ?? 'prepaid';
             if (!$discoId) {
             return [
@@ -397,8 +393,6 @@ class Adex extends ProviderAbstract
         try {
 
             $response = Http::get($url);
-            // Log::info(["response: " => $response]);
-
             if ($response->ok() && $response->json('status') === 'success') {
                 return [
                     'status' => 'success',
@@ -414,7 +408,6 @@ class Adex extends ProviderAbstract
             ];
             // $this->fail([], $response->json('message') ?? 'Verification failed.');
         } catch (\Exception $e) {
-            // Log::info(["ERROR: " => $e]);
             return [
                 'status' => 'error',
                 'message' => $e->getMessage(),
@@ -504,7 +497,6 @@ class Adex extends ProviderAbstract
         }
 
         $messageLower = strtolower($rawMessage);
-        Log::info($messageLower);
 
         return match (true) {
             // 1. Adex Wallet Exhausted (Note: comma acts as an OR operator in match)

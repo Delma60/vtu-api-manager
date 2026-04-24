@@ -23,7 +23,6 @@ class UpdatePackageRequest extends FormRequest
      */
     public function rules(): array
     {
-        Log::info($this->all());
         return [
             //
             'name' => 'required|string|max:255',

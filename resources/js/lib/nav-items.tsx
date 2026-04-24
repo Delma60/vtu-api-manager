@@ -134,11 +134,11 @@ export const navItems = ({
                     label: 'Customers',
                     routeName: 'customers.index',
                 },
-                {
-                    icon: <Wallet className="h-5 w-5 shrink-0" />,
-                    label: 'Wallets & Balances',
-                    routeName: 'wallets.index',
-                },
+                // {
+                //     icon: <Wallet className="h-5 w-5 shrink-0" />,
+                //     label: 'Wallets & Balances',
+                //     routeName: 'wallets.index',
+                // },
                 
             ],
         },

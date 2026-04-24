@@ -65,15 +65,14 @@ class TransferController extends Controller
 
         $setting = [
             'bank' => [
-                'value' => SystemSetting::getKeyValue("site_name", 0),
-                'type' => SystemSetting::getKeyValue("bank_transfer_charge_type", 'fixed'),
+                'value' => SystemSetting::getKeyValue("bank_transfer_charge_value", 0, [ 'ignore-scopes' => true ]),
+                'type' => SystemSetting::getKeyValue("bank_transfer_charge_type", 'fixed', [ 'ignore-scopes' => true ]),
             ],
             'wallet' => [
-                'value' => SystemSetting::getKeyValue("wallet_transfer_charge_value", 0),
-                'type' => SystemSetting::getKeyValue("wallet_transfer_charge_type", 'fixed'),
+                'value' => SystemSetting::getKeyValue("wallet_transfer_charge_value", 0, [ 'ignore-scopes' => true ]),
+                'type' => SystemSetting::getKeyValue("wallet_transfer_charge_type", 'fixed', [ 'ignore-scopes' => true ]),
             ],
         ];
-        Log::info($setting);
 
         // If 'wallet' is selected, fetch customers and go to the form
         if ($type === 'wallet') {
@@ -116,7 +115,6 @@ class TransferController extends Controller
             'account_bank' => 'required|string',
         ]);
 
-        // Log::info('Resolving bank account:', $request->only(['account_number', 'account_bank']));
 
         $response = Payment::resolveBank([
                 'account_number' => $request->account_number,
@@ -237,7 +235,7 @@ class TransferController extends Controller
                 'transaction_reference' => $txRef,
                 'amount' => $amount,
                 'fee' => $fee,
-                'type' => 'payout',
+                'transaction_type' => 'bank_transfer',
                 'status' => 'pending', 
                 'description' => "Bank Transfer to {$request->account_number} ({$request->narration})",
             ]);
@@ -249,9 +247,10 @@ class TransferController extends Controller
                     'narration' => $request->narration ?? 'Wallet Withdrawal',
                     'currency' => 'NGN',
                     'reference' => $txRef,
-                    'callback_url' => route('webhook.flutterwave'),
+                    'callback_url' => route('wallet.fund.verify'),
                     'debit_currency' => 'NGN'
-                ]);// : [];
+                ]);
+                Log::info($response->json());
 
             if (!$response->successful()) {
                 throw new Exception("Gateway error: " . ($response->json()['message'] ?? 'Transfer failed.'));

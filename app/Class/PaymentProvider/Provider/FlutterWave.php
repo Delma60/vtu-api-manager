@@ -26,8 +26,7 @@ class FlutterWave extends PaymentBase
          $fw = Http::withHeaders($this->getHeaders())
             ->get($this->provider->base_url . "/balances/NGN")
             ->json();
-
-            // Log::info($fw);
+            
         return $fw['status'] === "success" ? $fw['data']["available_balance"]: null;
     }
 

@@ -82,7 +82,6 @@ class RegisteredUserController extends Controller
 
         }catch(\Exception $e){
             DB::rollback();
-            Log::info($e);
             return back()->withErrors(['error' => 'Registration failed. Please try again.']);
         }
     }

@@ -51,7 +51,6 @@ class HandleInertiaRequests extends Middleware
                 ->toArray();
         });
 
-        Log::info($globalSettings);
 
         return array_merge(parent::share($request), [
             ...parent::share($request),

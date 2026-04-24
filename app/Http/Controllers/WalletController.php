@@ -43,7 +43,7 @@ class WalletController extends Controller
         $virtualAccounts = $user->virtualAccounts; 
 
         // Fetch only funding events (deposits, bonuses, manual credits)
-        $fundingHistory = FundingTransaction::where('wallet_id', $wallet->id)
+        $fundingHistory = FundingTransaction::where('transaction_type', ['wallet_funding', 'bonus_credit', 'manual_credit'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -176,7 +176,7 @@ class WalletController extends Controller
 
                 // 2. Get or create wallet for user
                 $wallet = Wallet::firstOrCreate(
-                    ['user_id' => $request->user()->id],
+                    ['user_id' => $request->user()->id, 'environment' => $request->user()->business->mode],
                     [
                         'balance' => 0,
                         'reserved' => 0,
@@ -195,7 +195,7 @@ class WalletController extends Controller
             return redirect()->route('dashboard')->with('success', "Successfully added ₦" . number_format($transaction->amount) . " to your wallet!");
 
         } catch (\Exception $e) {
-            Log::info($e);
+            Log::error("Wallet funding verification failed: " . $e->getMessage());
             return redirect()->route('dashboard')->with('error', 'An internal error occurred while funding your wallet.');
         }
 

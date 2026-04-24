@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Class\Payment\PaymentFactory;
+use App\Class\PaymentProvider\PaymentFactory;
 use App\Models\Package;
 use App\Models\PaymentGateway;
 use App\Models\User;

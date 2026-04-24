@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Class\Payment;
+namespace App\Class\PaymentProvider;
 
-use App\Class\Payment\Interface\PaymentInterface;
+use App\Class\PaymentProvider\Interface\PaymentInterface;
 use App\Models\Bank;
 use App\Models\PaymentGateway;
 use App\Models\Provider;

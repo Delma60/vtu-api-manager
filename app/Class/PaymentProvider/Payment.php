@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Class\Payment;
+namespace App\Class\PaymentProvider;
 
+use App\Class\PaymentProvider\PaymentFactory;
+use App\Models\PaymentGateway;
 use App\Models\Provider;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class Payment
 {
@@ -33,5 +34,12 @@ class Payment
         $vendorInstance->webhook($request);
         return response()->noContent();
 
+    }
+
+    // banks
+    static function banks(){
+        $default_provider = PaymentGateway::default();
+        $providerInstance = PaymentFactory::make($default_provider);
+        return $providerInstance->banks();
     }
 }

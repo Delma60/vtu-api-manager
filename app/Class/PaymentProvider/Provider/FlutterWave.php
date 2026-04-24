@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Class\Payment\Provider;
+namespace App\Class\PaymentProvider\Provider;
 
-use App\Class\Payment\PaymentBase;
+use App\Class\PaymentProvider\PaymentBase;
 use App\Models\General;
 use App\Models\Transaction;
 use App\Models\User;
@@ -203,8 +203,15 @@ class FlutterWave extends PaymentBase
 
         // Handle failure
         throw new \Exception($response->json('message'));
-
        
+    }
+
+    function banks():array 
+    {
+        $response = Http::withHeaders($this->getHeaders())
+                ->get($this->provider->base_url . '/banks/NG')
+                ->json('data');
+        return $response;
     }
 
 }

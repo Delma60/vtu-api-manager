@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Class\Payment;
+namespace App\Class\PaymentProvider;
 
-use App\Class\Payment\Provider\FlutterWave;
-use App\Class\Payment\Provider\Monnify;
-use App\Class\Payment\Provider\PaymentPoint;
+use App\Class\PaymentProvider\Provider\FlutterWave;
+use App\Class\PaymentProvider\Provider\Monnify;
+use App\Class\PaymentProvider\Provider\PaymentPoint;
 use App\Models\PaymentGateway;
 // use App\Models\Provider;
 use Illuminate\Support\Facades\Log;
@@ -24,5 +24,10 @@ class PaymentFactory
             "monnify" => new Monnify($provider),
             "payment point" => new PaymentPoint($provider),
         };
+    }
+
+
+    static function banks(){
+        Payment::defualt();
     }
 }

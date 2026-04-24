@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Class\Payment\Interface;
+namespace App\Class\PaymentProvider\Interface;
 
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -13,4 +13,5 @@ interface PaymentInterface
     public function webhook(Request $request): void;
     public function isHealthy(): bool;
     public function checkout(array $data): array;
+    public function banks(): array;
 }

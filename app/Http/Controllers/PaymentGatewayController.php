@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Class\Payment\PaymentFactory;
+use App\Class\PaymentProvider\PaymentFactory;
 use App\Models\PaymentGateway;
 use App\Http\Requests\StorePaymentGatewayRequest;
 use App\Http\Requests\UpdatePaymentGatewayRequest;

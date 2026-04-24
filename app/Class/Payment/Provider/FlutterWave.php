@@ -178,7 +178,7 @@ class FlutterWave extends PaymentBase
                 'tx_ref'       => $data['transaction_reference'],
                  'amount'       => $data['amount'] ?? 0.00,
                 'currency'     => 'NGN',
-                'redirect_url' => route('pay.success', ['paymentLink' => $data['paymentLink'], 'tx_ref' => $data['transaction_reference']]),
+                'redirect_url' => $data['redirect_url'] ?? null,
                 'customer'     => [
                     'email'       => $data['customer_email'],
                     'name'        => $data['customer_name'],

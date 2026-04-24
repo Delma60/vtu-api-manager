@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\Cache;
 class PaymentGateway extends Model
 {
     use HasFactory;
-
-    protected $connection = "mysql";
+    
 
     /**
      * The attributes that are mass assignable.

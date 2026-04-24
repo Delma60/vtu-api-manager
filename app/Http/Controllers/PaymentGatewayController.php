@@ -133,7 +133,8 @@ class PaymentGatewayController extends Controller
 
             $data['paymentLink'] = $paymentLink->id;
             $data['transaction_reference'] = $reference;
-            // ;
+            $data['redirect_url'] = route('pay.success', ['paymentLink' => $data['paymentLink'], 'tx_ref' => $data['transaction_reference']]);
+
             $provider = PaymentFactory::make($default_provider)->checkout($data);
             return Inertia::location($provider['checkout_url']);
         } catch (\Throwable $e) {

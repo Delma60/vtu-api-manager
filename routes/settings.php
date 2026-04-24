@@ -16,8 +16,7 @@ Route::middleware('auth')->name("settings.")->group(function () {
     Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/settings/billing', [BillingController::class, 'index'])->name('billing.index');
-    Route::post('/settings/billing/subscribe', [BillingController::class, 'subscribe'])->name('billing.subscribe');
-
+    
 
     Route::get('settings/password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::put('settings/password', [PasswordController::class, 'update'])->name('password.update');

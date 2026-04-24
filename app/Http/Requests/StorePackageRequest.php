@@ -29,10 +29,19 @@ class StorePackageRequest extends FormRequest
             'billing_cycle' => 'required|in:monthly,yearly,lifetime',
             'features' => 'nullable|array',
             'is_active' => 'boolean',
-            'settings' => 'nullable|array', // <-- Add validation for settings
+            'is_default' => 'boolean',
+            'is_featured' => 'boolean',
+
+            'settings' => 'nullable|array',
             'settings.api_access' => 'boolean',
             'settings.custom_domain' => 'boolean',
             'settings.staff_limit' => 'numeric|min:1',
+            'settings.monthly_api_limit' => 'numeric|min:10',
+            'settings.bot_access' => 'boolean',
+            'settings.webhook_access' => 'boolean',
+            'settings.custom_pricing' => 'boolean',
+            'settings.priority_support' => 'boolean',
+            'settings.white_label' => 'boolean',
         ];
     }
 }

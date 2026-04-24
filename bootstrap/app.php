@@ -34,6 +34,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             "api-auth" => ApiKeyAuth::class,
+            'package.feature' => \App\Http\Middleware\EnsurePackageFeature::class,
+            'api.monthly_limit' => \App\Http\Middleware\MonthlyApiRateLimiter::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

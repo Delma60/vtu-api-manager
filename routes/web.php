@@ -30,6 +30,7 @@ use App\Http\Controllers\SystemBotController;
 use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Middleware\SuperAdminMiddleware;
+use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -38,11 +39,19 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+Route::get('/pricing', function () {
+    $packages = Package::where('is_active', true)->orderBy('price', 'asc')->get();
+
+    return Inertia::render('pricing', [
+        'packages' => $packages,
+    ]);
+})->name('pricing');
+
 // Payment link pay.show
 Route::get('pay/{paymentLink}', [PaymentLinkController::class, 'show'])->name('pay.show');
 Route::post('pay/{paymentLink}', [PaymentGatewayController::class, 'checkout'])->name('pay.submit');
 // failed/successful payment
-Route::get('pay/{paymentLink}/success', [PaymentLinkController::class, 'paymentSuccess'])->name('pay.success');
+Route::get('pay/{transaction}/success', [PaymentLinkController::class, 'paymentSuccess'])->name('pay.success');
 Route::get('pay/{paymentLink}/failed', [PaymentLinkController::class, 'paymentFailed'])->name('pay.failed');
 
 Route::post('/webhook/telegram/sk_super_secret_string', [TelegramController::class, 'handleWebhook']);
@@ -54,6 +63,10 @@ Route::post('/webhook/{uuid}', function (Request $request, string $uuid) {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::post('/settings/billing/subscribe', [BillingController::class, 'subscribe'])->name('billing.subscribe');
+    Route::get('/settings/billing/verify', [BillingController::class, 'verify'])->name('billing.verify'); // <-- New Route
+    // Route::get('/settings/billing/verify', [\App\Http\Controllers\BillingController::class, 'verify'])->name('billing.verify');
 
     Route::get('toggle-mode', [DashboardController::class, 'toggleMode'])->name('toggle-mode');
 

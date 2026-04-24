@@ -20,7 +20,7 @@ Route::post('/debug', function (Request $request) {
     ]);
 });
 
-Route::prefix('v1')->middleware('api-auth')->group(function () {
+Route::prefix('v1')->middleware(['api_key_auth', 'api.monthly_limit'])->group(function () {
     Route::post('/airtime', [ServiceController::class, 'airtime']);
     Route::prefix("data")->group(function(){
         Route::post('', [ServiceController::class, 'data'])->name('data.purchase');

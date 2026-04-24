@@ -1,20 +1,11 @@
-import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import HeadingSmall from '@/components/heading-small';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Users } from 'lucide-react';
-
-interface Package {
-    id: number;
-    name: string;
-    description: string;
-    price: number;
-    billing_cycle: string;
-    is_active: boolean;
-    businesses_count: number;
-}
+import AppLayout from '@/layouts/app-layout';
+import { Package } from '@/types';
+import { Head, Link, router } from '@inertiajs/react';
+import { Edit, Plus, Trash2, Users } from 'lucide-react';
 
 export default function PackageIndex({ packages }: { packages: Package[] }) {
     const handleDelete = (id: number) => {
@@ -27,55 +18,64 @@ export default function PackageIndex({ packages }: { packages: Package[] }) {
         <AppLayout breadcrumbs={[{ title: 'Manage Packages', href: '/admin/packages' }]}>
             <Head title="Manage Packages" />
 
-            <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-                <div className="flex justify-between items-center">
+            <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+                <div className="flex items-center justify-between">
                     <HeadingSmall title="Subscription Packages" description="Manage the plans available to your tenants." />
                     <Link href={route('super-admin.packages.create')}>
-                        <Button><Plus className="h-4 w-4 mr-2" /> Add Package</Button>
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4" /> Add Package
+                        </Button>
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                     {packages.map((pkg) => (
                         <Card key={pkg.id} className={!pkg.is_active ? 'opacity-60 grayscale' : ''}>
                             <CardHeader>
-                                <div className="flex justify-between items-start">
+                                <div className="flex items-start justify-between">
                                     <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                                    <Badge variant={pkg.is_active ? 'default' : 'secondary'}>
-                                        {pkg.is_active ? 'Active' : 'Draft'}
-                                    </Badge>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <Badge className={pkg.is_active ? 'bg-primary' : 'bg-muted'}>{pkg.is_active ? 'Active' : 'Draft'}</Badge>
+                                        {pkg.is_default && (
+                                            <Badge className={pkg.is_default ? 'bg-blue-400' : 'bg-muted'}>
+                                                {pkg.is_default ? 'Default' : 'Not Default'}
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </div>
                                 <CardDescription>{pkg.description}</CardDescription>
                                 <div className="mt-4 text-2xl font-bold">
-                                    ₦{Number(pkg.price).toLocaleString()} 
-                                    <span className="text-sm font-normal text-muted-foreground">/{pkg.billing_cycle}</span>
+                                    ₦{Number(pkg.price).toLocaleString()}
+                                    <span className="text-muted-foreground text-sm font-normal">/{pkg.billing_cycle}</span>
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">
+                                <div className="text-muted-foreground bg-muted/50 flex items-center gap-2 rounded-md p-2 text-sm">
                                     <Users className="h-4 w-4" />
                                     <span>{pkg.businesses_count} active subscriptions</span>
                                 </div>
                             </CardContent>
                             <CardFooter className="flex gap-2">
                                 <Link href={route('super-admin.packages.edit', pkg.id)} className="flex-1">
-                                    <Button variant="outline" className="w-full"><Edit className="h-4 w-4 mr-2" /> Edit</Button>
+                                    <Button variant="outline" className="w-full">
+                                        <Edit className="mr-2 h-4 w-4" /> Edit
+                                    </Button>
                                 </Link>
-                                <Button 
-                                    variant="destructive" 
+                                <Button
+                                    variant="destructive"
                                     size="icon"
                                     onClick={() => handleDelete(pkg.id)}
                                     disabled={pkg.businesses_count > 0}
-                                    title={pkg.businesses_count > 0 ? "Cannot delete plan with active users" : "Delete"}
+                                    title={pkg.businesses_count > 0 ? 'Cannot delete plan with active users' : 'Delete'}
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
                             </CardFooter>
                         </Card>
                     ))}
-                    
+
                     {packages.length === 0 && (
-                        <div className="col-span-full py-12 text-center text-muted-foreground border-2 border-dashed rounded-xl">
+                        <div className="text-muted-foreground col-span-full rounded-xl border-2 border-dashed py-12 text-center">
                             No packages found. Create one to get started.
                         </div>
                     )}

@@ -9,6 +9,7 @@ use App\Models\CablePlan;
 use App\Models\DataPlan;
 use App\Models\Network;
 use App\Models\NetworkType;
+use App\Models\Package;
 use App\Models\Transaction;
 use App\Notifications\PaymentSuccessful;
 use App\Services\TransactionService;
@@ -16,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Symfony\Component\Console\Helper\TreeNode;
 
 class PaymentLinkController extends Controller
 {
@@ -126,19 +128,20 @@ class PaymentLinkController extends Controller
     
     }
 
-    public function paymentSuccess(Request $request, PaymentLink $paymentLink, TransactionService $transactionService)
+    public function paymentSuccess(Request $request, Transaction $transaction, TransactionService $transactionService)
     {
+        Log::info("Payment...");
         $data = $request->validate([
-            "tx_ref" => ['nullable', 'string'],
+            "paymentLink" => ['nullable', 'string'],
+            'type' => ['in:payment_link,subscription'],
+            'package_id' =>'sometimes|exists:packages,id',
         ]);
         // Handle successful payment callback
-        $paymentLink->load("business.owner");
+        
         // The callback may provide tx_ref as a route segment or query parameter.
-        $tx_ref = $data['tx_ref'] ?? $request->query('tx_ref');
-        $transaction  = Transaction::where('transaction_reference', $tx_ref)->first();
 
         if (!$transaction) {
-            Log::warning("Transaction not found for tx_ref: {$tx_ref}");
+            Log::warning("Transaction not found for tx_ref: {$transaction->transaction_reference}");
             return abort(404, 'Transaction not found');
         }
 
@@ -146,14 +149,30 @@ class PaymentLinkController extends Controller
             'message' => 'Payment completed successfully via callback.',
         ]);
 
-        $paymentLink->updateStatus("successful");
+        $link = $data['paymentLink'] ?? $request->query('paymentLink');
+        if($link){
+            $paymentLink  = PaymentLink::where('transaction_reference', $link)->first();
+            $paymentLink->load("business.owner");
+            $paymentLink->updateStatus("successful");
+        }
+        
 
-        // notify owner
-        $paymentLink->business->owner->notify(new PaymentSuccessful($paymentLink));
+        $business = $transaction->business;
+        
+        if($data['type'] === 'subscription'){
+            $package = Package::find($data['package_id']);
+            $business->update([
+                'package_id' => $package->id,
+                'subscription_ends_at' => now()->addMonth(), // or year based on package
+                'subscription_status' => 'active',
+            ]);
+        }
+            // notify owner
+        $business->owner->notify(new PaymentSuccessful($paymentLink));
 
         return Inertia::render('pay/success', [
-            'paymentLink' => $paymentLink,
-            'tx_ref' => $tx_ref,
+            'paymentLink' => $paymentLink || null,
+            'tx_ref' => $transaction->transaction_reference,
         ]);
     }
 

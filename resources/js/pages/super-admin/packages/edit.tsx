@@ -92,7 +92,7 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label>Price (₦)</Label>
-                                <Input type="number" step="0.01" value={data.price} onChange={(e) => setData('price', parseFloat(e.target.value) || 0)} required />
+                                <Input type="number" step="0.01" value={data.price} onChange={(e) => setData('price', e.target.value)} required />
                                 <InputError message={errors.price} />
                             </div>
                             <div className="grid gap-2">
@@ -249,6 +249,7 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                         </div>
                         <Switch checked={data.is_active} onCheckedChange={(checked) => setData('is_active', checked)} />
                     </div>
+
                     <div className="flex items-center justify-between border-t pt-6">
                         <div className="space-y-0.5">
                             <Label className="text-base">Default Package</Label>
@@ -257,7 +258,7 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                         <Switch checked={data.is_default} onCheckedChange={(checked) => setData('is_default', checked)} />
                     </div>
 
-                    <div className="flex items-center justify-between border-t pt-6">
+                     <div className="flex items-center justify-between border-t pt-6">
                         <div className="space-y-0.5">
                             <Label className="text-base">Featured Package</Label>
                             <p className="text-muted-foreground text-xs">Highlight this package as featured.</p>

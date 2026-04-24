@@ -16,7 +16,8 @@ class Package extends Model
         'features',
         'is_active',
         'is_default',
-        'settings'
+        'settings',
+        'is_featured'
         
     ];
 
@@ -25,7 +26,8 @@ class Package extends Model
         'is_active' => 'boolean',
         'price' => 'decimal:2',
         'settings' => 'array',
-        'is_default' => 'boolean'
+        'is_default' => 'boolean',
+        'is_featured' => 'boolean',
     ];
 
     public function businesses(): HasMany

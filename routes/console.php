@@ -39,3 +39,6 @@ Artisan::command('migrate:both {--fresh} {--seed} {--force}', function () {
         }
     }
 })->purpose('Run migrations on both mysql and mysql_test connections');
+
+// * * * * * cd /path-to-your-vtu-project && php artisan schedule:run >> /dev/null 2>&1
+Schedule::command('subscriptions:deactivate-expired')->dailyAt('00:05');

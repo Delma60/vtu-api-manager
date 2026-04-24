@@ -11,6 +11,7 @@ use App\Services\MetricsService;
 use App\Services\ProviderService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -35,6 +36,15 @@ class DashboardController extends Controller
             default => '7days'
         };
 
+        $currentMonth = now()->format('Y-m');
+        $cacheKey = "api_usage_{$business->id}_{$currentMonth}";
+        $apiUsage = Cache::get($cacheKey, 0);
+        $apiLimit = $business->package?->settings['monthly_api_limit'] ?? 0;
+
+        // 2. Wallet Balance
+        // (Assuming the tenant's wallet is tied to the User model. If it's tied to the Business, change to $business->wallet->balance)
+        $walletBalance = $user->wallet->balance ?? 0;
+
         $metrics = [
             'totalBalance' => (float) ProviderService::sumAllBalances(),
             'todayVolume' => (int) ApiLog::where('business_id', $business->id)
@@ -50,6 +60,12 @@ class DashboardController extends Controller
             'hourlyVolume' => (int) ApiLog::where('business_id', $business->id)
                 ->where('created_at', '>=', now()->startOfHour())
                 ->count(),
+            'availableBalance' => (float) $walletBalance,
+            'monthlyApiUsage' => [
+                'usage' => (int) $apiUsage,
+                'limit' => (int) $apiLimit,
+            ],
+            
         ];
 
         $providerHealth = Provider::orderBy('name')
@@ -71,8 +87,10 @@ class DashboardController extends Controller
             
 
             // Build volume chart data with aggregation by interval
-            $volumeChartData = $this->getAggregatedVolumeData($business->id, $range);
+        $volumeChartData = $this->getAggregatedVolumeData($business->id, $range);
 
+
+        
         return Inertia::render('dashboard', [
             'metrics' => $metrics,
             'providerHealth' => $providerHealth,

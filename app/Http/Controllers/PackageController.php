@@ -60,6 +60,9 @@ class PackageController extends Controller
     public function edit(Package $package)
     {
         //
+        return Inertia::render('super-admin/packages/edit', [
+            'package' => $package,
+        ]);
     }
 
     /**
@@ -68,6 +71,12 @@ class PackageController extends Controller
     public function update(UpdatePackageRequest $request, Package $package)
     {
         //
+        $validated = $request->validated();
+        $validated['slug'] = Str::slug($validated['name']);
+
+        $package->update($validated);
+
+        return redirect()->route('super-admin.packages.index')->with('success', 'Package updated successfully.');
     }
 
     /**

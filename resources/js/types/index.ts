@@ -143,3 +143,18 @@ export interface   DiscountPlan {
     max_amount: number;
     is_active: boolean;
 }
+
+
+export interface Package {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    billing_cycle: string;
+    is_active: boolean;
+    businesses_count: number;
+    is_default: boolean;
+    is_featured: boolean;
+    features?:string[]
+    settings?:Record<string, string>
+}

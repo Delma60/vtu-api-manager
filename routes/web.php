@@ -164,6 +164,9 @@ Route::prefix('docs')
     Route::get('/api-keys', 'apiKey')->name('api-keys');
     Route::get('/data', 'data')->name('data');
     Route::get('/data-plans', 'dataPlans')->name('data-plans');
+    Route::get('/cable', 'cable')->name('cable');
+    Route::get('/cable-plans', 'cablePlans')->name('cable-plans');
+    // Route::get('/utilities', 'utilities')->name('utilities');
     Route::get('/pins', 'pins')->name('pins');
 });
 

@@ -56,6 +56,21 @@ class DocumentationController extends Controller
             'currentSlug' => 'data-plans',
         ]);
     }
+
+    public function cable(){
+        return \Inertia\Inertia::render('docs/cable', [
+            'title' => 'Cable',
+            'currentSlug' => 'cable',
+        ]);
+    }
+    public function cablePlans(){
+        return \Inertia\Inertia::render('docs/cable-plans', [
+            'title' => 'Cable Plans',
+            'currentSlug' => 'cable-plans',
+        ]);
+    }
+
+
     public function authentication(){
         return \Inertia\Inertia::render('docs/authentication', [
             'title' => 'Authentication',

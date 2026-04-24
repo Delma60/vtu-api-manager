@@ -39,6 +39,7 @@ export default function DocsLayout({ children, title, currentPath, nextPage, pre
                 { title: 'Buy Data', path: '/docs/data', icon: Terminal },
                 { title: 'Data Bundles', path: '/docs/data-plans', icon: Terminal },
                 { title: 'Cable TV', path: '/docs/cable', icon: Terminal },
+                { title: 'Cable Bundles', path: route('docs.cable-plans'), icon: Terminal },
                 { title: 'Utilities', path: '/docs/utilities', icon: Terminal },
                 { title: 'PINs & Vouchers', url: route("docs.pins"), icon: KeyRound },
             ],

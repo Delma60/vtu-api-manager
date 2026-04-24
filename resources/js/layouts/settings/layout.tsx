@@ -12,6 +12,7 @@ const sidebarNavItems = [
     { title: "Appearance", href: route('settings.appearance.edit'), icon: Layout },
     // New ones:
     { title: "Business Profile", href: route('settings.business.edit'), icon: Building },
+    { title: "Billing", href: route('settings.billing.index'), icon: Building },
     { title: "Notifications", href: route('settings.notifications.edit'), icon: Bell },
     // { title: "Team Management", href: route('settings.team.index'), icon: Users },
 ];

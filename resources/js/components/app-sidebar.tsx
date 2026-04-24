@@ -32,6 +32,10 @@ export function SidebarComponent() {
     const [expandedItems, setExpandedItems] = useState<string[]>(['pricing']);
     const { state, isMobile, setOpenMobile } = useSidebar();
 
+    // FIXED: The sidebar is "expanded" if it's expanded on desktop OR if we are on a mobile device
+    // (since mobile uses a full-width Sheet slide-out)
+    const isExpanded = state === 'expanded' || isMobile;
+
     const handleChange = (routeName: string) => {
         setActiveTab(routeName);
         router.visit(route(routeName));
@@ -63,11 +67,8 @@ export function SidebarComponent() {
             <SidebarGroup className="border-sidebar-border border-b">
                 <div className="flex items-center justify-center gap-2 px-2 py-4">
                     <div className="from-primary to-chart-4 shadow-primary/30 h-6 w-6 shrink-0 rounded bg-gradient-to-br shadow-lg" />
-                    {state === 'expanded' && (
-                        <span className="text-sidebar-foreground text-lg font-bold tracking-tight whitespace-nowrap">NexusVTU</span>
-                    )}
+                    {isExpanded && <span className="text-sidebar-foreground text-lg font-bold tracking-tight whitespace-nowrap">NexusVTU</span>}
                 </div>
-                {/* <div className="rounded-lg bg-red-500 p-4 text-white shadow-md">{props.auth.user.user_type ?? 'none'}</div> */}
                 {/* Environment Toggle */}
                 {userType !== 'admin' && (
                     <div className="px-2 py-3">
@@ -79,12 +80,12 @@ export function SidebarComponent() {
                             <div
                                 className={`flex-1 rounded-md py-1 text-center transition-all ${!isLiveMode ? 'bg-secondary text-secondary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                             >
-                                {state === 'expanded' ? 'Test' : 'T'}
+                                {isExpanded ? 'Test' : 'T'}
                             </div>
                             <div
                                 className={`flex-1 rounded-md py-1 text-center transition-all ${isLiveMode ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 shadow-sm dark:text-emerald-400' : 'text-muted-foreground hover:text-foreground'}`}
                             >
-                                {state === 'expanded' ? 'Live' : 'L'}
+                                {isExpanded ? 'Live' : 'L'}
                             </div>
                         </button>
                     </div>
@@ -95,7 +96,7 @@ export function SidebarComponent() {
             <SidebarContent className="no-scrollbar flex-1 overflow-y-auto">
                 {_navItems.map((section) => (
                     <SidebarGroup key={section.section}>
-                        {state === 'expanded' && (
+                        {isExpanded && (
                             <SidebarGroupLabel className="text-sidebar-foreground/60 px-2 text-xs font-semibold tracking-wider uppercase">
                                 {section.section}
                             </SidebarGroupLabel>
@@ -123,12 +124,12 @@ export function SidebarComponent() {
                                                                 ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
                                                                 : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                                                         }`}
-                                                        title={state === 'collapsed' ? item.label : undefined}
+                                                        title={!isExpanded ? item.label : undefined}
                                                     >
                                                         <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             {item.icon}
                                                         </svg>
-                                                        {state === 'expanded' && (
+                                                        {isExpanded && (
                                                             <>
                                                                 <span className="flex-1">{item.label}</span>
                                                                 <ChevronRight className="h-4 w-4 shrink-0 opacity-50 transition-transform group-data-[state=open]:rotate-90" />
@@ -136,7 +137,7 @@ export function SidebarComponent() {
                                                         )}
                                                     </SidebarMenuButton>
                                                 </CollapsibleTrigger>
-                                                {expandedItems.includes(item.label) && state === 'expanded' && (
+                                                {expandedItems.includes(item.label) && isExpanded && (
                                                     <CollapsibleContent>
                                                         <SidebarMenu className="border-sidebar-border mt-1 ml-3 space-y-1 border-l pl-3">
                                                             {item.children.map((child) => (
@@ -168,12 +169,12 @@ export function SidebarComponent() {
                                                         ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
                                                         : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                                                 }`}
-                                                title={state === 'collapsed' ? item.label : undefined}
+                                                title={!isExpanded ? item.label : undefined}
                                             >
                                                 <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     {item.icon}
                                                 </svg>
-                                                {state === 'expanded' && (
+                                                {isExpanded && (
                                                     <>
                                                         <span className="flex-1">{item.label}</span>
                                                         {'badge' in item && item.badge && (

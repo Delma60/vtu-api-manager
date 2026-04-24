@@ -1,7 +1,7 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Head, useForm, usePage, router } from '@inertiajs/react';
-import { FormEventHandler, useRef, useState } from 'react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { FormEventHandler, useEffect, useRef, useState } from 'react';
 
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -26,6 +26,13 @@ export default function BusinessProfile() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [logoPreview, setLogoPreview] = useState<string | null>(business?.logo_url || null);
 
+    // Watch for prop changes from the server to update the logo
+    useEffect(() => {
+        if (business?.logo_url) {
+            setLogoPreview(business.logo_url);
+        }
+    }, [business?.logo_url]);
+
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
         name: business?.name || '',
         support_email: business?.support_email || '',
@@ -47,17 +54,30 @@ export default function BusinessProfile() {
         setLogoPreview(objectUrl);
 
         // Upload to server immediately
-        router.post(route('business.logo.update'), {
-            _method: 'post',
-            logo: file,
-        }, {
-            preserveScroll: true,
-            forceFormData: true,
-            onSuccess: () => {
-                // Clear the file input so they can upload the same file again if needed
-                if (fileInputRef.current) fileInputRef.current.value = '';
-            }
-        });
+        router.post(
+            route('business.logo.update'),
+            {
+                logo: file,
+            },
+            {
+                preserveScroll: true,
+                forceFormData: true,
+                onSuccess: () => {
+                    // Clear the file input so they can upload the same file again if needed
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+
+                    // Cleanup the object URL to prevent memory leaks
+                    URL.revokeObjectURL(objectUrl);
+                },
+                onError: () => {
+                    // Revert to original logo if upload fails
+                    setLogoPreview(business?.logo_url || null);
+
+                    // Cleanup the failed preview object URL
+                    URL.revokeObjectURL(objectUrl);
+                },
+            },
+        );
     };
 
     return (
@@ -66,35 +86,26 @@ export default function BusinessProfile() {
 
             <SettingsLayout>
                 <div className="space-y-10">
-                    
                     {/* LOGO SECTION */}
                     <div className="space-y-6">
                         <HeadingSmall title="Brand Identity" description="Update your company logo." />
-                        
+
                         <div className="flex items-center gap-6">
-                            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-lg border-2 border-dashed bg-muted overflow-hidden">
+                            <div className="bg-muted flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed">
                                 {logoPreview ? (
                                     <img src={logoPreview} alt="Business Logo" className="h-full w-full object-contain p-2" />
                                 ) : (
-                                    <Building2 className="h-8 w-8 text-muted-foreground opacity-50" />
+                                    <Building2 className="text-muted-foreground h-8 w-8 opacity-50" />
                                 )}
                             </div>
-                            
+
                             <div>
-                                <input 
-                                    type="file" 
-                                    className="hidden" 
-                                    ref={fileInputRef} 
-                                    onChange={handleLogoUpload} 
-                                    accept="image/*"
-                                />
+                                <input type="file" className="hidden" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" />
                                 <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
                                     <UploadCloud className="mr-2 h-4 w-4" />
                                     Upload New Logo
                                 </Button>
-                                <p className="mt-2 text-xs text-muted-foreground">
-                                    Recommended: Square image, max 2MB (PNG, JPG, SVG).
-                                </p>
+                                <p className="text-muted-foreground mt-2 text-xs">Recommended: Square image, max 2MB (PNG, JPG, SVG).</p>
                             </div>
                         </div>
                     </div>
@@ -118,7 +129,7 @@ export default function BusinessProfile() {
                                 <InputError message={errors.name} />
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                 <div className="grid gap-2">
                                     <Label htmlFor="support_email">Support Email</Label>
                                     <Input
@@ -171,7 +182,6 @@ export default function BusinessProfile() {
                             </div>
                         </form>
                     </div>
-                    
                 </div>
             </SettingsLayout>
         </AppLayout>

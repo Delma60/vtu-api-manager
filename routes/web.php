@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\ApiLogController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\Bot\TelegramController;
 use App\Http\Controllers\CablePlanController;
 use App\Http\Controllers\CustomerController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\NetworkTypeController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\PaymentLinkController;
 use App\Http\Controllers\ServiceControlController;
@@ -28,6 +30,7 @@ use App\Http\Controllers\SystemBotController;
 use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Middleware\SuperAdminMiddleware;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -58,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/settings', [SystemSettingController::class, "updateSingle"])
         ->name('settings.update.single');
 
+    
     Route::resource('transactions', TransactionController::class);
     Route::resource('payment-links', PaymentLinkController::class);
     Route::resource('wallets', WalletController::class);
@@ -169,6 +173,8 @@ Route::middleware(['auth', SuperAdminMiddleware::class])
     // 2. The standard resource route generates index, show, create, etc.
         Route::resource('businesses', BusinessController::class);
         Route::resource('users', SuperAdminUserController::class);
+        Route::resource('packages', PackageController::class);
+
         Route::post('users/{user}/toggle', [SuperAdminUserController::class, 'toggleStatus'])->name('users.toggle');
         // Route::resource('global-providers', GlobalProviderController::class);
         Route::post('payment-gateways/{paymentGateway}/toggle', [PaymentGatewayController::class, 'toggleStatus'])

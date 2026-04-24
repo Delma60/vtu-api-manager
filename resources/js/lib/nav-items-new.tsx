@@ -139,17 +139,16 @@ export const navItems = ({
                     label: 'Wallets & Balances',
                     routeName: 'wallets.index',
                 },
-                
-            ],
-        },
-        {
-            section: 'Payment',
-            items: [
                 {
                     icon: <Zap className="h-5 w-5 shrink-0" />,
                     label: 'Payment Links',
                     routeName: 'payment-links.index',
                 },
+            ],
+        },
+        {
+            section: 'Transfers',
+            items: [
                 {
                     icon: <ArrowUpDown className="h-5 w-5 shrink-0" />,
                     label: 'Transfer',

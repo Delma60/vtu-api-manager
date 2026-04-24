@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class Business extends Model
 {
     protected $fillable = [
@@ -22,6 +24,9 @@ class Business extends Model
         'telegram_is_active',
         'telegram_welcome_message',
         'mode',
+        'package_id',             
+        'subscription_ends_at',   
+        'subscription_status',
     ];
     protected $appends = ['logo_url'];
 
@@ -44,5 +49,10 @@ class Business extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(Package::class);
     }
 }

@@ -57,7 +57,7 @@ class HandleInertiaRequests extends Middleware
             'is_super_admin' => $request->user() ? $request->user()->isSuperAdmin() : false,
             'is_business_admin' => $request->user() ? $request->user()->isBusinessAdmin() : false,
             'general' => [
-                "app_name" => SystemSetting::getKeyValue("site_name", 'Laravel', [ 'ignore-scopes' => true ]),
+                "app_name" => SystemSetting::getKeyValue("site_name", '', [ 'ignore-scopes' => true ]),
                 // "app_name" SystemSettings
                 'app_url' => env('APP_URL', 'http://localhost'),
                 "site_logo" => SystemSetting::getKeyValue("site_logo", null, ['ignore-scopes' => true]) 

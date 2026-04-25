@@ -1,4 +1,5 @@
 // resources/js/pages/auth/register.tsx
+import AppLogo from '@/components/app-logo';
 import InputError from '@/components/input-error';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -37,7 +38,8 @@ export default function RegisterPage(props) {
 
             <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="mb-8 flex items-center justify-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30"></div>
+                    <AppLogo />
+                    {/* <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30"></div> */}
                     <span className="text-2xl font-bold tracking-tight text-white">{appName}</span>
                 </div>
                 <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-white">Create your workspace</h2>

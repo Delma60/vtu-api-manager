@@ -29,7 +29,6 @@ export function AppSidebarHeader() {
     const [error, setError] = useState<string | null>(null);
     const [searchActive, setSearchActive] = useState(false);
     const searchRef = useRef<HTMLDivElement | null>(null);
-    console.log(appName);
 
     // Keyboard shortcut (⌘K or Ctrl+K) to open search
     useEffect(() => {

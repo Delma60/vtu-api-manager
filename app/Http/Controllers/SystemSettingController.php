@@ -17,6 +17,7 @@ class SystemSettingController extends Controller
 
         $defaultSettings = [
             'site_name' => SystemSetting::getKeyValue('site_name', 'NexusVTU'),
+            'site_description' => SystemSetting::getKeyValue('site_description', 'NexusVTU'),
             'support_email' => SystemSetting::getKeyValue('support_email', ''),
             'support_phone' => SystemSetting::getKeyValue('support_phone', ''),
             'company_address' => SystemSetting::getKeyValue('company_address', ''),

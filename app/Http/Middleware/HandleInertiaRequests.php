@@ -76,6 +76,7 @@ class HandleInertiaRequests extends Middleware
     public function rootView(Request $request): string
     {
         view()->share('site_name', SystemSetting::getKeyValue("site_name", 'Laravel', [ 'ignore-scopes' => true ]));
+        view()->share('site_description', SystemSetting::getKeyValue("site_description", 'Laravel', [ 'ignore-scopes' => true ]));
     
     return 'app';
 

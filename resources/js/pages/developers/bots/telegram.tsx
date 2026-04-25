@@ -38,14 +38,18 @@ export default function MerchantTelegramBot({
 }: Props) {
     const [copied, setCopied] = useState(false);
 
-    // The deep link that routes customers to this specific merchant
-    const botLink = `https://t.me/${globalBotUsername}?start=${merchantCode}`;
-
     const { data, setData, put, processing, recentlySuccessful } = useForm({
         is_active: isActive,
         welcome_message: welcomeMessage || '',
         allowed_services: allowedServices,
     });
+
+    const enabledServicesCount = data.allowed_services.length;
+    const botLink = `https://t.me/${globalBotUsername}?start=${merchantCode}`;
+    const statusLabel = data.is_active ? 'Open for orders' : 'Closed';
+    const statusClasses = data.is_active
+        ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-700/60 dark:bg-emerald-900/20 dark:text-emerald-300'
+        : 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-700/60 dark:bg-rose-900/20 dark:text-rose-300';
 
     const handleCopy = () => {
         navigator.clipboard.writeText(botLink);
@@ -83,62 +87,79 @@ export default function MerchantTelegramBot({
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                     {/* Shareable Link & Stats Column */}
                     <div className="space-y-6 md:col-span-1">
-                        <Card className="border-none bg-indigo-600 text-white shadow-lg">
+                        <Card className="overflow-hidden border-none bg-indigo-600 text-white shadow-xl shadow-indigo-500/10">
                             <CardHeader>
                                 <CardTitle className="text-lg text-white">Your Bot Link</CardTitle>
                                 <CardDescription className="text-indigo-200">
-                                    Share this link on your WhatsApp status, Facebook, or Instagram.
+                                    Share this link on WhatsApp, Instagram, or your website to let customers order from Telegram.
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex items-center justify-center rounded-lg bg-indigo-900/50 p-3">
-                                    {/* SVG QR Code Placeholder - In production, you can generate a real QR here */}
-                                    <svg className="h-32 w-32 text-white opacity-80" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M3 3h8v8H3zm2 2v4h4V5zM13 3h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm13-2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm-4-4h2v2h-2zm0-4h2v2h-2z" />
-                                    </svg>
+                            <CardContent className="space-y-5">
+                                <div className="rounded-3xl bg-indigo-900/20 p-4 text-sm leading-6 ring-1 ring-white/10">
+                                    <p className="font-semibold text-white">Instant access for customers</p>
+                                    <p className="mt-2 text-indigo-100/85">
+                                        Use the Telegram deep link below or share the QR code so customers can start shopping immediately.
+                                    </p>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs tracking-wider text-indigo-200 uppercase">Direct Link</Label>
-                                    <div className="flex gap-2">
+
+                                <div className="grid gap-3">
+                                    <div className="rounded-2xl border border-indigo-500/30 bg-indigo-900/30 p-4 text-sm text-indigo-100">
+                                        <p className="font-medium text-indigo-100">Bot status</p>
+                                        <p className="mt-1 text-base font-semibold">{statusLabel}</p>
+                                    </div>
+                                    <div className="flex flex-col gap-3">
                                         <Input
                                             readOnly
                                             value={botLink}
-                                            className="border-indigo-500 bg-indigo-700/50 text-xs text-white focus-visible:ring-0"
+                                            className="border-indigo-400/70 bg-indigo-700/40 text-sm text-white focus-visible:ring-0"
                                         />
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <Button
+                                                onClick={handleCopy}
+                                                variant="secondary"
+                                                className="min-w-[10rem] bg-white font-bold text-indigo-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-indigo-300 dark:hover:bg-slate-800"
+                                            >
+                                                {copied ? 'Copied!' : 'Copy link'}
+                                            </Button>
+                                            <a
+                                                href={botLink}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex items-center rounded-full border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
+                                            >
+                                                Open in Telegram
+                                            </a>
+                                        </div>
+                                        <p className="text-xs text-indigo-200/90">
+                                            Bot username: <span className="font-semibold">@{globalBotUsername}</span>
+                                        </p>
                                     </div>
                                 </div>
                             </CardContent>
-                            <CardFooter>
-                                <Button
-                                    onClick={handleCopy}
-                                    variant="secondary"
-                                    className="w-full bg-white font-bold text-indigo-600 hover:bg-slate-100 dark:bg-slate-900 dark:text-indigo-300 dark:hover:bg-slate-800"
-                                >
-                                    {copied ? 'Copied!' : 'Copy Link'}
-                                </Button>
-                            </CardFooter>
                         </Card>
 
                         {/* Bot Performance / Sales Card */}
-                        <Card>
+                        <Card className="overflow-hidden">
                             <CardHeader className="pb-3">
                                 <CardTitle className="text-lg">Bot Performance</CardTitle>
                                 <CardDescription>Sales generated via Telegram</CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    <div className="rounded-lg border border-emerald-100 bg-emerald-50/50 p-4 dark:border-emerald-900/30 dark:bg-emerald-900/10">
-                                        <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Total Revenue</p>
-                                        <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                            ₦{totalSalesAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                        </p>
-                                    </div>
-                                    <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800/50 dark:bg-slate-800/20">
-                                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Transactions Completed</p>
-                                        <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                            {totalSalesCount.toLocaleString()}
-                                        </p>
-                                    </div>
+                            <CardContent className="grid gap-4 sm:grid-cols-3">
+                                <div className={`rounded-3xl border p-4 ${statusClasses}`}>
+                                    <p className="text-sm font-medium">Bot status</p>
+                                    <p className="mt-2 text-2xl font-semibold tracking-tight">{statusLabel}</p>
+                                </div>
+                                <div className="rounded-3xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-800/50 dark:bg-slate-900/15">
+                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Revenue</p>
+                                    <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                        ₦{totalSalesAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                    </p>
+                                </div>
+                                <div className="rounded-3xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-800/50 dark:bg-slate-900/15">
+                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Transactions Completed</p>
+                                    <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                        {totalSalesCount.toLocaleString()}
+                                    </p>
                                 </div>
                             </CardContent>
                         </Card>
@@ -151,6 +172,14 @@ export default function MerchantTelegramBot({
                                 <CardTitle>Bot Preferences</CardTitle>
                                 <CardDescription>Customize how the bot interacts with your customers.</CardDescription>
                             </CardHeader>
+                            <div className="flex flex-wrap gap-3 border-b border-slate-200/80 bg-slate-50/70 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/40">
+                                <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">
+                                    {enabledServicesCount} services active
+                                </div>
+                                <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">
+                                    {data.welcome_message ? 'Welcome message ready' : 'No welcome message yet'}
+                                </div>
+                            </div>
                             <form onSubmit={handleSave}>
                                 <CardContent className="space-y-8">
                                     {/* Enable/Disable Toggle */}

@@ -4,19 +4,19 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ $site_name }}</title>
-        <meta name="title" inertia content="{{ $site_name }}">
-        <meta name="description" inertia content="{{  $site_description }}">
+        <title inertia>{{ $site_name ?? config('app.name', 'VTU API Manager') }}</title>
+        <meta name="title" inertia content="{{ $site_name ?? config('app.name', 'VTU API Manager') }}">
+        <meta name="description" inertia content="{{ $site_description ?? config('app.description', 'VTU API Manager') }}">
 
         <meta property="og:type" content="website">
         <meta property="og:url" content="{{ url()->current() }}">
-        <meta property="og:title" inertia content="{{ $site_name }}">
-        <meta property="og:description" inertia content="{{ $site_description }}">
+        <meta property="og:title" inertia content="{{ $site_name ?? config('app.name', 'VTU API Manager') }}">
+        <meta property="og:description" inertia content="{{ $site_description ?? config('app.description', 'VTU API Manager') }}">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
-        <link rel="icon" type="image/svg+xml" href="{{ $site_logo }}">
+        <link rel="icon" type="image/svg+xml" href="{{ $site_logo ?? asset('favicon.svg') }}">
 
         @routes
         @viteReactRefresh

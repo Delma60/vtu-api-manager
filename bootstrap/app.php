@@ -11,6 +11,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -50,25 +51,20 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (ModelNotFoundException $e, Request $request) {
-            if ($request->is('api/*') || $request->wantsJson()) {
-                // Get the model name (e.g., App\Models\Network -> Network)
-                $model = class_basename($e->getModel());
-                return response()->json([
-                    'status'  => false,
-                    'message' => "The requested {$model} was not found.",
-                ], 404);
-            }
-        });
-
-        // 3. Handle Bad Routes / Endpoints
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-            if ($request->is('api/*') || $request->wantsJson()) {
+            
+            // If it's an API request (e.g. from mobile app or external server), return JSON
+            if ($request->wantsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'status'  => false,
-                    'message' => 'The requested API endpoint does not exist.',
+                    'status' => false,
+                    'message' => 'Endpoint not found.'
                 ], 404);
             }
+
+            // Otherwise, render the beautiful React 404 page!
+            return Inertia::render('errors/404')
+                ->toResponse($request)
+                ->setStatusCode(404);
         });
 
         // 4. Handle Wrong HTTP Methods (e.g., sending GET to a POST route)

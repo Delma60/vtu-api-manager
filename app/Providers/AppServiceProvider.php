@@ -27,8 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
-        // Register model observers
+        
         Transaction::observe(TransactionObserver::class);
        if(str_contains(env("APP_URL"), "ngrok") ){
             URL::forceScheme('https');

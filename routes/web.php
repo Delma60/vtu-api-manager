@@ -40,6 +40,13 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+Route::get('/create-symlink', function () {
+    $targetFolder = storage_path('app/public');
+    $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
+    symlink($targetFolder, $linkFolder);
+    return 'Symlink created successfully';
+});
+
 Route::get('/pricing', function () {
     $packages = Package::where('is_active', true)->orderBy('price', 'asc')->get();
 

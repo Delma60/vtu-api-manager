@@ -60,6 +60,9 @@ class HandleInertiaRequests extends Middleware
                 "app_name" => SystemSetting::getKeyValue("site_name", 'Laravel', [ 'ignore-scopes' => true ]),
                 // "app_name" SystemSettings
                 'app_url' => env('APP_URL', 'http://localhost'),
+                "site_logo" => SystemSetting::getKeyValue("site_logo", null, ['ignore-scopes' => true]) 
+                                ? asset('storage/' . SystemSetting::getKeyValue("site_logo", null, ['ignore-scopes' => true])) 
+                                : asset('logo.svg')
             ],
             'flash' => function () {
                 return [
@@ -77,7 +80,10 @@ class HandleInertiaRequests extends Middleware
     {
         view()->share('site_name', SystemSetting::getKeyValue("site_name", 'Laravel', [ 'ignore-scopes' => true ]));
         view()->share('site_description', SystemSetting::getKeyValue("site_description", 'Laravel', [ 'ignore-scopes' => true ]));
-    
+        view()->share('site_logo', SystemSetting::getKeyValue("site_logo", null, ['ignore-scopes' => true]) 
+                                ? asset('storage/' . SystemSetting::getKeyValue("site_logo", null, ['ignore-scopes' => true])) 
+                                : asset('logo.svg'));
+
     return 'app';
 
     }

@@ -20,6 +20,7 @@ export default function SystemSettingsIndex({ settings }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         site_name: settings.site_name,
         site_description: settings.site_description || '',
+        site_logo: settings.site_logo || null,
         support_email: settings.support_email || '',
         support_phone: settings.support_phone || '',
         company_address: settings.company_address || '',
@@ -68,7 +69,7 @@ export default function SystemSettingsIndex({ settings }: Props) {
                                     <CardDescription>Core details used across the platform.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 md:col-span-2">
                                         <Label>Site Name</Label>
                                         <Input value={data.site_name} onChange={(e) => setData('site_name', e.target.value)} />
                                     </div>
@@ -82,6 +83,37 @@ export default function SystemSettingsIndex({ settings }: Props) {
                                             rows={3}
                                         />
                                         {errors.site_description && <p className="text-sm text-red-500">{errors.site_description}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="site_logo">Site Logo</Label>
+
+                                        <div className="mt-2 flex items-center gap-4">
+                                            {/* Show preview of the newly selected file */}
+                                            {data.site_logo instanceof File ? (
+                                                <img
+                                                    src={URL.createObjectURL(data.site_logo)}
+                                                    alt="New Logo Preview"
+                                                    className="h-16 w-auto rounded border object-contain p-1"
+                                                />
+                                            ) : settings.site_logo ? (
+                                                /* Or show the existing logo from the database */
+                                                <img
+                                                    src={`/storage/${settings.site_logo}`}
+                                                    alt="Current Logo"
+                                                    className="h-16 w-auto rounded border object-contain p-1"
+                                                />
+                                            ) : null}
+
+                                            <Input
+                                                id="site_logo"
+                                                type="file"
+                                                accept="image/*"
+                                                className="w-full md:max-w-md"
+                                                onChange={(e) => setData('site_logo', e.target.files ? e.target.files[0] : null)}
+                                            />
+                                        </div>
+                                        {errors.site_logo && <p className="text-sm text-red-500">{errors.site_logo}</p>}
+                                        <p className="text-muted-foreground mt-1 text-sm">Recommended size: 200x50px (PNG or SVG).</p>
                                     </div>
                                     <div className="space-y-2">
                                         <Label>Support Email</Label>

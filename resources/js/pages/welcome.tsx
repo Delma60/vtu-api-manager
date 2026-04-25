@@ -1,7 +1,8 @@
-import { router, usePage } from "@inertiajs/react";
+import AppLogo from '@/components/app-logo';
+import { router, usePage } from '@inertiajs/react';
 
 export default function WelcomePage() {
-    const { props } = usePage()
+    const { props } = usePage();
     const appName = props?.general?.app_name;
     const appUrl = props?.general?.app_url;
     // const url =
@@ -10,7 +11,8 @@ export default function WelcomePage() {
             {/* 1. Navigation Bar */}
             <nav className="mx-auto flex max-w-7xl items-center justify-between px-8 py-6">
                 <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30"></div>
+                    <AppLogo />
+                    {/* <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30"></div> */}
                     <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">{appName}</span>
                 </div>
 
@@ -67,10 +69,16 @@ export default function WelcomePage() {
                     </p>
 
                     <div className="flex flex-col gap-4 pt-4 sm:flex-row">
-                        <button onClick={() => router.get(route("register"))} className="rounded-lg bg-indigo-600 px-8 py-3.5 font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500">
+                        <button
+                            onClick={() => router.get(route('register'))}
+                            className="rounded-lg bg-indigo-600 px-8 py-3.5 font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500"
+                        >
                             Start Integrating
                         </button>
-                        <button onClick={() => router.get(route("docs.quick-start"))} className="rounded-lg border border-slate-200 bg-slate-100/70 px-8 py-3.5 font-semibold text-slate-900 transition-all hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-800">
+                        <button
+                            onClick={() => router.get(route('docs.quick-start'))}
+                            className="rounded-lg border border-slate-200 bg-slate-100/70 px-8 py-3.5 font-semibold text-slate-900 transition-all hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-800"
+                        >
                             Read the Docs
                         </button>
                     </div>

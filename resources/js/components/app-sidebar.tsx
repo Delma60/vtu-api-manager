@@ -18,6 +18,7 @@ import { User } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
+import AppLogo from './app-logo';
 
 export function SidebarComponent() {
     const { props, url } = usePage<{
@@ -67,7 +68,8 @@ export function SidebarComponent() {
             {/* Logo Section */}
             <SidebarGroup className="border-sidebar-border border-b">
                 <div className="flex items-center justify-center gap-2 px-2 py-4">
-                    <div className="from-primary to-chart-4 shadow-primary/30 h-6 w-6 shrink-0 rounded bg-gradient-to-br shadow-lg" />
+                    {/* <div className="from-primary to-chart-4 shadow-primary/30 h-6 w-6 shrink-0 rounded bg-gradient-to-br shadow-lg" /> */}
+                    <AppLogo />
                     {isExpanded && <span className="text-sidebar-foreground text-lg font-bold tracking-tight whitespace-nowrap">{appName as unknown as string}</span>}
                 </div>
                 {/* Environment Toggle */}

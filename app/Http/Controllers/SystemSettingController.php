@@ -18,6 +18,7 @@ class SystemSettingController extends Controller
         $defaultSettings = [
             'site_name' => SystemSetting::getKeyValue('site_name', 'NexusVTU'),
             'site_description' => SystemSetting::getKeyValue('site_description', 'NexusVTU'),
+            'site_logo' => SystemSetting::getKeyValue('site_logo', null),
             'support_email' => SystemSetting::getKeyValue('support_email', ''),
             'support_phone' => SystemSetting::getKeyValue('support_phone', ''),
             'company_address' => SystemSetting::getKeyValue('company_address', ''),
@@ -41,6 +42,16 @@ class SystemSettingController extends Controller
     {
         // We exclude inertia system fields and update all others dynamically
         $data = $request->except(['_token', '_method']);
+        if ($request->hasFile('site_logo')) {
+            // Store the file in 'storage/app/public/logos'
+            $path = $request->file('site_logo')->store('logos', 'public');
+            
+            // Overwrite the file object with the string path so it saves correctly
+            $data['site_logo'] = $path; 
+        } else {
+            // If no new file was uploaded, remove it from the data array so we don't overwrite the existing DB value with null
+            unset($data['site_logo']);
+        }
 
         foreach ($data as $key => $value) {
             $processedValue = $value;

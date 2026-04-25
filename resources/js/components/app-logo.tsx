@@ -3,7 +3,6 @@ import { usePage } from "@inertiajs/react";
 
 export default function AppLogo() {
     const { general } = usePage().props;
-    console.log(general)
     return (
         <img 
             src={general.site_logo} 

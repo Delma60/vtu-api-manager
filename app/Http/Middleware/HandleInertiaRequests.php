@@ -41,16 +41,6 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
 
-        $globalSettings = Cache::remember('global_system_settings', 60 * 60 * 24, function () {
-            // Fetch global settings (where settingable_id is null)
-            // Assuming business_id 1 is the main/default platform
-            return SystemSetting::whereNull('settingable_id')
-                ->where('business_id', 2) 
-                ->where('environment', 'live') // adjust this if you need dynamic environments
-                ->pluck('value', 'key')
-                ->toArray();
-        });
-
 
         return array_merge(parent::share($request), [
             ...parent::share($request),
@@ -67,8 +57,9 @@ class HandleInertiaRequests extends Middleware
             'is_super_admin' => $request->user() ? $request->user()->isSuperAdmin() : false,
             'is_business_admin' => $request->user() ? $request->user()->isBusinessAdmin() : false,
             'general' => [
-
+                "app_name" => SystemSetting::getKeyValue("app_name", 'Laravel', [ 'ignore-scopes' => true ]),
                 // "app_name" SystemSettings
+                'app_url' => env('APP_URL', 'http://localhost'),
             ],
             'flash' => function () {
                 return [

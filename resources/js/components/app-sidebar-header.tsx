@@ -21,6 +21,7 @@ interface SearchResult {
 
 export function AppSidebarHeader() {
     const [open, setOpen] = useState(false);
+    const appName = usePage().props?.general?.app_name;
     const [query, setQuery] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState('');
     const [results, setResults] = useState<SearchResult[]>([]);
@@ -28,6 +29,7 @@ export function AppSidebarHeader() {
     const [error, setError] = useState<string | null>(null);
     const [searchActive, setSearchActive] = useState(false);
     const searchRef = useRef<HTMLDivElement | null>(null);
+    console.log(appName);
 
     // Keyboard shortcut (⌘K or Ctrl+K) to open search
     useEffect(() => {
@@ -125,8 +127,8 @@ export function AppSidebarHeader() {
         { type: 'page', id: 5, title: 'Wallets', description: 'View wallet balances', url: route('wallets.index') },
         { type: 'page', id: 6, title: 'Discounts', description: 'View active discounts', url: route('discounts.index') },
         { type: 'page', id: 7, title: 'Airtime & Data', description: 'Manage pricing plans', url: route('pricing.airtime-data') },
-        { type: 'doc', id: 101, title: 'Docs: Introduction', description: 'Read the NexusVTU introduction guide', url: route('docs.introduction') },
-        { type: 'doc', id: 102, title: 'Docs: Quick Start', description: 'Get started with NexusVTU quickly', url: route('docs.quick-start') },
+        { type: 'doc', id: 101, title: 'Docs: Introduction', description: `Read the ${appName} introduction guide`, url: route('docs.introduction') },
+        { type: 'doc', id: 102, title: 'Docs: Quick Start', description: `Get started with ${appName} quickly`, url: route('docs.quick-start') },
         { type: 'doc', id: 103, title: 'Docs: Airtime & Data', description: 'Learn how to manage airtime and data', url: route('docs.airtime') },
         { type: 'doc', id: 104, title: 'Docs: Authentication', description: 'Understand API authentication', url: route('docs.authentication') },
         { type: 'doc', id: 105, title: 'Docs: API Keys', description: 'Learn how to manage API keys', url: route('docs.api-keys') },

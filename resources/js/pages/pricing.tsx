@@ -1,9 +1,10 @@
 import { Package } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 
 export default function PricingPage({ packages = [] }: { packages: Package[] }) {
     // provid
-    console.log(packages[0]);
+    // console.log(packages[0]);
+    const appName = usePage().props?.appName;
     return (
         <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-indigo-500 selection:text-white dark:bg-slate-950 dark:text-slate-200">
             <Head title="Pricing Plans" />
@@ -14,7 +15,7 @@ export default function PricingPage({ packages = [] }: { packages: Package[] }) 
                     <div className="flex lg:flex-1">
                         <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
                             <div className="h-8 w-8 rounded bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg" />
-                            <span className="text-xl font-bold tracking-tight">NexusVTU</span>
+                            <span className="text-xl font-bold tracking-tight">{appName}</span>
                         </Link>
                     </div>
                     <div className="flex flex-1 items-center justify-end gap-x-6">

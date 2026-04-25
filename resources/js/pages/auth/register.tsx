@@ -12,7 +12,9 @@ interface RegisterForm {
     terms?: boolean;
 }
 
-export default function RegisterPage() {
+export default function RegisterPage(props) {
+    const appName = props?.general?.app_name;
+
     const { data, setData, post, processing, errors, reset } = useForm<RegisterForm>({
         company_name: '',
         name: '',
@@ -36,7 +38,7 @@ export default function RegisterPage() {
             <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="mb-8 flex items-center justify-center gap-2">
                     <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30"></div>
-                    <span className="text-2xl font-bold tracking-tight text-white">NexusVTU</span>
+                    <span className="text-2xl font-bold tracking-tight text-white">{appName}</span>
                 </div>
                 <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-white">Create your workspace</h2>
                 <p className="mt-2 text-center text-sm text-slate-400">

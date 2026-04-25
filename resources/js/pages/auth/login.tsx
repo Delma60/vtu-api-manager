@@ -106,7 +106,9 @@ interface LoginProps {
 //     );
 // }
 
-export default function LoginPage() {
+export default function LoginPage(props) {
+    const appName = props?.general?.app_name;
+
     const { data, setData, post, processing, errors, reset } = useForm<LoginForm>({
         email: '',
         password: '',
@@ -121,16 +123,16 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-slate-950 py-12 font-sans selection:bg-indigo-500 selection:text-white sm:px-6 lg:px-8 p-4">
+        <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-slate-950 p-4 py-12 font-sans selection:bg-indigo-500 selection:text-white sm:px-6 lg:px-8">
             {/* Background Decorative Blurs */}
             <div className="pointer-events-none absolute top-0 left-1/2 h-[500px] w-full max-w-lg -translate-x-1/2 rounded-full bg-gradient-to-b from-indigo-500/20 to-purple-500/0 blur-3xl"></div>
 
             <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="mb-8 flex items-center justify-center gap-2">
                     <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30"></div>
-                    <span className="text-2xl font-bold tracking-tight text-white">NexusVTU</span>
+                    <span className="text-2xl font-bold tracking-tight text-white">{appName}</span>
                 </div>
-                <h2 className="mt-6 text-center md:text-3xl text-2xl font-extrabold tracking-tight text-white">Sign in to your dashboard</h2>
+                <h2 className="mt-6 text-center text-2xl font-extrabold tracking-tight text-white md:text-3xl">Sign in to your dashboard</h2>
                 <p className="mt-2 text-center text-sm text-slate-400">
                     Or{' '}
                     <a href="/register" className="font-medium text-indigo-400 transition-colors hover:text-indigo-300">
@@ -205,9 +207,9 @@ export default function LoginPage() {
                             <button
                                 disabled={processing}
                                 type="submit"
-                                className="flex w-full justify-center rounded-lg border border-transparent disabled:bg-indigo-600/50 bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 focus:outline-none"
+                                className="flex w-full justify-center rounded-lg border border-transparent bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 focus:outline-none disabled:bg-indigo-600/50"
                             >
-                                {processing ? "Signing in..." : "Sign in"}
+                                {processing ? 'Signing in...' : 'Sign in'}
                             </button>
                         </div>
                     </form>

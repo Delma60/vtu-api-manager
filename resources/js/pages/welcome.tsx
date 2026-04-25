@@ -1,11 +1,17 @@
+import { router, usePage } from "@inertiajs/react";
+
 export default function WelcomePage() {
+    const { props } = usePage()
+    const appName = props?.general?.app_name;
+    const appUrl = props?.general?.app_url;
+    // const url =
     return (
         <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-indigo-500 selection:text-white dark:bg-slate-950 dark:text-slate-200">
             {/* 1. Navigation Bar */}
             <nav className="mx-auto flex max-w-7xl items-center justify-between px-8 py-6">
                 <div className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30"></div>
-                    <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">NexusVTU</span>
+                    <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">{appName}</span>
                 </div>
 
                 <div className="hidden items-center gap-8 text-sm font-medium text-slate-400 md:flex">
@@ -61,10 +67,10 @@ export default function WelcomePage() {
                     </p>
 
                     <div className="flex flex-col gap-4 pt-4 sm:flex-row">
-                        <button className="rounded-lg bg-indigo-600 px-8 py-3.5 font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500">
+                        <button onClick={() => router.get(route("register"))} className="rounded-lg bg-indigo-600 px-8 py-3.5 font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500">
                             Start Integrating
                         </button>
-                        <button className="rounded-lg border border-slate-200 bg-slate-100/70 px-8 py-3.5 font-semibold text-slate-900 transition-all hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-800">
+                        <button onClick={() => router.get(route("docs.quick-start"))} className="rounded-lg border border-slate-200 bg-slate-100/70 px-8 py-3.5 font-semibold text-slate-900 transition-all hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-800">
                             Read the Docs
                         </button>
                     </div>
@@ -84,7 +90,7 @@ export default function WelcomePage() {
                         <div className="overflow-x-auto p-6 font-mono text-sm leading-relaxed">
                             <div className="text-slate-400">
                                 <span className="text-pink-400">const</span> response = <span className="text-pink-400">await</span> fetch(
-                                <span className="text-emerald-300">'https://api.nexusvtu.com/topup'</span>, {'{'}
+                                <span className="text-emerald-300">{`${appUrl}/api/v1/topup`}</span>, {'{'}
                             </div>
                             <div className="pl-4 text-slate-300">
                                 method: <span className="text-emerald-300">'POST'</span>,
@@ -304,7 +310,7 @@ export default function WelcomePage() {
                 <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-8 md:flex-row">
                     <div className="flex items-center gap-2">
                         <div className="h-6 w-6 flex-shrink-0 rounded bg-indigo-500"></div>
-                        <span className="font-semibold tracking-tight text-slate-900 dark:text-white">NexusVTU</span>
+                        <span className="font-semibold tracking-tight text-slate-900 dark:text-white">{appName}</span>
                     </div>
                     <div className="flex gap-6 text-sm text-slate-500">
                         <a href="#" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
@@ -320,7 +326,7 @@ export default function WelcomePage() {
                             Terms
                         </a>
                     </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">© 2026 Nexus Infrastructure.</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-400">© 2026 {appName} Infrastructure.</div>
                 </div>
             </footer>
         </div>

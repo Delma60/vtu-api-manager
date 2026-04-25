@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\DataPlan;
 use App\Models\Network;
 use App\Models\Provider;
+use App\Models\SystemSetting;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 
@@ -23,6 +24,7 @@ class SearchController extends Controller
         }
 
         $results = collect();
+        $app_name = SystemSetting::getKeyValue("app_name", 'Laravel', [ 'ignore-scopes' => true ]);
 
         $transactions = Transaction::with(['user', 'provider'])
             ->where(function ($q) use ($query) {
@@ -97,14 +99,14 @@ class SearchController extends Controller
                 'type' => 'doc',
                 'id' => 1,
                 'title' => 'Docs: Introduction',
-                'description' => 'Read the NexusVTU introduction guide',
+                'description' => "Read the {$app_name} introduction guide",
                 'url' => route('docs.introduction'),
             ],
             [
                 'type' => 'doc',
                 'id' => 2,
                 'title' => 'Docs: Quick Start',
-                'description' => 'Get started with NexusVTU quickly',
+                'description' => "Get started with {$app_name} quickly",
                 'url' => route('docs.quick-start'),
             ],
             [

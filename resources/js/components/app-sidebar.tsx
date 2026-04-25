@@ -27,6 +27,7 @@ export function SidebarComponent() {
     }>();
     const providerDownCount = (props as Record<string, unknown>)?.provider_down_count ?? 0;
     const userType = props.auth.user.user_type;
+    const appName = usePage().props?.general?.app_name;
     const [activeTab, setActiveTab] = useState(url);
     const [isLiveMode, setIsLiveMode] = useState(props.mode === 'live');
     const [expandedItems, setExpandedItems] = useState<string[]>(['pricing']);
@@ -67,7 +68,7 @@ export function SidebarComponent() {
             <SidebarGroup className="border-sidebar-border border-b">
                 <div className="flex items-center justify-center gap-2 px-2 py-4">
                     <div className="from-primary to-chart-4 shadow-primary/30 h-6 w-6 shrink-0 rounded bg-gradient-to-br shadow-lg" />
-                    {isExpanded && <span className="text-sidebar-foreground text-lg font-bold tracking-tight whitespace-nowrap">NexusVTU</span>}
+                    {isExpanded && <span className="text-sidebar-foreground text-lg font-bold tracking-tight whitespace-nowrap">{appName as unknown as string}</span>}
                 </div>
                 {/* Environment Toggle */}
                 {userType !== 'admin' && (

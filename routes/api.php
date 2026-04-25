@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\V1\ServiceController;
+use App\Http\Controllers\Bot\TelegramController;
+use App\Http\Controllers\Bot\WhatsAppController;
 use App\Http\Controllers\MetricsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +21,14 @@ Route::post('/debug', function (Request $request) {
         'user_authenticated' => !!$request->user(),
     ]);
 });
+
+// Webhook endpoint for Telegram Bots.
+// The {bot_code} allows you to identify which tenant's bot is receiving the message.
+Route::post('/webhook/telegram/{bot_code}', [TelegramController::class, 'handleWebhook'])->name('bot.webhook');
+
+// WhatsApp Webhook Routes
+Route::get('/webhook/whatsapp/{bot_code}', [WhatsAppController::class, 'verifyWebhook'])->name('whatsapp.webhook.verify');
+Route::post('/webhook/whatsapp/{bot_code}', [WhatsAppController::class, 'handleWebhook'])->name('whatsapp.webhook.handle');
 
 Route::prefix('v1')->middleware(['api_key_auth', 'api.monthly_limit'])->group(function () {
     Route::post('/airtime', [ServiceController::class, 'airtime']);

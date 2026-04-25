@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('bot_sessions', function (Blueprint $table) {
             $table->id();
-            $table->string('platform'); // 'whatsapp' or 'telegram'
-            $table->string('chat_id')->unique(); // Phone number or Telegram ID
-            $table->foreignId('customer_id')->nullable(); // Link to your existing customers table
-            $table->string('current_state')->default('START'); // e.g., 'AWAITING_AMOUNT', 'AWAITING_NETWORK'
-            $table->json('payload')->nullable(); // Store temporary data like ['network' => 'MTN', 'amount' => 500]
+            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
+            $table->string('chat_id')->index(); // Telegram user ID
+            $table->string('state')->default('idle'); // The current step they are on
+            $table->json('payload')->nullable(); // Temporarily hold phone, amount, network, etc.
+            $table->string('telegram_username')->nullable();
             $table->timestamps();
         });
     }

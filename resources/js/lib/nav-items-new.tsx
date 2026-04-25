@@ -210,7 +210,10 @@ export const navItems = ({
                     icon: <Bot className="h-5 w-5 shrink-0" />,
                     label: 'Bots',
                     routeName: 'bots.index',
-                    children: [{ label: 'Telegram', routeName: 'bots.telegram.index' }],
+                    children: [
+                        { label: 'Telegram', routeName: 'bots.telegram.index' },
+                        { label: 'WhatsApp', routeName: 'bots.whatsapp.edit' },
+                    ],
                 },
             ],
         },

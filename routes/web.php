@@ -4,6 +4,7 @@ use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\ApiLogController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\Bot\TelegramController;
+use App\Http\Controllers\Bot\WhatsAppController;
 use App\Http\Controllers\CablePlanController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
@@ -54,7 +55,7 @@ Route::post('pay/{paymentLink}', [PaymentGatewayController::class, 'checkout'])-
 Route::get('pay/{transaction}/success', [PaymentLinkController::class, 'paymentSuccess'])->name('pay.success');
 Route::get('pay/{paymentLink}/failed', [PaymentLinkController::class, 'paymentFailed'])->name('pay.failed');
 
-Route::post('/webhook/telegram/sk_super_secret_string', [TelegramController::class, 'handleWebhook']);
+Route::post('/webhook/telegram/{bot_code}/sk_super_secret_string', [TelegramController::class, 'handleWebhook']);
 
 Route::post('/webhook/{uuid}', function (Request $request, string $uuid) {
     return \App\Services\ProviderService::webhook($request, $uuid);
@@ -129,6 +130,10 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/', 'settings')->name('index');
                 Route::post('/sync', 'syncWebhook')->name('sync');
                 Route::put('/update-merchant', 'updateMerchant')->name('update-merchant');
+            });
+            Route::prefix("whatsapp-bot")->controller(WhatsAppController::class)->name("whatsapp.")->group(function(){
+                Route::get('/', 'edit')->name('edit');
+                Route::post('/', 'update')->name('update');
             });
         })->name('bots');
     });

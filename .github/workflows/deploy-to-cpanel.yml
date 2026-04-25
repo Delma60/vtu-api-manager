@@ -51,7 +51,7 @@ jobs:
             **/.github/**
             **/tests/**
             **/node_modules/**
-            **/.env*
+            **/.env.example
             composer.json
             composer.lock
             package-lock.json

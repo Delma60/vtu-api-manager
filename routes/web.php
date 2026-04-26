@@ -31,7 +31,9 @@ use App\Http\Controllers\SuperAdmin\BusinessController;
 use App\Http\Controllers\SystemBotController;
 use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\Settings\SettlementPreferenceController;
 use App\Http\Middleware\SuperAdminMiddleware;
+
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -108,10 +110,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/settings/billing/subscribe', [BillingController::class, 'subscribe'])->name('billing.subscribe');
     Route::get('/settings/billing/verify', [BillingController::class, 'verify'])->name('billing.verify'); // <-- New Route
+
+    // Put this inside your existing auth/settings middleware group
+    Route::get('settings/settlements', [SettlementPreferenceController::class, 'edit'])->name('settings.settlements');
+    Route::patch('settings/settlements', [SettlementPreferenceController::class, 'update'])->name('settings.settlements.update');
     // Route::get('/settings/billing/verify', [\App\Http\Controllers\BillingController::class, 'verify'])->name('billing.verify');
 
-    Route::get('toggle-mode', [DashboardController::class, 'toggleMode'])->name('toggle-mode');
     Route::resource('settlements', SettlementController::class);
+    Route::get('toggle-mode', [DashboardController::class, 'toggleMode'])->name('toggle-mode');
 
     Route::resource('system-settings', SystemSettingController::class);
     Route::post('/settings', [SystemSettingController::class, "updateSingle"])

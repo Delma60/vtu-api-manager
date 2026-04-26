@@ -68,12 +68,20 @@ class RegisteredUserController extends Controller
                 'business_id' => $business->id,
             ]);
 
+            
+
             $newUser = $business->owner()->create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'business_id' => $business->id, // Assign to the newly created business
                 'type' => 'business_admin',     // Set them as an admin, not a customer
+            ]);
+
+            // wallet for user
+            $newUser->wallet()->create([
+                'balance' => 0,
+                'pending_balance' => 0,
             ]);
 
             $newUser->assignRole($ownerRole);

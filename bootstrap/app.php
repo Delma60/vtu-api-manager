@@ -67,6 +67,26 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->setStatusCode(404);
         });
 
+
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            
+            // 1. If it's an API request, return a clean JSON response
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'The requested resource or record was not found.',
+                ], 404);
+            }
+
+            // 2. If it's a web request and previous page exists, you can redirect back with a flash message
+            if ($e->getPrevious() instanceof ModelNotFoundException) {
+                return back()->with('error', 'Record not found.');
+            }
+
+            // Otherwise, let Laravel render the default 404 page (or your Inertia 404 page)
+            return null; 
+        });
+
         // 4. Handle Wrong HTTP Methods (e.g., sending GET to a POST route)
         $exceptions->render(function (MethodNotAllowedHttpException $e, Request $request) {
             if ($request->is('api/*') || $request->wantsJson()) {

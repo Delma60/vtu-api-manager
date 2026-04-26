@@ -1,5 +1,5 @@
 import AppLogo from '@/components/app-logo';
-import { router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -7,7 +7,7 @@ export default function WelcomePage() {
     const { props } = usePage();
     const appName = (props as any)?.general?.app_name || 'VTU API';
     const appUrl = (props as any)?.general?.app_url || 'https://api.example.com';
-    
+
     // State for the mobile menu toggle
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -47,7 +47,7 @@ export default function WelcomePage() {
                 </div>
 
                 {/* Mobile Menu Toggle */}
-                <button 
+                <button
                     className="flex text-slate-600 md:hidden dark:text-slate-300"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 >
@@ -60,10 +60,12 @@ export default function WelcomePage() {
                         <div className="flex flex-col gap-4">
                             <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-base font-medium text-slate-600 dark:text-slate-300">Features</a>
                             <a href="#performance" onClick={() => setIsMobileMenuOpen(false)} className="text-base font-medium text-slate-600 dark:text-slate-300">Uptime</a>
-                            <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-base font-medium text-slate-600 dark:text-slate-300">Pricing</a>
+                            <Link href={route("pricing")} className="text-base font-medium text-slate-600 dark:text-slate-300">Pricing</Link>
                             <a href="#docs" onClick={() => setIsMobileMenuOpen(false)} className="text-base font-medium text-slate-600 dark:text-slate-300">Documentation</a>
                             <hr className="my-2 border-slate-100 dark:border-slate-800" />
-                            <a href="/login" className="text-base font-medium text-slate-600 dark:text-slate-300">Sign in</a>
+                            <Link href={route("login")} className="text-base font-medium text-slate-600 dark:text-slate-300 w-full text-center">
+                                Sign in
+                            </Link>
                             <a href="/register" className="inline-block w-full text-center rounded-lg bg-indigo-600 px-4 py-3 text-base font-medium text-white">
                                 Get API Keys
                             </a>

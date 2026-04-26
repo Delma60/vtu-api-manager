@@ -14,8 +14,22 @@ class SettlementController extends Controller
      */
     public function index()
     {
-        // Assuming the logged-in user belongs to a business/tenant which has a wallet
-        $wallet = Wallet::where('user_id', auth()->id())->firstOrFail();
+        $wallet = Wallet::where('user_id', auth()->id())->first();
+
+        // 2. If the user has no wallet yet, return a blank slate gracefully
+        if (!$wallet) {
+            return inertia('settlements/index', [
+                'balances' => [
+                    'available' => 0.00,
+                    'pending'   => 0.00,
+                ],
+                'nextSettlement' => null,
+                'settlements' => [
+                    'data' => [], 
+                    'links' => []
+                ]
+            ]);
+        }
 
         // Get paginated settlements for this wallet
         $settlements = Settlement::where('wallet_id', $wallet->id)
@@ -28,7 +42,7 @@ class SettlementController extends Controller
             ->orderBy('settles_at', 'asc')
             ->first();
 
-        return Inertia::render('settlements/index', [
+        return inertia('settlements/index', [
             'balances' => [
                 'available' => $wallet->balance,
                 'pending'   => $wallet->pending_balance,

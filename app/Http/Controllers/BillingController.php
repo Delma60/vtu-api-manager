@@ -31,12 +31,17 @@ class BillingController extends Controller
     public function subscribe(Request $request, TransactionService $payment)
     {
         // Validate request
-        $request->validate(['package_id' => 'required|exists:packages,id']);
+        $request->validate(['package_id' => 'required|exists:packages,id,is_active,1']);
 
         $business = $request->user()->business;
         $package = Package::find($request->package_id);
 
         if ($package->price == 0) {
+            // Prevent immediate downgrade if they have active premium time remaining
+            if ($business->subscription_ends_at && $business->subscription_ends_at->isFuture()) {
+                return back()->with('error', 'You still have an active premium subscription. Please wait until it expires to switch to the free plan.');
+            }
+
             $business->update([
                 'package_id' => $package->id,
                 'subscription_ends_at' => null,
@@ -101,34 +106,55 @@ class BillingController extends Controller
     {
         $status = $request->query('status');
         $tx_ref = $request->query('tx_ref') ?? $request->query('transaction');
-        $package_id = $request->query('package_id');
 
-        if ($status !== 'successful' && $status !== 'completed') {
-            return redirect()->route('billing.index')->with('error', 'Payment was cancelled or failed.');
+        // 1. Fetch the trusted subscription attempt from YOUR database
+        $pendingSubscription = DB::table('subscription_payments')
+            ->where('reference', $tx_ref)
+            ->first();
+
+        if (!$pendingSubscription) {
+            abort(404, 'Subscription record not found.');
         }
 
-        // Find the transaction you created via TransactionService
-        $transaction = \App\Models\Transaction::withoutGlobalScopes()
-        ->where('transaction_reference', $tx_ref)->firstOrFail();
+        if ($status !== 'successful' && $status !== 'completed') {
+            // Update subscription_payments status to 'failed'
+            DB::table('subscription_payments')->where('id', $pendingSubscription->id)->update(['status' => 'failed']);
+            return redirect()->route('billing.index')->with('error', 'Payment failed.');
+        }
 
+        $transaction = \App\Models\Transaction::withoutGlobalScopes()
+            ->where('transaction_reference', $tx_ref)->firstOrFail();
+
+        // Prevent double processing
         if ($transaction->status === 'successful') {
             return redirect()->route('settings.billing.index')->with('success', 'Subscription is already active.');
         }
 
-        // Mark transaction as successful using your existing service
+        // 2. IMPORTANT: Ensure transactionService actually queries the gateway
+        // to verify the exact AMOUNT paid matches $pendingSubscription->amount.
         $transactionService->markAsSuccessful($transaction, [
             'message' => 'Subscription payment completed successfully.',
         ]);
 
-        // Apply the package to the Business Tenant
-        $package = Package::findOrFail($package_id);
+        // 3. Apply the package from the database record, NOT the URL
+        $package = Package::findOrFail($pendingSubscription->package_id);
         $business = $request->user()->business;
+
+        $currentExpiration = $business->subscription_ends_at;
+
+        // If they have an active sub, add to it. Otherwise, start from now.
+        $startDate = ($currentExpiration && $currentExpiration->isFuture())
+            ? $currentExpiration
+            : now();
 
         $business->update([
             'package_id' => $package->id,
-            'subscription_ends_at' => $package->billing_cycle === 'yearly' ? now()->addYear() : now()->addMonth(),
+            'subscription_ends_at' => $package->billing_cycle === 'yearly' ? $startDate->copy()->addYear() : $startDate->copy()->addMonth(),
             'subscription_status' => 'active',
         ]);
+
+        // 4. Update the subscription_payments table status to 'successful'
+        DB::table('subscription_payments')->where('id', $pendingSubscription->id)->update(['status' => 'successful']);
 
         return redirect()->route('settings.billing.index')->with('success', "Successfully activated your {$package->name} subscription!");
     }

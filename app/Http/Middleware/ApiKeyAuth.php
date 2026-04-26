@@ -42,6 +42,9 @@ class ApiKeyAuth
         // Set API mode in config
         config(['app.api_mode' => $credential->environment]);
 
+        // Pass the environment down the chain for rate limiting
+        $request->attributes->set('environment', $credential->environment);
+
         return $next($request);
     }
 }

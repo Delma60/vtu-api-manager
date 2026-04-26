@@ -84,6 +84,14 @@ class PackageController extends Controller
      */
     public function destroy(Package $package)
     {
-        //
+        // Check if any businesses are currently using this package
+        if ($package->businesses()->exists()) {
+            return redirect()->route('super-admin.packages.index')
+                ->with('error', 'Cannot delete package that is currently assigned to businesses. Please reassign those businesses first.');
+        }
+
+        $package->delete();
+
+        return redirect()->route('super-admin.packages.index')->with('success', 'Package deleted successfully.');
     }
 }

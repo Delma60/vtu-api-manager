@@ -29,7 +29,7 @@ class EnsurePackageFeature
         // 3. Check if the specific feature is enabled (true or > 0)
         // Note: For numerical limits like 'staff_limit', any number > 0 passes this basic gate.
         // You would write a separate check for exact numeric limits inside the controller.
-        if (!isset($settings[$feature]) || empty($settings[$feature])) {
+        if (!isset($settings[$feature]) || $settings[$feature] === false || $settings[$feature] === "") {
             return $this->denyAccess($request, "This feature is not available on your current plan. Please upgrade to access it.");
         }
 

@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // Seed providers after user exists
         $this->call([
+            PackageSeeder::class,
             UserSeeder::class,
             ProviderSeeder::class,
             RoleSeeder::class,

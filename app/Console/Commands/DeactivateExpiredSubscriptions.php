@@ -24,34 +24,34 @@ class DeactivateExpiredSubscriptions extends Command
      */
     public function handle()
     {
-        // Find all businesses whose subscription has expired but are still marked as active
-        $expiredBusinesses = Business::where('subscription_status', 'active')
-            ->whereNotNull('subscription_ends_at')
-            ->where('subscription_ends_at', '<', now())
-            ->get();
-
-        if ($expiredBusinesses->isEmpty()) {
-            $this->info('No expired subscriptions found today.');
-            return;
-        }
-
         // Find the default Free Tier package (lowest price active package)
         $freeTier = Package::where('is_active', true)->orderBy('price', 'asc')->first();
 
-        $count = 0;
-
-        foreach ($expiredBusinesses as $business) {
-            $business->update([
-                'package_id' => $freeTier?->id,
-                'subscription_status' => 'past_due', // Or 'active' if you just consider the free tier normal
-                'subscription_ends_at' => null, // Free tier doesn't expire
-            ]);
-
-            // TODO: Optional - Send an email/notification to the business owner here
-            // $business->owner->notify(new SubscriptionExpiredNotification());
-
-            $count++;
+        if (!$freeTier) {
+            Log::critical('Subscription Cron Failed: No Free Tier package found to downgrade users to.');
+            $this->error('Critical Error: No Free Tier package found. Cannot proceed with subscription deactivation.');
+            return;
         }
+
+        // Use chunks to prevent memory exhaustion
+        $count = 0;
+        Business::where('subscription_status', 'active')
+            ->whereNotNull('subscription_ends_at')
+            ->where('subscription_ends_at', '<', now())
+            ->chunkById(100, function ($businesses) use ($freeTier, &$count) {
+                foreach ($businesses as $business) {
+                    $business->update([
+                        'package_id' => $freeTier->id,
+                        'subscription_status' => 'past_due',
+                        'subscription_ends_at' => null,
+                    ]);
+                    // Fire events or notifications here if needed
+                    // TODO: Optional - Send an email/notification to the business owner here
+                    // $business->owner->notify(new SubscriptionExpiredNotification());
+
+                    $count++;
+                }
+            });
 
         $this->info("Successfully downgraded {$count} expired subscriptions.");
         Log::info("Subscription Cron: Downgraded {$count} expired subscriptions.");

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Business;
+use App\Models\Package;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -44,13 +45,20 @@ class RegisteredUserController extends Controller
         try{
             DB::beginTransaction();
         
+            // 1. Fetch the default Free Package
+            $defaultPackage = Package::where('is_default', true)
+                                     ->where('is_active', true)
+                                     ->first();
             
-            // 1. Create the Business Tenant
+            // 2. Create the Business Tenant
             $business = Business::create([
                 'name' => $request->company_name,
                 'slug' => Str::slug($request->company_name) . '-' . Str::random(4), 
                 'support_email' => $request->email,
                 'is_active' => true,
+                'package_id' => $defaultPackage?->id,
+                'subscription_status' => 'active',
+                'subscription_ends_at' => null, // Free plan doesn't expire
             ]);
 
             // 2. Create basic roles for the business

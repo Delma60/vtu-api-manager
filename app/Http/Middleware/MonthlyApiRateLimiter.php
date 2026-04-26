@@ -14,7 +14,13 @@ class MonthlyApiRateLimiter
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // 1. Get the business from the authenticated user (Set by your ApiKeyAuth middleware)
+        // 1. Check if this is a test environment - bypass rate limiting entirely
+        $environment = $request->attributes->get('environment') ?? 'live';
+        if ($environment === 'test') {
+            return $next($request);
+        }
+
+        // 2. Get the business from the authenticated user (Set by your ApiKeyAuth middleware)
         $business = $request->user()?->business;
 
         if (!$business) {

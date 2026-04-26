@@ -145,35 +145,65 @@ class Smeplug extends ProviderAbstract
      */
     protected function getPlans(?array $payload = null): mixed
     {
-        $url = rtrim($this->provider->base_url, '/') . '/data/plans';
-        
-        $response = Http::withHeaders($this->getAuthHeaders())->get($url);
+        $response = Http::withHeaders($this->getAuthHeaders())
+            ->get(rtrim($this->provider->base_url, '/') . '/v1/data/plans');
 
-        return $response->json();
+        if ($response->failed()) {
+            Log::error('SME Plug Fetch Plans Failed', ['response' => $response->body()]);
+            return [
+                'status' => false,
+                'data' => []
+            ];
+        }
+
+        $rawPlans = $response->json('data') ?? [];
+
+        // Group plans by network ID
+        $groupedPlans = [];
+
+        foreach ($rawPlans as $plan) {
+            $networkId = $this->mapNetworkNameToId(strtolower($plan['plan_network'] ?? ''));
+
+            if (!isset($groupedPlans[$networkId])) {
+                $groupedPlans[$networkId] = [];
+            }
+
+            $groupedPlans[$networkId][] = [
+                'id' => (string) $plan['plan_id'],
+                'name' => $plan['plan_name'],
+                'price' => (string) $plan['plan_amount'],
+                'telco_price' => (string) ($plan['telco_price'] ?? $plan['plan_amount'])
+            ];
+        }
+
+        // If a specific network_id is requested, return just that network's plans
+        if (isset($payload['network_id']) && isset($groupedPlans[$payload['network_id']])) {
+            return [
+                'status' => 'success',
+                'message' => 'Data plans retrieved successfully',
+                'data' => $groupedPlans[$payload['network_id']]
+            ];
+        }
+
+        // Return all plans grouped by network
+        return [
+            'status' => true,
+            'data' => $groupedPlans
+        ];
     }
 
     /**
-     * Process the incoming webhook and return standard properties.
+     * Map network name to network ID.
      */
-    protected function callback(Request $request): array
+    private function mapNetworkNameToId(string $networkName): string
     {
-        $payload = $request->all();
-        $status = 'pending';
-
-        if (isset($payload['status'])) {
-            $smeStatus = strtolower($payload['status']);
-            if ($smeStatus === 'successful' || $smeStatus === 'success') {
-                $status = 'successful';
-            } elseif ($smeStatus === 'failed') {
-                $status = 'failed';
-            }
-        }
-
-        return [
-            'tx_ref'             => $payload['customer_reference'] ?? null,
-            'status'             => $status,
-            'provider_reference' => $payload['reference'] ?? null,
-        ];
+        return match (strtolower($networkName)) {
+            'mtn' => '1',
+            'glo' => '2',
+            'airtel' => '3',
+            '9mobile', 'etisalat' => '4',
+            default => '1'
+        };
     }
 
     /**

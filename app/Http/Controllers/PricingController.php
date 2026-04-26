@@ -72,10 +72,70 @@ class PricingController extends Controller
             'network_types' => NetworkType::with("typeable")->whereHas('typeable', function ($q) {
                 $q->whereIn('type', ['airtime', 'data']);
             })->get(),
-            'data_plans' => DataPlan::all(),
+            'data_plans' => $this->getAllDataPlansFromProviders(),
             'airtime_pin_discounts' => Discount::where('type', 'airtimePin')->with(['providers'])->get(),
             'data_pin_discounts' => \App\Models\Discount::whereIn('type', ['data_pin', 'dataPin'])->with(['providers'])->get(),
         ]);
+    }
+
+    /**
+     * Get all data plans from all active providers that support data.
+     */
+    private function getAllDataPlansFromProviders()
+    {
+        $providers = Provider::withoutGlobalScopes()->where('is_active', true)->get();
+        $allDataPlans = [];
+
+        foreach ($providers as $provider) {
+            try {
+                $providerInstance = ProviderService::make($provider);
+
+                if ($providerInstance && $providerInstance->supportsService('data')) {
+                    $plansResponse = $providerInstance->plans(['type' => 'data']);
+
+                    // Handle different response formats
+                    $isSuccess = ($plansResponse['status'] ?? false) === true || ($plansResponse['status'] ?? '') === 'success';
+
+                    if ($isSuccess && isset($plansResponse['data'])) {
+                        $data = $plansResponse['data'];
+
+                        // Handle SME plug grouped format (status: true, data: {networkId: [...plans]})
+                        if (is_array($data) && !isset($data[0]) && ($plansResponse['status'] ?? false) === true) {
+                            foreach ($data as $networkId => $plans) {
+                                if (!isset($allDataPlans[$networkId])) {
+                                    $allDataPlans[$networkId] = [];
+                                }
+
+                                // Add provider info to each plan
+                                foreach ($plans as $plan) {
+                                    $plan['provider_id'] = $provider->id;
+                                    $plan['provider_name'] = $provider->name;
+                                    $allDataPlans[$networkId][] = $plan;
+                                }
+                            }
+                        }
+                        // Handle Adex format (flat array of plans)
+                        elseif (is_array($data) && isset($data[0])) {
+                            $networkId = '1'; // Default network for Adex
+                            if (!isset($allDataPlans[$networkId])) {
+                                $allDataPlans[$networkId] = [];
+                            }
+
+                            foreach ($data as $plan) {
+                                $plan['provider_id'] = $provider->id;
+                                $plan['provider_name'] = $provider->name;
+                                $allDataPlans[$networkId][] = $plan;
+                            }
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning("Failed to get data plans from provider {$provider->name}: " . $e->getMessage());
+                continue;
+            }
+        }
+
+        return $allDataPlans;
     }
 
     /**

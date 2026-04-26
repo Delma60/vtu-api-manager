@@ -36,7 +36,10 @@ class TransactionService
     public function initialize(User $user, array $data, ?string $platform = "api"): Transaction
     {
         return DB::transaction(function () use ($user, $data, $platform) {
-            if($platform !== "api"){
+            // Check if this is a test environment - skip wallet deduction
+            $environment = request()->attributes->get('environment') ?? 'live';
+            
+            if ($environment !== 'test') {
                 $wallet = $user->wallet()->lockForUpdate()->first();
     
                 // Calculate exact amount to deduct
@@ -48,7 +51,6 @@ class TransactionService
                 // Deduct the wallet
                 $wallet->balance -= $amountToDeduct;
                 $wallet->save();
-
             }
 
             // Create the pending transaction

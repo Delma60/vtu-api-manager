@@ -26,19 +26,11 @@ class ProviderService
      */
     public static function make(Provider $provider): ProviderAbstract
     {
-        $useSandbox = false;
+        // CRITICAL: Check environment from request attributes (set by ApiKeyAuth middleware)
+        $environment = request()->attributes->get('environment') ?? 'live';
 
-        if(request()->user()){
-            $user = request()->user();
-            $useSandbox = $user->business?->mode === 'test';
-        }
-
-        // Determine if sandbox mode should be used based on the authenticated user's business mode
-        if (auth()->check() && auth()->user()->user_type !== 'admin' && auth()->user()->business) {
-            $useSandbox = auth()->user()->business->mode === 'test';
-        }
-
-        if ($useSandbox) {
+        // Force sandbox for test environment to prevent real transactions
+        if ($environment === 'test') {
             return new Sandbox($provider);
         }
 

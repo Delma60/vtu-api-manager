@@ -2,358 +2,411 @@
 
 namespace App\Class\Providers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class Vtpass extends ProviderAbstract
 {
-    protected string $baseUrl;
-    
-    public function __construct($providerModel = null)
-    {
-        parent::__construct($providerModel);
+    protected string $providerName = 'vtpass';
 
-        // Set the Base URL based on your provider's mode
-        $this->baseUrl = $this->provider->mode === 'live' 
-            ? 'https://vtpass.com/api' 
-            : 'https://sandbox.vtpass.com/api';
+    /**
+     * Resolves the Base URL dynamically based on the sandbox state
+     */
+    protected function baseUrl(): string
+    {
+        return $this->isSandbox 
+            ? 'https://sandbox.vtpass.com/api' 
+            : 'https://vtpass.com/api';
     }
 
     /**
-     * VTPass typically uses Basic Auth with Email:Password, 
-     * but newer integrations use Api-Key and Secret-Key. 
-     * Adjust this based on what you saved in your DB.
+     * Required by Abstract: Returns standard auth headers
      */
     protected function getAuthHeaders(): array
     {
-        // Assuming your DB `api_key` column holds the username/email
-        // and `secret_key` holds the password
-        $credentials = base64_encode("{$this->provider->api_key}:{$this->provider->secret_key}");
-
         return [
-            'Authorization' => 'Basic ' . $credentials,
-            'Content-Type'  => 'application/json',
-        ];
-    }
-
-    // =========================================================================
-    // Interface / Abstract Required Methods
-    // =========================================================================
-
-    public function login()
-    {
-        // VTPass uses API Keys per request, so no session login is required.
-        return true;
-    }
-
-    public function endpoint($path = '')
-    {
-        return rtrim($this->baseUrl, '/') . '/' . ltrim($path, '/');
-    }
-
-    public function pingEndpoint()
-    {
-        return $this->endpoint('balance');
-    }
-
-    public function getSupportedServices()
-    {
-        return ['airtime', 'data', 'cable', 'electricity', 'education'];
-    }
-
-    public function formatPayload($service, $data = [])
-    {
-        return $data; // VTPass payload formatting is handled inside executePay()
-    }
-
-    public function sendRequest($method, $endpoint, $data = [])
-    {
-        $url = $this->endpoint($endpoint);
-
-        if (strtolower($method) === 'get') {
-            return Http::withHeaders($this->getAuthHeaders())->timeout(45)->get($url, $data);
-        }
-
-        return Http::withHeaders($this->getAuthHeaders())->timeout(45)->post($url, $data);
-    }
-
-    public function formatResponse($response)
-    {
-        $data = $response->json();
-
-        return [
-            'status' => in_array($data['code'] ?? '', ['000', '099']),
-            'message' => $data['response_description'] ?? 'No message',
-            'data' => $data,
-            'raw' => $response->body()
-        ];
-    }
-
-    public function normalizeError($response)
-    {
-        $data = is_array($response) ? $response : $response->json();
-        return $data['response_description'] ?? 'An error occurred with the provider.';
-    }
-
-    public function checkBalance()
-    {
-        try {
-            $response = $this->sendRequest('GET', 'balance');
-            $data = $response->json();
-
-            if (isset($data['code']) && $data['code'] === '000') {
-                return $data['contents']['balance'] ?? 0.00;
-            }
-            return 0.00;
-        } catch (\Exception $e) {
-            return 0.00;
-        }
-    }
-
-    public function verifyTransaction($reference)
-    {
-        $response = $this->sendRequest('POST', 'requery', [
-            'request_id' => $reference
-        ]);
-
-        $data = $response->json();
-
-        if (isset($data['code']) && $data['code'] === '000') {
-            return [
-                'status' => 'successful',
-                'message' => $data['response_description'] ?? 'Transaction Successful',
-                'raw' => $data
-            ];
-        } elseif (isset($data['code']) && $data['code'] === '099') {
-            return [
-                'status' => 'pending',
-                'message' => 'Transaction is still pending',
-                'raw' => $data
-            ];
-        }
-
-        return [
-            'status' => 'failed',
-            'message' => $data['response_description'] ?? 'Transaction Failed',
-            'raw' => $data
-        ];
-    }
-
-    public function verifyUser($service, $accountNumber)
-    {
-        $response = $this->sendRequest('POST', 'merchant-verify', [
-            'billersCode' => $accountNumber,
-            'serviceID' => strtolower($service)
-        ]);
-
-        $data = $response->json();
-
-        if (isset($data['code']) && $data['code'] === '000') {
-            return [
-                'status' => true,
-                'name' => $data['content']['Customer_Name'] ?? 'Verified User',
-                'raw' => $data
-            ];
-        }
-
-        return [
-            'status' => false,
-            'name' => null,
-            'message' => $data['response_description'] ?? 'Verification failed'
-        ];
-    }
-
-    public function callback(\Illuminate\Http\Request $request)
-    {
-        // Handle VTPass webhook/callback responses here if needed
-        return response()->json(['status' => 'success']);
-    }
-
-    public function diagnose()
-    {
-        $balance = $this->checkBalance();
-        return [
-            'status' => true,
-            'message' => "VTPass is connected. Wallet Balance: ₦{$balance}"
+            'api-key'      => $this->provider->api_key,
+            'secret-key'   => $this->provider->secret_key,
+            'Content-Type' => 'application/json',
         ];
     }
 
     /**
-     * VTPass requires a VERY specific Request ID format:
-     * Format: YYYYMMDDHHII + random alphanumeric
+     * Required by Abstract: Build the endpoint path for a specific service
      */
-    protected function generateRequestId(): string
+    protected function endpoint(string $service): string
     {
-        return now()->format('YmdHi') . strtolower(Str::random(10));
-    }
-
-    /**
-     * Helper to map your internal network IDs to VTPass Airtime Service IDs
-     */
-    protected function getAirtimeServiceId(string $networkName): string
-    {
-        return match (strtolower($networkName)) {
-            'mtn' => 'mtn',
-            'airtel' => 'airtel',
-            'glo' => 'glo',
-            '9mobile', 'etisalat' => 'etisalat',
-            default => throw new \Exception("Unsupported Airtime Network for VTPass"),
+        return match (strtolower($service)) {
+            'airtime', 'data', 'cable', 'electricity', 'education' => '/pay',
+            'balance' => '/balance',
+            'verify'  => '/merchant-verify',
+            'requery' => '/requery',
+            default   => '/pay',
         };
     }
 
-    /**
-     * Helper to map your internal network IDs to VTPass Data Service IDs
-     */
-    protected function getDataServiceId(string $networkName): string
+    protected function buildEndpoint(string $service): string
     {
-        return match (strtolower($networkName)) {
-            'mtn' => 'mtn-data',
-            'airtel' => 'airtel-data',
-            'glo' => 'glo-data',
-            '9mobile', 'etisalat' => 'etisalat-data',
-            default => throw new \Exception("Unsupported Data Network for VTPass"),
-        };
-    }
-
-    // =========================================================================
-    // Core Transaction Methods
-    // =========================================================================
-
-    public function buyAirtime(string $phone, float $amount, string $networkName): array
-    {
-        $payload = [
-            'request_id' => $this->generateRequestId(),
-            'serviceID'  => $this->getAirtimeServiceId($networkName),
-            'amount'     => $amount,
-            'phone'      => $phone,
-        ];
-
-        return $this->executePay($payload);
-    }
-
-    public function buyData(string $phone, string $providerPlanId, string $networkName): array
-    {
-        $payload = [
-            'request_id'     => $this->generateRequestId(),
-            'serviceID'      => $this->getDataServiceId($networkName),
-            'billersCode'    => $phone, // VTPass uses billersCode for data recipient
-            'variation_code' => $providerPlanId, // e.g., "mtn-10mb-100"
-            'phone'          => $phone,
-        ];
-
-        return $this->executePay($payload);
-    }
-
-    public function buyCable(string $smartcard, string $providerPlanId, string $serviceId, string $subscriptionType = 'change'): array
-    {
-        // $serviceId should be "dstv", "gotv", or "startimes"
-        $payload = [
-            'request_id'        => $this->generateRequestId(),
-            'serviceID'         => strtolower($serviceId),
-            'billersCode'       => $smartcard,
-            'variation_code'    => $providerPlanId, // e.g., "gotv-lite"
-            'phone'             => '08011111111', // Dummy/Agent phone number
-            'subscription_type' => $subscriptionType, // "change" or "renew"
-        ];
-
-        return $this->executePay($payload);
+        return $this->baseUrl() . $this->endpoint($service);
     }
 
     /**
-     * Centralized execution method since ALL VTPass purchases use POST /pay
+     * Required by Abstract: Ping endpoint for health checks
      */
-    protected function executePay(array $payload): array
+    protected function pingEndpoint(): string
     {
-        try {
-            $response = Http::withHeaders($this->getAuthHeaders())
-                ->timeout(45)
-                ->post($this->baseUrl . '/pay', $payload);
-
-            $data = $response->json();
-
-            // VTPass returns code "000" for success, "099" for pending
-            if (in_array($data['code'] ?? '', ['000', '099'])) {
-                return [
-                    'status'    => true,
-                    'reference' => $payload['request_id'],
-                    'message'   => $data['response_description'] ?? 'Transaction successful',
-                    'raw'       => $data,
-                ];
-            }
-
-            return [
-                'status'  => false,
-                'message' => $data['response_description'] ?? 'Transaction failed',
-                'raw'     => $data,
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('VTPass API Exception', ['error' => $e->getMessage(), 'payload' => $payload]);
-            return [
-                'status'  => false,
-                'message' => 'Provider timeout or internal error.',
-                'raw'     => null,
-            ];
-        }
+        return $this->buildEndpoint('balance');
     }
 
-    // =========================================================================
-    // Requery & Validation Methods
-    // =========================================================================
-
-    public function verifySmartcard(string $smartcardNumber, string $serviceId): array
+    /**
+     * Required by Interface: Formats payload directly to VTPass requirements
+     */
+    public function formatPayload(string $service, array $payload): array
     {
-        $response = Http::withHeaders($this->getAuthHeaders())
-            ->post($this->baseUrl . '/merchant-verify', [
-                'billersCode' => $smartcardNumber,
-                'serviceID'   => strtolower($serviceId), // e.g., 'dstv'
-            ]);
+        $requestId = now()->timezone('Africa/Lagos')->format('YmdHi') . strtolower(Str::random(10));
+        $txRef = $payload['tx_ref'] ?? $requestId;
 
-        $data = $response->json();
-
-        if (isset($data['code']) && $data['code'] === '000') {
+        if ($service === 'airtime') {
             return [
-                'status'        => true,
-                'customer_name' => $data['content']['Customer_Name'] ?? 'Verified Customer',
+                'request_id' => $txRef,
+                'serviceID'  => $this->getServiceNetworkName($payload['network'] ?? '', 'airtime'),
+                'amount'     => $payload['amount'],
+                'phone'      => $payload['phone'],
             ];
         }
 
-        return ['status' => false, 'message' => $data['response_description'] ?? 'Invalid Smartcard'];
+        if ($service === 'data') {
+            return [
+                'request_id'     => $txRef,
+                'serviceID'      => $this->getServiceNetworkName($payload['network'] ?? '', 'data'),
+                'billersCode'    => $payload['phone'], 
+                'variation_code' => $payload['plan_id'] ?? $payload['data_plan'] ?? '', 
+                'phone'          => $payload['phone'],
+                'amount'         => $payload['amount'] ?? null, 
+            ];
+        }
+
+        if ($service === 'cable') {
+            return [
+                'request_id'        => $txRef,
+                'serviceID'         => strtolower($payload['cable_network'] ?? $payload['cable_name'] ?? ''), 
+                'billersCode'       => $payload['iuc'] ?? $payload['smartcard_number'] ?? '',
+                'variation_code'    => $payload['plan_id'] ?? $payload['cable_plan'] ?? '', 
+                'phone'             => $payload['phone'] ?? '08011111111', 
+                'subscription_type' => $payload['subscription_type'] ?? 'change',
+            ];
+        }
+
+        if ($service === 'electricity') {
+            return [
+                'request_id'     => $txRef,
+                'serviceID'      => $payload['disco'] ?? '',
+                'billersCode'    => $payload['meter_number'] ?? '',
+                'variation_code' => strtolower($payload['meter_type'] ?? 'prepaid'),
+                'amount'         => $payload['amount'],
+                'phone'          => $payload['phone'] ?? '08011111111',
+            ];
+        }
+
+        return $payload;
     }
 
-    public function requeryTransaction(string $requestId): array
+    /**
+     * Helper to map internal networks to VTPass exact Service IDs
+     */
+    protected function getServiceNetworkName(string|int $network, string $type): string
+    {
+        // Support parsing mapped IDs as fallback
+        $networkMap = [1 => 'mtn', 2 => 'airtel', 3 => 'glo', 4 => 'etisalat'];
+        
+        $networkName = is_numeric($network) && isset($networkMap[$network]) 
+            ? $networkMap[$network] 
+            : strtolower((string)$network);
+
+        if (in_array($networkName, ['9mobile', 'etisalat'])) {
+            $networkName = 'etisalat';
+        }
+
+        return $type === 'data' ? "{$networkName}-data" : $networkName;
+    }
+
+    /**
+     * Required by Abstract: Executes the HTTP call
+     */
+    public function sendRequest(string $service, array $payload): array
     {
         $response = Http::withHeaders($this->getAuthHeaders())
-            ->post($this->baseUrl . '/requery', [
-                'request_id' => $requestId,
-            ]);
+            ->timeout($this->getTimeout())
+            ->post($this->buildEndpoint($service), $payload);
 
         return $response->json() ?? [];
     }
 
     /**
-     * Fetch service variations from VTPass API
+     * Required by Abstract: Parses VTPass API response to system standard
      */
-    public function getPlans(string $serviceId): array
+    protected function formatResponse(string $service, array $response): array
     {
+        $isSuccess = isset($response['code']) && in_array($response['code'], ['000', '099']);
+        
+        $default = [
+            'provider'              => $this->providerName,
+            'status'                => $isSuccess ? 'success' : 'fail',
+            'transaction_reference' => $response['requestId'] ?? null,
+            'payment_reference'     => $response['content']['transactions']['transactionId'] ?? null,
+            'response_message'      => $response['response_description'] ?? 'Transaction processed',
+            'completed_at'          => now(),
+            'service_fee'           => 0.00,
+            'platform'              => 'api',
+        ];
+
+        // Service specific mappings
+        $transaction = $response['content']['transactions'] ?? [];
+        switch ($service) {
+            case 'airtime':
+                $default['transaction_type'] = 'airtime_recharge';
+                $default['amount'] = $transaction['amount'] ?? 0.00;
+                $default['receiver'] = $transaction['unique_element'] ?? null;
+                break;
+            case 'data':
+                $default['transaction_type'] = 'data_subscription';
+                $default['amount'] = $transaction['amount'] ?? 0.00;
+                $default['receiver'] = $transaction['unique_element'] ?? null;
+                break;
+            case 'cable':
+                $default['transaction_type'] = 'cable_subscription';
+                $default['amount'] = $transaction['amount'] ?? 0.00;
+                $default['receiver'] = $transaction['unique_element'] ?? null;
+                break;
+            case 'electricity':
+                $default['transaction_type'] = 'electricity_bill';
+                $default['amount'] = $transaction['amount'] ?? 0.00;
+                $default['receiver'] = $transaction['unique_element'] ?? null;
+                $default['token'] = $response['purchased_code'] ?? $response['token'] ?? null;
+                break;
+        }
+
+        return $default;
+    }
+
+    /**
+     * Required by Abstract: Verify User (Cable / Electricity)
+     */
+    public function verifyUser(string $service, string $identifier, array $payload): mixed
+    {
+        if (!in_array($service, ['cable', 'electricity'])) {
+            return [
+                'status'  => 'error',
+                'message' => "Verification not supported for service: {$service}",
+                'data'    => null,
+            ];
+        }
+
+        $serviceId = $service === 'cable' 
+            ? strtolower($payload['cable_network'] ?? $payload['cable_name'] ?? '')
+            : strtolower($payload['disco'] ?? '');
+
+        $type = $payload['meter_type'] ?? 'prepaid';
+
+        try {
+            $response = Http::withHeaders($this->getAuthHeaders())
+                ->timeout($this->getTimeout())
+                ->post($this->buildEndpoint('verify'), [
+                    'billersCode' => $identifier,
+                    'serviceID'   => $serviceId,
+                    'type'        => $type,
+                ]);
+
+            $data = $response->json();
+
+            if (isset($data['code']) && $data['code'] === '000') {
+                return [
+                    'status'  => 'success',
+                    'message' => 'Verification successful',
+                    'data'    => [
+                        'name' => $data['content']['Customer_Name'] ?? 'Verified Customer',
+                        'raw'  => $data
+                    ]
+                ];
+            }
+
+            return [
+                'status'  => 'error',
+                'message' => $data['response_description'] ?? 'Invalid Account / Smartcard details',
+                'data'    => null
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+                'data'    => null
+            ];
+        }
+    }
+
+    /**
+     * Required by Interface: Check Wallet Balance
+     */
+    public function checkBalance(): string
+    {
+        try {
+            $response = Http::withHeaders($this->getAuthHeaders())
+                ->timeout($this->getTimeout())
+                ->get($this->buildEndpoint('balance'));
+
+            $data = $response->json();
+
+            if (isset($data['code']) && $data['code'] === '000') {
+                return (string) ($data['contents']['balance'] ?? '0.00');
+            }
+
+            return '0.00';
+        } catch (\Exception $e) {
+            Log::error('VTPass Check Balance Error: ' . $e->getMessage());
+            return '0.00';
+        }
+    }
+
+    /**
+     * Required by Abstract: Verify/Requery Transaction
+     */
+    public function verifyTransaction(string $tx_ref): array
+    {
+        try {
+            $response = Http::withHeaders($this->getAuthHeaders())
+                ->timeout($this->getTimeout())
+                ->post($this->buildEndpoint('requery'), [
+                    'request_id' => $tx_ref
+                ]);
+
+            $data = $response->json();
+
+            if (isset($data['code']) && in_array($data['code'], ['000', '099'])) {
+                return [
+                    'status'  => 'success',
+                    'message' => $data['response_description'] ?? 'Transaction verified successfully',
+                    'data'    => $data
+                ];
+            }
+
+            return [
+                'status'  => 'failed',
+                'message' => $data['response_description'] ?? 'Transaction failed',
+                'data'    => $data
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status'  => 'pending',
+                'message' => 'Could not verify transaction at this time.',
+                'data'    => []
+            ];
+        }
+    }
+
+    /**
+     * Required by Abstract: Standardize Callback Format
+     */
+    protected function callback(Request $request): array
+    {
+        $payload = $request->all();
+        
+        return [
+            "status" => (isset($payload['code']) && $payload['code'] === '000') ? 'success' : 'failed',
+            "tx_ref" => $payload['requestId'] ?? null,
+        ];
+    }
+
+    /**
+     * Required by Abstract: Fetch and format plans
+     */
+    protected function getPlans(?array $payload = null): mixed
+    {
+        $serviceId = $payload['service_id'] ?? 'mtn-data';
+
         $response = Http::withHeaders($this->getAuthHeaders())
-            ->get($this->baseUrl . '/service-variations?serviceID=' . $serviceId);
+            ->timeout($this->getTimeout())
+            ->get($this->baseUrl() . '/service-variations?serviceID=' . $serviceId);
 
-        $payload = $response->json();
+        $data = $response->json();
 
-        if (!isset($payload['content']['variations'])) {
+        if (!isset($data['content']['variations'])) {
             return [];
         }
 
-        return collect($payload['content']['variations'])->map(function ($plan) use ($serviceId) {
+        return collect($data['content']['variations'])->map(function ($plan) {
             return [
-                // This 'variation_code' is what goes into your DataPlan `provider_plan_id` column
-                'provider_plan_id' => $plan['variation_code'], 
+                'provider_plan_id' => $plan['variation_code'],
                 'name'             => $plan['name'],
                 'amount'           => (float) $plan['variation_amount'],
-                'raw_service_id'   => $serviceId,
+                'validity'         => '30 Days', 
             ];
         })->toArray();
+    }
+
+    /**
+     * Required by Abstract: Normalize API Errors to standard readable format
+     */
+    protected function normalizeError(array $responseData, string $service): string
+    {
+        $rawMessage = $responseData['response_description'] ?? $responseData['message'] ?? '';
+
+        if (empty($rawMessage)) {
+            return 'Transaction failed due to an unknown provider error.';
+        }
+
+        $messageLower = strtolower($rawMessage);
+
+        if (str_contains($messageLower, 'low wallet balance') || str_contains($messageLower, 'insufficient balance')) {
+            $this->diagnose($service, 'Insufficient Balance', $rawMessage, 'warning');
+            return 'This service is currently unavailable due to provider capacity. Please try again later.';
+        }
+
+        return $rawMessage;
+    }
+
+    /**
+     * Required by Abstract: Diagnostics Log
+     */
+    public function diagnose(string $service, string $title, string $body, ?string $type = "error"): void
+    {
+        $meta = $this->provider->meta ?? [];
+        $diagnostics = $meta['diagnostics'] ?? [];
+
+        $diagnostics[] = [
+            "time"     => now()->toDateTimeString(),
+            "endpoint" => $this->endpoint($service),
+            "body"     => $body,
+            'title'    => $title,
+            'type'     => $type,
+        ];
+
+        if (count($diagnostics) > 10) {
+            $diagnostics = array_slice($diagnostics, -10);
+        }
+
+        $meta['diagnostics'] = $diagnostics;
+
+        $this->provider->update([
+            'meta' => $meta
+        ]);
+    }
+
+    /**
+     * Required by Interface: Login Method
+     */
+    public function login(): mixed
+    {
+        // VTPass handles auth via Keys natively, so we default to returning success mock
+        return ['status' => 'success'];
+    }
+
+    /**
+     * Required by Abstract
+     */
+    protected function getSupportedServices(): array
+    {
+        return ['airtime', 'data', 'cable', 'electricity', 'education'];
     }
 }

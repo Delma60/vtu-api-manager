@@ -42,3 +42,6 @@ Artisan::command('migrate:both {--fresh} {--seed} {--force}', function () {
 
 // * * * * * cd /path-to-your-vtu-project && php artisan schedule:run >> /dev/null 2>&1
 Schedule::command('subscriptions:deactivate-expired')->dailyAt('00:05');
+
+// Run every hour, or every minute depending on how granular you need it
+Schedule::command('settlements:process')->everyMinute()->withoutOverlapping();

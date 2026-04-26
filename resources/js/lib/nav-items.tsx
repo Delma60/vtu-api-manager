@@ -153,6 +153,11 @@ export const navItems = ({
                     label: 'Transfer',
                     routeName: 'transfers.index',
                 },
+                {
+                    icon: <Receipt className="h-5 w-5 shrink-0" />,
+                    label: 'Settlements',
+                    routeName: 'settlements.index',
+                },
             ],
         },
         {

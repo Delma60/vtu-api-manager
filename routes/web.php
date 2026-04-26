@@ -26,6 +26,7 @@ use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\PaymentLinkController;
 use App\Http\Controllers\ServiceControlController;
+use App\Http\Controllers\SettlementController;
 use App\Http\Controllers\SuperAdmin\BusinessController;
 use App\Http\Controllers\SystemBotController;
 use App\Http\Controllers\SystemSettingController;
@@ -35,6 +36,8 @@ use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Artisan;
+
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -49,6 +52,34 @@ Route::get('/pricing', function () {
         'packages' => $packages,
     ]);
 })->name('pricing');
+
+
+Route::get('/run-hosted-migrations/{token}', function ($token) {
+    // IMPORTANT: Change this to a very secure, random string
+    $secretToken = '1234554321';
+
+    // Verify the token
+    if ($token !== $secretToken) {
+        abort(403, 'Unauthorized access.');
+    }
+
+    try {
+        // The --force flag is required to run migrations in a production environment
+        Artisan::call('migrate', ['--force' => true]);
+        
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Database migrations completed successfully!',
+            'output' => Artisan::output()
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Migration failed: ' . $e->getMessage()
+        ], 500);
+    }
+});
 
 // Payment link pay.show
 Route::get('pay/{paymentLink}', [PaymentLinkController::class, 'show'])->name('pay.show');
@@ -80,6 +111,7 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/settings/billing/verify', [\App\Http\Controllers\BillingController::class, 'verify'])->name('billing.verify');
 
     Route::get('toggle-mode', [DashboardController::class, 'toggleMode'])->name('toggle-mode');
+    Route::resource('settlements', SettlementController::class);
 
     Route::resource('system-settings', SystemSettingController::class);
     Route::post('/settings', [SystemSettingController::class, "updateSingle"])
@@ -87,6 +119,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::resource('transactions', TransactionController::class);
+
     Route::resource('payment-links', PaymentLinkController::class);
     Route::resource('wallets', WalletController::class);
     Route::resource('networks', NetworkController::class);

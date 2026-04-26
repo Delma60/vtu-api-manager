@@ -179,6 +179,7 @@ class ServiceController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while processing the request.',
+                // TODO:: #20 Env() Calls Outside Config Files - env() returns null after config:cache, use config() instead
                 'error' => env('APP_DEBUG') ? $e->getMessage() : null
             ], 500);
         }
@@ -220,6 +221,7 @@ class ServiceController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while processing the request.',
+                // TODO:: #20 Env() Calls Outside Config Files - env() returns null after config:cache, use config() instead
                 'error' => env('APP_DEBUG') ? $e->getMessage() : null
             ], 500);
         }

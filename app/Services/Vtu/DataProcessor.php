@@ -14,6 +14,7 @@ class DataProcessor
 
     public function process(User $user, array $payload): array
     {
+        // TODO:: #3 Trusting Client-Submitted Prices - Never trust client-submitted prices, always fetch from database
         // $provider = ProviderService::getProviderInstance("data");
         $txRef = $payload['tx_ref'] ?? 'VTM_' . uniqid();
         $payload['tx_ref'] = $txRef;
@@ -50,8 +51,10 @@ class DataProcessor
 
         // 2. Format & Send Request
         foreach ($providersToTry as $providerInstance) {
-            try {
-                // Update the transaction record to reflect the current provider being attempted
+            try {                // TODO:: #6 Uncaught Provider API Exceptions - Handle 502 HTML errors, timeouts, and unexpected responses
+                // TODO:: #7 Synchronous Execution Timeouts - VTU providers can be slow, causing PHP max_execution_time issues
+                // TODO:: #8 Platform Wallet Exhaustion - Detect when provider wallet is empty and refund user
+                // TODO:: #9 Unexpected Provider Payload Changes - Handle API response format changes gracefully                // Update the transaction record to reflect the current provider being attempted
                 $transaction->update(['provider_id' => $providerInstance->getProviderModel()->id]);
 
                 // Format the payload specifically for THIS provider

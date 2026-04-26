@@ -43,6 +43,7 @@ class ApiKeyAuth
         config(['app.api_mode' => $credential->environment]);
 
         // Pass the environment down the chain for rate limiting
+        // TODO:: #15 Environment Leakage - FIXED: Added environment attribute to request for downstream middleware
         $request->attributes->set('environment', $credential->environment);
 
         return $next($request);

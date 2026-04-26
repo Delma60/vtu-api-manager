@@ -29,6 +29,8 @@ class EnsurePackageFeature
         // 3. Check if the specific feature is enabled (true or > 0)
         // Note: For numerical limits like 'staff_limit', any number > 0 passes this basic gate.
         // You would write a separate check for exact numeric limits inside the controller.
+        // TODO:: #19 Silent Feature Gating Bypasses - Use strict type checking, not empty() where 0 is valid
+        // TODO:: #21 Strict Type Checking - FIXED: Use isset() and strict comparison instead of empty() for better type safety
         if (!isset($settings[$feature]) || $settings[$feature] === false || $settings[$feature] === "") {
             return $this->denyAccess($request, "This feature is not available on your current plan. Please upgrade to access it.");
         }

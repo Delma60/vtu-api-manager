@@ -59,6 +59,7 @@ class HandleInertiaRequests extends Middleware
             'general' => [
                 "app_name" => SystemSetting::getKeyValue("site_name", '', [ 'ignore-scopes' => true ]),
                 // "app_name" SystemSettings
+                // TODO:: #20 Env() Calls Outside Config Files - env() returns null after config:cache, use config() instead
                 'app_url' => env('APP_URL', 'http://localhost'),
                 "site_logo" => SystemSetting::getKeyValue("site_logo", null, ['ignore-scopes' => true]) 
                                 ? asset('storage/' . SystemSetting::getKeyValue("site_logo", null, ['ignore-scopes' => true])) 

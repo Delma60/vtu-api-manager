@@ -14,7 +14,9 @@ class MonthlyApiRateLimiter
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // TODO:: #17 Rate Limiter Cache Failure - Handle Redis/Memcached restarts that reset rate limit counters
         // 1. Check if this is a test environment - bypass rate limiting entirely
+        // TODO:: #16 Test Environment Bypass - FIXED: Added environment check to skip rate limiting in test mode
         $environment = $request->attributes->get('environment') ?? 'live';
         if ($environment === 'test') {
             return $next($request);

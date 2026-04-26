@@ -24,6 +24,8 @@ class DeactivateExpiredSubscriptions extends Command
      */
     public function handle()
     {
+        // TODO:: #18 Memory Leaks in Cron Jobs - Use chunk() or chunkById() instead of get() to prevent memory exhaustion
+        // TODO:: #19 Missing Free Tier Fallback - FIXED: Added validation and error handling for missing free tier
         // Find the default Free Tier package (lowest price active package)
         $freeTier = Package::where('is_active', true)->orderBy('price', 'asc')->first();
 

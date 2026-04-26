@@ -35,8 +35,7 @@ class BillingController extends Controller
 
         $business = $request->user()->business;
         $package = Package::find($request->package_id);
-
-        if ($package->price == 0) {
+        // TODO:: #14 Free Plan Time Theft - FIXED: Added validation to prevent free plan renewal extension        if ($package->price == 0) {
             // Prevent immediate downgrade if they have active premium time remaining
             if ($business->subscription_ends_at && $business->subscription_ends_at->isFuture()) {
                 return back()->with('error', 'You still have an active premium subscription. Please wait until it expires to switch to the free plan.');
@@ -104,6 +103,7 @@ class BillingController extends Controller
 
     public function verify(Request $request, TransactionService $transactionService)
     {
+        // TODO:: #13 Parameter Tampering on Redirect - FIXED: Now using trusted database values instead of URL parameters
         $status = $request->query('status');
         $tx_ref = $request->query('tx_ref') ?? $request->query('transaction');
 

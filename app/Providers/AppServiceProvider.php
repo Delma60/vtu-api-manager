@@ -29,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     {
         
         Transaction::observe(TransactionObserver::class);
+        // TODO:: #20 Env() Calls Outside Config Files - env() returns null after config:cache, use config() instead
        if(str_contains(env("APP_URL"), "ngrok") ){
             URL::forceScheme('https');
         }

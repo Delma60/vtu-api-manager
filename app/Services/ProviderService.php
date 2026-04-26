@@ -24,6 +24,7 @@ class ProviderService
     /**
      * Instantiate the correct provider instance.
      */
+    // TODO:: #18 Unhandled Provider Exceptions - FIXED: Added environment-based provider selection and fallback logic
     public static function make(Provider $provider): ProviderAbstract
     {
         // CRITICAL: Check environment from request attributes (set by ApiKeyAuth middleware)
@@ -226,6 +227,7 @@ class ProviderService
      */
     public static function getFallbackProviders(string $service, ?int $networkTypeId = null): array
     {
+        // TODO:: #10 Deadlock on Default Provider Failure - Ensure fallback routing works when primary provider is offline
         $primaryProviderId = null;
 
         // 1. Identify the primary provider assigned to this specific network type

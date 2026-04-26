@@ -137,6 +137,7 @@ class WalletController extends Controller
             'customer_name' => $user->name,
             'customer_email' => $user->email,
             'amount' => $amount,
+            // TODO:: #20 Env() Calls Outside Config Files - env() returns null after config:cache, use config() instead
             'description' => "Wallet Top-up for " . env('APP_NAME'),
             'transaction_reference' => $reference,
             'redirect_url' => route('wallet.fund.verify'),

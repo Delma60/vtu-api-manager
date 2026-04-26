@@ -113,6 +113,7 @@ class PaymentLinkController extends Controller
 
     public function verify(Request $request, $id)
     {
+        // TODO:: #15 Insecure Direct Object Reference (IDOR) - Always scope queries to prevent users accessing other users' data
         $paymentLink = PaymentLink::findOrFail($id);
 
 

@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 
 class Transaction extends Model
 {
+    // TODO:: #4 Missing Database Indexes on References - Index transaction_reference column for fast lookups at scale
     /** @use HasFactory<\Database\Factories\TransactionFactory> */
     use HasFactory, BelongsToBusiness, TenantEnvironmentScope;
 

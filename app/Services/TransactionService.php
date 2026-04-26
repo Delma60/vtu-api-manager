@@ -35,6 +35,8 @@ class TransactionService
 
     public function initialize(User $user, array $data, ?string $platform = "api"): Transaction
     {
+        // TODO:: #1 Wallet Race Conditions (Double Spending) - Use DB::transaction() and lockForUpdate() to prevent concurrent deductions
+        // TODO:: #2 Post-Delay Balance Checks - Balance could change during provider response delay, causing negative balances
         return DB::transaction(function () use ($user, $data, $platform) {
             // Check if this is a test environment - skip wallet deduction
             $environment = request()->attributes->get('environment') ?? 'live';
@@ -95,6 +97,7 @@ class TransactionService
      */
     public function markAsFailed(Transaction $transaction, string $reason, array $response = []): Transaction
     {
+        // TODO:: #5 Orphaned Pending Transactions - Need background job to periodically resolve/refund stale pending transactions
         return DB::transaction(function () use ($transaction, $reason, $response) {
             // Prevent double refunds
             if ($transaction->status === 'failed' || $transaction->status === 'refunded') {

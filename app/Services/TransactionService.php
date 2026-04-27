@@ -123,7 +123,7 @@ class TransactionService
         });
     }
 
-    public function calculateFinalPrice($basePrice, $package)
+    public function calculatePackageFinalPrice($basePrice, $package)
 {
     if (!$package || $package->discount <= 0) {
         return $basePrice;

@@ -1,10 +1,27 @@
+import { handleSubscribe } from '@/lib/utils';
 import { Package } from '@/types';
+import { Button } from '@headlessui/react';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { Bot, MessageCircle } from 'lucide-react'; // Import bot icons
 
 export default function PricingPage({ packages = [] }: { packages: Package[] }) {
-    // provid
-    // console.log(packages[0]);
-    const appName = usePage().props?.appName;
+    const appName = usePage().props?.general.app_name;
+
+    // Helper to calculate discounted price
+    const getDiscountedPrice = (pkg: Package) => {
+        if (!pkg.discount || pkg.discount <= 0) return Number(pkg.price);
+        
+        const priceNum = Number(pkg.price);
+        const discountNum = Number(pkg.discount);
+
+        if (pkg.discount_type === 'percentage') {
+            const amountOff = (priceNum * discountNum) / 100;
+            return Math.max(0, priceNum - amountOff);
+        }
+        
+        return Math.max(0, priceNum - discountNum);
+    };
+
     return (
         <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-indigo-500 selection:text-white dark:bg-slate-950 dark:text-slate-200">
             <Head title="Pricing Plans" />
@@ -49,19 +66,29 @@ export default function PricingPage({ packages = [] }: { packages: Package[] }) 
                         </div>
 
                         <div className="mx-auto mt-16 grid max-w-lg grid-cols-1 gap-y-6 sm:mt-20 lg:max-w-none lg:grid-cols-3 lg:gap-8">
-                            {packages.map((pkg, index) => {
-                                // Highlight the middle tier (usually index 1)
+                            {packages.map((pkg) => {
                                 const isFeatured = pkg.is_featured;
+                                const finalPrice = getDiscountedPrice(pkg);
+                                const hasDiscount = pkg.discount > 0;
 
                                 return (
                                     <div
                                         key={pkg.id}
-                                        className={`flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 transition-all hover:-translate-y-1 xl:p-10 dark:bg-slate-900 ${
+                                        className={`relative flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 transition-all hover:-translate-y-1 xl:p-10 dark:bg-slate-900 ${
                                             isFeatured
                                                 ? 'scale-105 shadow-indigo-500/10 ring-indigo-600 lg:z-10 dark:ring-indigo-500'
                                                 : 'ring-slate-200 lg:mt-8 dark:ring-slate-800'
                                         }`}
                                     >
+                                        {/* Floating Discount Badge */}
+                                        {hasDiscount && (
+                                            <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-2 lg:-translate-y-4 lg:translate-x-4">
+                                                <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-600 ring-1 ring-inset ring-red-500/20 animate-pulse">
+                                                    {pkg.discount_type === 'percentage' ? `${pkg.discount}% OFF` : `Save ₦${pkg.discount}`}
+                                                </span>
+                                            </div>
+                                        )}
+
                                         <div>
                                             <div className="flex items-center justify-between gap-x-4">
                                                 <h3
@@ -76,15 +103,26 @@ export default function PricingPage({ packages = [] }: { packages: Package[] }) 
                                                 ) : null}
                                             </div>
                                             <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-400">{pkg.description}</p>
-                                            <p className="mt-6 flex items-baseline gap-x-1">
-                                                <span className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                                    ₦{Number(pkg.price).toLocaleString()}
-                                                </span>
-                                                <span className="text-sm leading-6 font-semibold text-slate-600 dark:text-slate-400">
-                                                    /{pkg.billing_cycle === 'monthly' ? 'mo' : pkg.billing_cycle === 'yearly' ? 'yr' : 'one-time'}
-                                                </span>
-                                            </p>
+                                            
+                                            <div className="mt-6 flex flex-col">
+                                                <p className="flex items-baseline gap-x-1">
+                                                    <span className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                                        ₦{finalPrice.toLocaleString()}
+                                                    </span>
+                                                    <span className="text-sm leading-6 font-semibold text-slate-600 dark:text-slate-400">
+                                                        /{pkg.billing_cycle === 'monthly' ? 'mo' : pkg.billing_cycle === 'yearly' ? 'yr' : 'one-time'}
+                                                    </span>
+                                                </p>
+                                                {/* Strike-through original price */}
+                                                {hasDiscount && (
+                                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                        Regularly <span className="line-through decoration-red-500">₦{Number(pkg.price).toLocaleString()}</span>
+                                                    </p>
+                                                )}
+                                            </div>
+
                                             <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                                                {/* Map through JSON features if any */}
                                                 {pkg.features?.map((feature, i) => (
                                                     <li key={i} className="flex gap-x-3">
                                                         <svg
@@ -102,10 +140,24 @@ export default function PricingPage({ packages = [] }: { packages: Package[] }) 
                                                         {feature}
                                                     </li>
                                                 ))}
+
+                                                {/* Appended Bot Access Features */}
+                                                <li className={`flex gap-x-3 items-center ${pkg.settings?.allow_telegram_bot ? 'text-slate-900 dark:text-white' : 'text-slate-400/50 dark:text-slate-600'}`}>
+                                                    <Bot className={`h-5 w-5 flex-none ${pkg.settings?.allow_telegram_bot ? (isFeatured ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400') : 'text-slate-300 dark:text-slate-700'}`} />
+                                                    Telegram Bot Access
+                                                    {!pkg.settings?.allow_telegram_bot && <span className="ml-auto text-xs opacity-60">(Not Included)</span>}
+                                                </li>
+
+                                                <li className={`flex gap-x-3 items-center ${pkg.settings?.allow_whatsapp_bot ? 'text-slate-900 dark:text-white' : 'text-slate-400/50 dark:text-slate-600'}`}>
+                                                    <MessageCircle className={`h-5 w-5 flex-none ${pkg.settings?.allow_whatsapp_bot ? (isFeatured ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400') : 'text-slate-300 dark:text-slate-700'}`} />
+                                                    WhatsApp Bot Access
+                                                    {!pkg.settings?.allow_whatsapp_bot && <span className="ml-auto text-xs opacity-60">(Not Included)</span>}
+                                                </li>
                                             </ul>
                                         </div>
-                                        <Link
-                                            href={route('register')}
+                                        <Button
+                                            onClick={() =>handleSubscribe(pkg.id)}
+                                            // href={route('register')}
                                             className={`mt-8 block rounded-md px-3 py-2 text-center text-sm leading-6 font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
                                                 isFeatured
                                                     ? 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600'
@@ -113,7 +165,7 @@ export default function PricingPage({ packages = [] }: { packages: Package[] }) 
                                             }`}
                                         >
                                             Get started today
-                                        </Link>
+                                        </Button>
                                     </div>
                                 );
                             })}

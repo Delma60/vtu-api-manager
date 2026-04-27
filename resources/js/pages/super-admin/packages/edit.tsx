@@ -93,40 +93,41 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                             <InputError message={errors.name} />
                         </div>
 
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 ">
                             <div className="grid gap-2">
                                 <Label>Price (₦)</Label>
                                 <Input type="number" step="0.01" value={data.price} onChange={(e) => setData('price', e.target.value)} required />
                                 <InputError message={errors.price} />
                             </div>
+                            <div className="col-span-2 grid gap-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Discount Amount */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="discount">Discount Value</Label>
+                                        <Input
+                                            id="discount"
+                                            type="number"
+                                            step="0.01"
+                                            value={data.discount}
+                                            onChange={(e) => setData('discount', e.target.value)}
+                                        />
+                                        {errors.discount && <div className="text-sm text-red-500">{errors.discount}</div>}
+                                    </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Discount Amount */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="discount">Discount Value</Label>
-                                    <Input
-                                        id="discount"
-                                        type="number"
-                                        step="0.01"
-                                        value={data.discount}
-                                        onChange={(e) => setData('discount', e.target.value)}
-                                    />
-                                    {errors.discount && <div className="text-sm text-red-500">{errors.discount}</div>}
-                                </div>
-
-                                {/* Discount Type */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="discount_type">Discount Type</Label>
-                                    <Select value={data.discount_type} onValueChange={(value) => setData('discount_type', value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="flat">Flat Amount (₦)</SelectItem>
-                                            <SelectItem value="percentage">Percentage (%)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.discount_type && <div className="text-sm text-red-500">{errors.discount_type}</div>}
+                                    {/* Discount Type */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="discount_type">Discount Type</Label>
+                                        <Select value={data.discount_type} onValueChange={(value) => setData('discount_type', value)}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="flat">Flat Amount (₦)</SelectItem>
+                                                <SelectItem value="percentage">Percentage (%)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.discount_type && <div className="text-sm text-red-500">{errors.discount_type}</div>}
+                                    </div>
                                 </div>
                             </div>
                             <div className="grid gap-2">

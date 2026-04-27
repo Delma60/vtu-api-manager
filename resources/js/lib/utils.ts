@@ -1,3 +1,4 @@
+import { router } from '@inertiajs/react';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -19,4 +20,19 @@ export const getNetworkColor = (name: string) => {
             default:
                 return 'bg-slate-500';
         }
+    };
+
+export const getDiscountedPrice = (price: number, discount: number, type?: 'flat' | 'percentage') => {
+    if (!discount || discount <= 0) return price;
+    
+    if (type === 'percentage') {
+        const discountAmount = (price * discount) / 100;
+        return Math.max(0, price - discountAmount);
+    }
+    
+    return Math.max(0, price - discount);
+};
+
+ export const handleSubscribe = (packageId: number) => {
+        router.post(route('billing.subscribe'), { package_id: packageId });
     };

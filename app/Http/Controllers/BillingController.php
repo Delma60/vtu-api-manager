@@ -7,6 +7,7 @@ use App\Models\Package;
 use App\Models\PaymentGateway;
 use App\Models\User;
 use App\Services\TransactionService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -35,11 +36,12 @@ class BillingController extends Controller
 
         $business = $request->user()->business;
         $package = Package::find($request->package_id);
+        $price = $payment->calculatePackageFinalPrice($package->price, $package);
 
         // TODO:: #14 Free Plan Time Theft - FIXED: Added validation to prevent free plan renewal extension
-        if ($package->price == 0) {
+        if ($price == 0) {
             // Prevent immediate downgrade if they have active premium time remaining
-            if ($business->subscription_ends_at && $business->subscription_ends_at->isFuture()) {
+            if ($business->subscription_ends_at && Carbon::parse($business->subscription_ends_at)->isFuture()) {
                 return back()->with('error', 'You still have an active premium subscription. Please wait until it expires to switch to the free plan.');
             }
 
@@ -58,7 +60,7 @@ class BillingController extends Controller
             'business_id' => $business->id,
             'package_id' => $package->id,
             'reference' => $reference,
-            'amount' => $package->price,
+            'amount' => $price,
             'status' => 'pending',
             'created_at' => now(),
             'updated_at' => now(),
@@ -75,14 +77,14 @@ class BillingController extends Controller
             'transaction_type' => 'payment_link',
             'account_or_phone' => $customer->phone ?? null,
             'customer_email' => $customer->email,
-            'amount' => $package->price,
+            'amount' => $price,
             'description' => "Subscription payment for {$package->name} plan",
         ]);
 
-        $provider = PaymentFactory::make($default_provider)->checkout([
+        $provider = PaymentFactory::make($default_provider)?->checkout([
             'customer_name' => $customer->name,
             'customer_email' => $customer->email,
-            'amount' => $package->price,
+            'amount' => $price,
             'description' => "Subscription payment for {$package->name} plan",
             'transaction_reference' => $reference,
             'redirect_url' => route('billing.verify', [

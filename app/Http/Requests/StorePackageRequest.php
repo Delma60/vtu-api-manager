@@ -42,6 +42,9 @@ class StorePackageRequest extends FormRequest
             'settings.custom_pricing' => 'boolean',
             'settings.priority_support' => 'boolean',
             'settings.white_label' => 'boolean',
+            'discount' => ['nullable', 'numeric', 'min:0'],
+            'allow_telegram_bot' => ['boolean'],
+            'allow_whatsapp_bot' => ['boolean'],
         ];
     }
 }

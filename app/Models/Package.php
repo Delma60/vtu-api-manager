@@ -12,13 +12,16 @@ class Package extends Model
         'slug',
         'description',
         'price',
+        'discount', // New
+        'allow_telegram_bot', // New
+        'allow_whatsapp_bot', // New
         'billing_cycle',
         'features',
         'is_active',
         'is_default',
         'settings',
         'is_featured'
-        
+
     ];
 
     protected $casts = [
@@ -28,6 +31,9 @@ class Package extends Model
         'settings' => 'array',
         'is_default' => 'boolean',
         'is_featured' => 'boolean',
+        'allow_telegram_bot' => 'boolean',
+        'allow_whatsapp_bot' => 'boolean',
+        'discount' => 'decimal:2',
     ];
 
     public function businesses(): HasMany

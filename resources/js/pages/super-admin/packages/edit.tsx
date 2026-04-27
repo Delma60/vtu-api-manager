@@ -30,7 +30,9 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
             custom_domain: false,
             staff_limit: 1,
             monthly_api_limit: 0,
-            bot_access: false,
+            // bot_access: false,
+            allow_telegram_bot: false,
+            allow_whatsapp_bot: false,
             webhook_access: false,
             custom_pricing: false,
             priority_support: false,
@@ -94,6 +96,17 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                                 <Label>Price (₦)</Label>
                                 <Input type="number" step="0.01" value={data.price} onChange={(e) => setData('price', e.target.value)} required />
                                 <InputError message={errors.price} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="discount">Package Discount (Amount or %)</Label>
+                                <Input
+                                    id="discount"
+                                    type="number"
+                                    step="0.01"
+                                    value={data.discount}
+                                    onChange={(e) => setData('discount', e.target.value)}
+                                />
+                                {errors.discount && <div className="text-sm text-red-500">{errors.discount}</div>}
                             </div>
                             <div className="grid gap-2">
                                 <Label>Billing Cycle</Label>
@@ -171,7 +184,6 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                                 />
                                 <p className="text-muted-foreground text-[10px]">Max admin users allowed.</p>
                             </div>
-
                             <div className="space-y-2">
                                 <Label>Monthly API Limit</Label>
                                 <Input
@@ -182,7 +194,6 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                                 />
                                 <p className="text-muted-foreground text-[10px]">Max API calls allowed per month.</p>
                             </div>
-
                             {/* Toggles */}
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
@@ -191,7 +202,6 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                                 </div>
                                 <Switch checked={data.settings.api_access} onCheckedChange={(c) => updateSetting('api_access', c)} />
                             </div>
-
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
                                     <Label>Webhook Access</Label>
@@ -200,14 +210,37 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                                 <Switch checked={data.settings.webhook_access} onCheckedChange={(c) => updateSetting('webhook_access', c)} />
                             </div>
 
+                            {/* Telegram Bot Access */}
                             <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Label htmlFor="allow_telegram_bot">Allow Telegram Bot Access</Label>
+                                    <p className="text-muted-foreground text-[10px]">Enable Telegram bot integration.</p>
+                                </div>
+                                <Switch
+                                    id="allow_telegram_bot"
+                                    checked={data.allow_telegram_bot}
+                                    onCheckedChange={(checked) => setData('allow_telegram_bot', checked)}
+                                />
+                            </div>
+                            {/* WhatsApp Bot Access */}
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Label htmlFor="allow_whatsapp_bot">Allow WhatsApp Bot Access</Label>
+                                    <p className="text-muted-foreground text-[10px]">Enable WhatsApp bot integration.</p>
+                                </div>
+                                <Switch
+                                    id="allow_whatsapp_bot"
+                                    checked={data.allow_whatsapp_bot}
+                                    onCheckedChange={(checked) => setData('allow_whatsapp_bot', checked)}
+                                />
+                            </div>
+                            {/* <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
                                     <Label>Bot Integration</Label>
                                     <p className="text-muted-foreground text-[10px]">Telegram/WhatsApp bots.</p>
                                 </div>
                                 <Switch checked={data.settings.bot_access} onCheckedChange={(c) => updateSetting('bot_access', c)} />
-                            </div>
-
+                            </div> */}
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
                                     <Label>Custom Domain</Label>
@@ -215,7 +248,6 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                                 </div>
                                 <Switch checked={data.settings.custom_domain} onCheckedChange={(c) => updateSetting('custom_domain', c)} />
                             </div>
-
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
                                     <Label>Custom Pricing</Label>
@@ -223,7 +255,6 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                                 </div>
                                 <Switch checked={data.settings.custom_pricing} onCheckedChange={(c) => updateSetting('custom_pricing', c)} />
                             </div>
-
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
                                     <Label>White Label</Label>
@@ -231,7 +262,6 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                                 </div>
                                 <Switch checked={data.settings.white_label} onCheckedChange={(c) => updateSetting('white_label', c)} />
                             </div>
-
                             <div className="flex items-center justify-between md:col-span-2">
                                 <div className="space-y-0.5">
                                     <Label>Priority Support</Label>
@@ -258,7 +288,7 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                         <Switch checked={data.is_default} onCheckedChange={(checked) => setData('is_default', checked)} />
                     </div>
 
-                     <div className="flex items-center justify-between border-t pt-6">
+                    <div className="flex items-center justify-between border-t pt-6">
                         <div className="space-y-0.5">
                             <Label className="text-base">Featured Package</Label>
                             <p className="text-muted-foreground text-xs">Highlight this package as featured.</p>

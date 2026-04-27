@@ -222,6 +222,10 @@ class WhatsAppController extends Controller
     public function edit(Request $request)
     {
         $business = $request->user()->business;
+        if($business->package->settings['bot_access'] !== true){
+            return redirect()->back()
+            ->with('error', 'Your current subscription plan does not include access to the Telegram Bot feature. Please upgrade your plan to use this feature.');
+        }
 
         // Auto-generate verify token and bot code if they don't exist yet
         if (!$business->whatsapp_verify_token || !$business->bot_code) {

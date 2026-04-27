@@ -52,7 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-            
+
             // If it's an API request (e.g. from mobile app or external server), return JSON
             if ($request->wantsJson() || $request->is('api/*')) {
                 return response()->json([
@@ -69,7 +69,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-            
+
             // 1. If it's an API request, return a clean JSON response
             if ($request->wantsJson() || $request->is('api/*')) {
                 return response()->json([
@@ -84,7 +84,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             // Otherwise, let Laravel render the default 404 page (or your Inertia 404 page)
-            return null; 
+            return null;
         });
 
         // 4. Handle Wrong HTTP Methods (e.g., sending GET to a POST route)

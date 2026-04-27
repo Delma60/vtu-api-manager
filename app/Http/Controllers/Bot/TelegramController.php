@@ -24,6 +24,12 @@ class TelegramController extends Controller
     public function settings()
     {
         $business = auth()->user()->business;
+        // package security
+
+        if($business->package->settings['bot_access'] !== true){
+            return redirect()->back()
+            ->with('error', 'Your current subscription plan does not include access to the Telegram Bot feature. Please upgrade your plan to use this feature.');
+        }
         
         return Inertia::render('developers/bots/telegram', [
             'globalBotUsername' => $business->telegram_bot_username ?? '',

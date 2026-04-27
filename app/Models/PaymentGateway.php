@@ -62,11 +62,13 @@ class PaymentGateway extends Model
         $user = auth()->user();
         
        $provider = PaymentFactory::make($this);
+       if(!$provider){
+        return false;
+       }
        $provider->isHealthy();
         $key = md5($this->base_url . $this->api_key . $this->api_secret . ($user?->id ?? "") );
         return $provider->isHealthy();
-        // return Cache::remember($key, now()->addMinutes(60), function() use($provider) {
-        // });
+        
     }
 
     function getLogoImageAttribute(): string

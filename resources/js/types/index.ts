@@ -156,6 +156,7 @@ export interface Package {
     is_default: boolean;
     is_featured: boolean;
     discount?:number;
+    discount_type?:"fiat" | "percentage";
     features?:string[]
     settings?:Record<string, string>
 }

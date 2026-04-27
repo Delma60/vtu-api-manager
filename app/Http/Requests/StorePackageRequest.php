@@ -43,6 +43,7 @@ class StorePackageRequest extends FormRequest
             'settings.priority_support' => 'boolean',
             'settings.white_label' => 'boolean',
             'discount' => ['nullable', 'numeric', 'min:0'],
+            'discount_type' => ['nullable', 'in:flat,percentage'],
             'settings.allow_telegram_bot' => ['boolean'],
             'settings.allow_whatsapp_bot' => ['boolean'],
         ];

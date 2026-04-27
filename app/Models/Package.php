@@ -20,7 +20,8 @@ class Package extends Model
         'is_active',
         'is_default',
         'settings',
-        'is_featured'
+        'is_featured',
+        'discount_type',
 
     ];
 
@@ -34,6 +35,7 @@ class Package extends Model
         'allow_telegram_bot' => 'boolean',
         'allow_whatsapp_bot' => 'boolean',
         'discount' => 'decimal:2',
+        'discount_type' => 'string',
     ];
 
     public function businesses(): HasMany

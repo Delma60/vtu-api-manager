@@ -40,6 +40,7 @@ class UpdatePackageRequest extends FormRequest
             'settings.staff_limit' => 'numeric|min:1',
             'settings.monthly_api_limit' => 'numeric|min:0', // <-- Changed this line
             'discount' => ['nullable', 'numeric', 'min:0'],
+            'discount_type' => ['nullable', 'in:flat,percentage'],
             'settings.allow_telegram_bot' => ['boolean'],
             'settings.allow_whatsapp_bot' => ['boolean'],
             'settings.webhook_access' => 'boolean',

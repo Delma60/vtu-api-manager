@@ -122,4 +122,24 @@ class TransactionService
             return $transaction;
         });
     }
+
+    public function calculateFinalPrice($basePrice, $package)
+{
+    if (!$package || $package->discount <= 0) {
+        return $basePrice;
+    }
+
+    if ($package->discount_type === 'percentage') {
+        // Calculate percentage off
+        $discountAmount = ($basePrice * $package->discount) / 100;
+        return max(0, $basePrice - $discountAmount); 
+    } 
+    
+    if ($package->discount_type === 'flat') {
+        // Flat amount deduction
+        return max(0, $basePrice - $package->discount);
+    }
+
+    return $basePrice;
+}
 }

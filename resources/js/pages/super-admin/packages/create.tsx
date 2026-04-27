@@ -25,12 +25,15 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
         is_active: pkg?.is_active ?? true,
         is_default: pkg?.is_default ?? false,
         is_featured: pkg?.is_featured ?? false,
+        discount: pkg?.discount || '',
         settings: pkg?.settings || {
             api_access: false,
             custom_domain: false,
             staff_limit: 1,
             monthly_api_limit: 0,
-            bot_access: false,
+            // bot_access: false,
+            allow_telegram_bot: false,
+            allow_whatsapp_bot: false,
             webhook_access: false,
             custom_pricing: false,
             priority_support: false,
@@ -92,8 +95,25 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label>Price (₦)</Label>
-                                <Input type="number" step="0.01" value={data.price} onChange={(e) => setData('price', parseFloat(e.target.value) || 0)} required />
+                                <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={data.price}
+                                    onChange={(e) => setData('price', parseFloat(e.target.value) || 0)}
+                                    required
+                                />
                                 <InputError message={errors.price} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="discount">Package Discount (Amount or %)</Label>
+                                <Input
+                                    id="discount"
+                                    type="number"
+                                    step="0.01"
+                                    value={data.discount}
+                                    onChange={(e) => setData('discount', e.target.value)}
+                                />
+                                {errors.discount && <div className="text-sm text-red-500">{errors.discount}</div>}
                             </div>
                             <div className="grid gap-2">
                                 <Label>Billing Cycle</Label>
@@ -200,12 +220,29 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                                 <Switch checked={data.settings.webhook_access} onCheckedChange={(c) => updateSetting('webhook_access', c)} />
                             </div>
 
+                            {/* Telegram Bot Access */}
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <Label>Bot Integration</Label>
-                                    <p className="text-muted-foreground text-[10px]">Telegram/WhatsApp bots.</p>
+                                    <Label htmlFor="allow_telegram_bot">Allow Telegram Bot Access</Label>
+                                    <p className="text-muted-foreground text-[10px]">Enable Telegram bot integration.</p>
                                 </div>
-                                <Switch checked={data.settings.bot_access} onCheckedChange={(c) => updateSetting('bot_access', c)} />
+                                <Switch
+                                    id="allow_telegram_bot"
+                                    checked={data?.settings?.allow_telegram_bot}
+                                    onCheckedChange={(checked) => updateSetting('allow_telegram_bot', checked)}
+                                />
+                            </div>
+                            {/* WhatsApp Bot Access */}
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Label htmlFor="allow_whatsapp_bot">Allow WhatsApp Bot Access</Label>
+                                    <p className="text-muted-foreground text-[10px]">Enable WhatsApp bot integration.</p>
+                                </div>
+                                <Switch
+                                    id="allow_whatsapp_bot"
+                                    checked={data?.settings?.allow_whatsapp_bot}
+                                    onCheckedChange={(checked) => updateSetting('allow_whatsapp_bot', checked)}
+                                />
                             </div>
 
                             <div className="flex items-center justify-between">

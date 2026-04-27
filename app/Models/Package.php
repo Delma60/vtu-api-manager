@@ -40,4 +40,14 @@ class Package extends Model
     {
         return $this->hasMany(Business::class);
     }
+
+    public function hasTelegramBotAccess(): bool
+    {
+        return $this->settings['telegram_bot_access'] ?? false;
+    }
+
+    public function hasWhatsappBotAccess(): bool
+    {
+        return $this->settings['whatsapp_bot_access'] ?? false;
+    }
 }

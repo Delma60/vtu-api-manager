@@ -25,6 +25,7 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
         is_active: pkg?.is_active ?? true,
         is_default: pkg?.is_default ?? false,
         is_featured: pkg?.is_featured ?? false,
+        discount: pkg?.discount || 0,
         settings: pkg?.settings || {
             api_access: false,
             custom_domain: false,
@@ -218,8 +219,8 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                                 </div>
                                 <Switch
                                     id="allow_telegram_bot"
-                                    checked={data.allow_telegram_bot}
-                                    onCheckedChange={(checked) => setData('allow_telegram_bot', checked)}
+                                    checked={data?.settings?.allow_telegram_bot}
+                                    onCheckedChange={(checked) => updateSetting('allow_telegram_bot', checked)}
                                 />
                             </div>
                             {/* WhatsApp Bot Access */}
@@ -230,8 +231,8 @@ export default function PackageForm({ package: pkg }: { package?: Package }) {
                                 </div>
                                 <Switch
                                     id="allow_whatsapp_bot"
-                                    checked={data.allow_whatsapp_bot}
-                                    onCheckedChange={(checked) => setData('allow_whatsapp_bot', checked)}
+                                    checked={data?.settings?.allow_whatsapp_bot}
+                                    onCheckedChange={(checked) => updateSetting('allow_whatsapp_bot', checked)}
                                 />
                             </div>
                             {/* <div className="flex items-center justify-between">

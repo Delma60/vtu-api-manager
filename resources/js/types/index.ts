@@ -155,6 +155,7 @@ export interface Package {
     businesses_count: number;
     is_default: boolean;
     is_featured: boolean;
+    discount?:number;
     features?:string[]
     settings?:Record<string, string>
 }

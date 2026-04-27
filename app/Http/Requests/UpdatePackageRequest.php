@@ -39,7 +39,9 @@ class UpdatePackageRequest extends FormRequest
             'settings.custom_domain' => 'boolean',
             'settings.staff_limit' => 'numeric|min:1',
             'settings.monthly_api_limit' => 'numeric|min:0', // <-- Changed this line
-            'settings.bot_access' => 'boolean',
+            'discount' => ['nullable', 'numeric', 'min:0'],
+            'settings.allow_telegram_bot' => ['boolean'],
+            'settings.allow_whatsapp_bot' => ['boolean'],
             'settings.webhook_access' => 'boolean',
             'settings.custom_pricing' => 'boolean',
             'settings.priority_support' => 'boolean',

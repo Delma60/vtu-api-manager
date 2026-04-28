@@ -9,9 +9,16 @@ class TicketController extends Controller
 {
     public function index()
     {
-        $tickets = Ticket::where('business_id', auth()->user()->business_id)
-            ->latest()
-            ->get();
+        $user = auth()->user();
+        $query = Ticket::with(['user', 'replies.user'])->latest();
+        
+        if ($user->user_type !== 'admin') {
+            $query->where('business_id', $user->business_id);
+        } else {
+            $query->with('business'); 
+        }
+
+        $tickets = $query->get();
 
         return inertia('support/index', ['tickets' => $tickets]);
     }
@@ -40,28 +47,39 @@ class TicketController extends Controller
         return redirect()->route('tickets.show', $ticket)->with('success', 'Ticket created successfully.');
     }
 
-public function show(Ticket $ticket)
-{
-    // Eager load the user who created the ticket and the users who replied
-    $ticket->load(['user', 'replies.user']);
-    
-    return inertia('support/show', ['ticket' => $ticket]);
-}
+    public function show(Ticket $ticket)
+    {
+        $user = auth()->user();
 
-public function storeReply(Request $request, Ticket $ticket)
-{
-    $request->validate(['message' => 'required|string']);
+        if ($user->user_type !== 'admin' && $ticket->business_id !== $user->business_id) {
+            abort(403);
+        }
 
-    $ticket->replies()->create([
-        'user_id' => auth()->id(),
-        'message' => $request->message,
-    ]);
-
-    // Automatically update status to 'in_progress' if an admin replies, or keep it open
-    if ($ticket->status === 'closed') {
-        $ticket->update(['status' => 'open']);
+        $ticket->load(['user', 'replies.user']);
+        
+        return inertia('support/show', ['ticket' => $ticket]);
     }
 
-    return back()->with('success', 'Reply sent.');
-}
+    public function storeReply(Request $request, Ticket $ticket)
+    {
+        $request->validate(['message' => 'required|string']);
+
+        $user = auth()->user();
+        if ($user->user_type !== 'admin' && $ticket->business_id !== $user->business_id) {
+            abort(403);
+        }
+
+        $ticket->replies()->create([
+            'user_id' => $user->id,
+            'message' => $request->message,
+        ]);
+
+        if ($ticket->status === 'closed') {
+            $ticket->update(['status' => $user->user_type === 'admin' ? 'in_progress' : 'open']);
+        } elseif ($user->user_type === 'admin' && $ticket->status === 'open') {
+            $ticket->update(['status' => 'in_progress']);
+        }
+
+        return redirect()->route('tickets.show', $ticket)->with('success', 'Reply sent.');
+    }
 }

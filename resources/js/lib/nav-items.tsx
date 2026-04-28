@@ -114,7 +114,7 @@ export const navItems = ({
                     {
                         icon: <HelpCircle className="h-5 w-5 shrink-0" />,
                         label: 'Support',
-                        routeName: 'support',
+                        routeName: 'super-admin.tickets.index',
                     },
                 ],
             },

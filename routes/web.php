@@ -228,6 +228,8 @@ Route::middleware(['auth', SuperAdminMiddleware::class])
     ->group(function () {
 
         Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
+        Route::resource('tickets', \App\Http\Controllers\SuperAdmin\TicketController::class)->only(['index', 'show']);
+        Route::post('tickets/{ticket}/reply', [\App\Http\Controllers\SuperAdmin\TicketController::class, 'storeReply'])->name('tickets.reply');
 
         // Future routes go here:
         Route::post('businesses/{business}/toggle', [BusinessController::class, 'toggleStatus'])

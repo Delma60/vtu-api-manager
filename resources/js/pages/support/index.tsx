@@ -79,7 +79,7 @@ export default function SupportIndex({ tickets }: Props) {
                             View and manage your support tickets. Get help with account issues, billing, or product questions.
                         </p>
                     </div>
-                    <Link href={route('support')}>
+                    <Link href={route('tickets.create')}>
                         <Button className="gap-2">
                             <Plus className="h-4 w-4" />
                             New Ticket

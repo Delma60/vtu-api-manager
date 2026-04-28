@@ -4,6 +4,7 @@ import {
     Building2,
     CreditCard,
     DollarSign,
+    HelpCircle,
     Key,
     LayoutDashboard,
     Network,
@@ -109,6 +110,11 @@ export const navItems = ({
                         icon: <Settings className="h-5 w-5 shrink-0" />,
                         label: 'System Settings',
                         routeName: 'super-admin.settings.index',
+                    },
+                    {
+                        icon: <HelpCircle className="h-5 w-5 shrink-0" />,
+                        label: 'Support',
+                        routeName: 'support',
                     },
                 ],
             },
@@ -218,6 +224,16 @@ export const navItems = ({
                         { label: 'Telegram', routeName: 'bots.telegram.index' },
                         { label: 'WhatsApp', routeName: 'bots.whatsapp.edit' },
                     ],
+                },
+            ],
+        },
+        {
+            section: 'Support',
+            items: [
+                {
+                    icon: <HelpCircle className="h-5 w-5 shrink-0" />,
+                    label: 'Support',
+                    routeName: 'support',
                 },
             ],
         },

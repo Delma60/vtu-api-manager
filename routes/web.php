@@ -110,6 +110,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/settings/billing/subscribe', [BillingController::class, 'subscribe'])->name('billing.subscribe');
     Route::get('/settings/billing/verify', [BillingController::class, 'verify'])->name('billing.verify'); // <-- New Route
+    Route::get('/support', function () {
+        return Inertia::render('support');
+    })->name('support');
+
+    Route::resource('tickets', \App\Http\Controllers\TicketController::class);
+    Route::post('tickets/{ticket}/reply', [\App\Http\Controllers\TicketController::class, 'storeReply'])->name('tickets.reply');
 
     // Put this inside your existing auth/settings middleware group
     Route::get('settings/settlements', [SettlementPreferenceController::class, 'edit'])->name('settings.settlements');
